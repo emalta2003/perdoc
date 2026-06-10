@@ -1,0 +1,880 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PerDoc — Análise Documentoscópica</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"
+        integrity="sha512-XMVd28F1oH/O71fzwBnV7HucLxVwtxf26XV8P4wPk26EDxuGZ91N8bsOttmnomcCD3CS5ZMRL50H0GgOHvegtg=="
+        crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+<style>
+:root {
+  --bg:      #0d1117; --surface: #161b22; --border:  #30363d;
+  --accent:  #238636; --accent2: #1f6feb; --warn:    #d29922;
+  --danger:  #da3633; --text:    #e6edf3; --muted:   #8b949e;
+  --radius:  8px;     --font:    'Segoe UI', system-ui, sans-serif;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { background: var(--bg); color: var(--text); font-family: var(--font); font-size: 14px; min-height: 100vh; }
+
+header {
+  background: var(--surface); border-bottom: 1px solid var(--border);
+  padding: 12px 24px; display: flex; align-items: center; gap: 12px;
+}
+.logo { font-size: 20px; font-weight: 700; letter-spacing: -.5px; }
+.logo span { color: var(--accent2); }
+.badge { background: var(--border); color: var(--muted); font-size: 11px; padding: 2px 7px; border-radius: 20px; }
+.container { max-width: 1120px; margin: 0 auto; padding: 20px 16px; }
+
+/* Perito bar */
+.perito-bar {
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: var(--radius); padding: 14px 18px; margin-bottom: 16px;
+  display: flex; flex-wrap: wrap; gap: 12px; align-items: flex-end;
+}
+.perito-bar label { font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: .5px; display: block; margin-bottom: 4px; }
+.perito-bar input[type=text] {
+  padding: 6px 10px; border-radius: 6px; border: 1px solid var(--border);
+  background: var(--bg); color: var(--text); font-size: 13px; outline: none; width: 220px;
+}
+.perito-bar input[type=text]:focus { border-color: var(--accent2); }
+.perito-bar .pi-label { font-size: 11px; color: var(--muted); }
+
+/* Drop zone */
+#dropzone {
+  border: 2px dashed var(--border); border-radius: var(--radius);
+  padding: 36px 24px; text-align: center; cursor: pointer;
+  transition: border-color .2s, background .2s; position: relative;
+}
+#dropzone.drag-over { border-color: var(--accent2); background: rgba(31,111,235,.06); }
+#dropzone input { position: absolute; inset: 0; opacity: 0; cursor: pointer; width: 100%; height: 100%; }
+.drop-icon { font-size: 32px; margin-bottom: 6px; }
+.drop-title { font-size: 15px; font-weight: 600; margin-bottom: 3px; }
+.drop-sub { color: var(--muted); font-size: 12px; }
+
+/* SHA row */
+#sha-row {
+  display: none; margin-top: 10px;
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: var(--radius); padding: 10px 16px;
+  font-family: 'Cascadia Code','Consolas',monospace; font-size: 12px;
+}
+#sha-row .sha-label { color: var(--muted); margin-right: 8px; font-size: 11px; font-family: var(--font); text-transform: uppercase; }
+#sha-value { color: var(--accent2); word-break: break-all; }
+
+/* Tabs */
+.tabs { display: flex; gap: 4px; border-bottom: 1px solid var(--border); margin: 20px 0 0; }
+.tab-btn {
+  background: none; border: none; color: var(--muted);
+  padding: 8px 16px; cursor: pointer; font-size: 14px;
+  border-bottom: 2px solid transparent; margin-bottom: -1px; transition: color .15s;
+}
+.tab-btn.active { color: var(--text); border-bottom-color: var(--accent2); }
+.tab-btn:hover:not(.active) { color: var(--text); }
+.tab-panel { display: none; padding: 18px 0; }
+.tab-panel.active { display: block; }
+
+/* Cards */
+.card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 18px; margin-bottom: 14px; }
+.card-title { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: .7px; color: var(--muted); margin-bottom: 12px; }
+
+/* Meta table */
+.meta-table { width: 100%; border-collapse: collapse; }
+.meta-table tr { border-bottom: 1px solid var(--border); }
+.meta-table tr:last-child { border-bottom: none; }
+.meta-table td { padding: 7px 6px; vertical-align: top; }
+.meta-table td:first-child { color: var(--muted); font-size: 12px; font-weight: 500; white-space: nowrap; width: 190px; padding-right: 12px; }
+.meta-table td:last-child { word-break: break-all; font-family: 'Cascadia Code','Consolas',monospace; font-size: 12px; }
+
+/* Flags */
+.flags-list { display: flex; flex-wrap: wrap; gap: 8px; }
+.flag { display: inline-flex; align-items: center; gap: 5px; padding: 4px 10px; border-radius: 20px; font-size: 12px; font-weight: 600; }
+.flag::before { content: '⚑ '; }
+.flag.high   { background: rgba(218,54,51,.18); color: #ff6b6b; border: 1px solid rgba(218,54,51,.35); }
+.flag.medium { background: rgba(210,153,34,.15); color: #f0b429; border: 1px solid rgba(210,153,34,.3); }
+.flag.info   { background: rgba(31,111,235,.15); color: #79b8ff; border: 1px solid rgba(31,111,235,.3); }
+
+/* Score */
+.score-row { display: flex; align-items: center; gap: 16px; }
+.score-num { font-size: 38px; font-weight: 700; min-width: 56px; }
+.score-num.low { color: var(--accent); } .score-num.medium { color: var(--warn); } .score-num.high { color: var(--danger); }
+.score-bar-wrap { flex: 1; }
+.score-lbl { font-size: 12px; color: var(--muted); margin-bottom: 5px; }
+.score-bar { height: 9px; background: var(--border); border-radius: 5px; overflow: hidden; }
+.score-fill { height: 100%; border-radius: 5px; transition: width .5s; }
+.score-fill.low { background: var(--accent); } .score-fill.medium { background: var(--warn); } .score-fill.high { background: var(--danger); }
+.score-verdict { font-size: 13px; margin-top: 6px; }
+
+/* File info */
+.file-info { display: flex; flex-wrap: wrap; gap: 20px; }
+.fi-label { font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: .5px; }
+.fi-value { font-size: 14px; font-weight: 600; }
+
+/* pHash */
+.phash-layout { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+@media (max-width: 600px) { .phash-layout { grid-template-columns: 1fr; } }
+#phash-canvas { display: none; }
+.hash-display { font-family: 'Cascadia Code','Consolas',monospace; font-size: 13px; word-break: break-all; background: var(--bg); padding: 10px 12px; border-radius: 6px; border: 1px solid var(--border); color: var(--accent2); margin-top: 8px; }
+.img-preview { max-width: 100%; max-height: 180px; border-radius: 6px; border: 1px solid var(--border); object-fit: contain; background: var(--bg); display: block; margin-top: 8px; }
+.cmp-result { margin-top: 10px; padding: 10px 14px; border-radius: 6px; font-size: 13px; font-weight: 600; }
+.cmp-result.identical { background: rgba(35,134,54,.18); color: #3fb950; border: 1px solid rgba(35,134,54,.3); }
+.cmp-result.similar   { background: rgba(210,153,34,.15); color: #f0b429; border: 1px solid rgba(210,153,34,.3); }
+.cmp-result.different { background: rgba(218,54,51,.15); color: #ff6b6b; border: 1px solid rgba(218,54,51,.3); }
+
+/* Buttons */
+.btn { display: inline-flex; align-items: center; gap: 6px; padding: 7px 14px; border-radius: 6px; border: 1px solid var(--border); background: var(--surface); color: var(--text); cursor: pointer; font-size: 13px; font-weight: 500; transition: background .15s; }
+.btn:hover { background: var(--border); }
+.btn.primary { background: var(--accent2); border-color: transparent; }
+.btn.primary:hover { background: #388bfd; }
+.btn.success { background: var(--accent); border-color: transparent; }
+.btn.success:hover { background: #2ea043; }
+input[type=text].inline { width: 100%; padding: 8px 12px; border-radius: 6px; border: 1px solid var(--border); background: var(--bg); color: var(--text); font-size: 13px; font-family: 'Cascadia Code',monospace; outline: none; }
+input[type=text].inline:focus { border-color: var(--accent2); }
+
+/* Observações */
+textarea.obs {
+  width: 100%; min-height: 80px; padding: 10px 12px;
+  border-radius: 6px; border: 1px solid var(--border);
+  background: var(--bg); color: var(--text); font-size: 13px;
+  font-family: var(--font); resize: vertical; outline: none;
+}
+textarea.obs:focus { border-color: var(--accent2); }
+
+/* Tags */
+.tag { display: inline-block; padding: 1px 7px; border-radius: 4px; font-size: 11px; font-weight: 700; text-transform: uppercase; background: var(--border); color: var(--muted); }
+.tag.jpeg,.tag.jpg { background: rgba(31,111,235,.25); color: #79b8ff; }
+.tag.pdf  { background: rgba(218,54,51,.2);   color: #ff6b6b; }
+.tag.docx { background: rgba(35,134,54,.2);   color: #3fb950; }
+.tag.xlsx { background: rgba(35,134,54,.2);   color: #3fb950; }
+.tag.png  { background: rgba(210,153,34,.2);  color: #f0b429; }
+
+.two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+@media (max-width: 700px) { .two-col { grid-template-columns: 1fr; } }
+.empty-state { text-align: center; padding: 50px 20px; color: var(--muted); }
+.empty-state .es-icon { font-size: 44px; margin-bottom: 10px; }
+hr.divider { border: none; border-top: 1px solid var(--border); margin: 14px 0; }
+.action-row { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 6px; }
+
+/* ── PRINT / REPORT STYLES ── */
+@media print {
+  body { background: #fff !important; color: #000 !important; font-family: 'Times New Roman', serif; }
+  .no-print { display: none !important; }
+  .print-only { display: block !important; }
+  .report-page { padding: 0; }
+}
+.print-only { display: none; }
+</style>
+</head>
+<body>
+
+<header class="no-print">
+  <div class="logo">Per<span>Doc</span></div>
+  <div class="badge">v1.1</div>
+  <div style="margin-left:auto; color:var(--muted); font-size:12px;">Análise Documentoscópica Digital</div>
+</header>
+
+<div class="container no-print">
+
+  <!-- Perito identification -->
+  <div class="perito-bar">
+    <div>
+      <label>Perito / Analista</label>
+      <input type="text" id="perito-nome" placeholder="Nome completo">
+    </div>
+    <div>
+      <label>Matrícula / CRF / Nº</label>
+      <input type="text" id="perito-reg" placeholder="ex: 12345-SP">
+    </div>
+    <div>
+      <label>Nº do Caso / Processo</label>
+      <input type="text" id="caso-num" placeholder="opcional">
+    </div>
+    <div style="margin-left:auto; text-align:right">
+      <div class="pi-label">Data/hora da análise</div>
+      <div id="ts-display" style="font-size:13px; font-weight:600"></div>
+    </div>
+  </div>
+
+  <!-- Drop zone -->
+  <div id="dropzone">
+    <input type="file" id="file-input" accept=".jpg,.jpeg,.pdf,.docx,.xlsx,.png">
+    <div class="drop-icon">📂</div>
+    <div class="drop-title">Arraste o documento aqui ou clique para selecionar</div>
+    <div class="drop-sub">JPEG · PDF · DOCX · XLSX · PNG</div>
+  </div>
+
+  <!-- SHA-256 integrity row -->
+  <div id="sha-row">
+    <span class="sha-label">SHA-256 (cadeia de custódia)</span>
+    <span id="sha-value">calculando…</span>
+  </div>
+
+  <!-- Tabs -->
+  <div class="tabs">
+    <button class="tab-btn active" data-tab="meta">📋 Metadados</button>
+    <button class="tab-btn" data-tab="hash">🔢 Hash Perceptual</button>
+  </div>
+
+  <!-- ── Metadados Tab ── -->
+  <div id="tab-meta" class="tab-panel active">
+    <div id="meta-empty" class="empty-state">
+      <div class="es-icon">🔍</div>
+      <div>Carregue um documento para iniciar a análise</div>
+    </div>
+    <div id="meta-results" style="display:none">
+      <div class="card">
+        <div class="card-title">Identificação do Arquivo</div>
+        <div class="file-info" id="file-info-row"></div>
+      </div>
+      <div class="two-col">
+        <div class="card">
+          <div class="card-title">Metadados Extraídos</div>
+          <table class="meta-table" id="meta-table-body"></table>
+        </div>
+        <div>
+          <div class="card">
+            <div class="card-title">Red Flags</div>
+            <div id="flags-container" class="flags-list"></div>
+          </div>
+          <div class="card">
+            <div class="card-title">Índice de Risco (FraudScore)</div>
+            <div class="score-row">
+              <div class="score-num" id="score-num">0</div>
+              <div class="score-bar-wrap">
+                <div class="score-lbl" id="score-lbl"></div>
+                <div class="score-bar"><div class="score-fill" id="score-fill" style="width:0%"></div></div>
+                <div class="score-verdict" id="score-verdict"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Observações -->
+      <div class="card">
+        <div class="card-title">Observações do Perito</div>
+        <textarea class="obs" id="obs-text" placeholder="Anotações para o laudo…"></textarea>
+      </div>
+
+      <!-- Export actions -->
+      <div class="action-row">
+        <button class="btn success" onclick="exportReport()">📄 Gerar Relatório de Evidências</button>
+        <button class="btn" onclick="exportTxt()">⬇ Baixar .txt</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── Hash Tab ── -->
+  <div id="tab-hash" class="tab-panel">
+    <div class="phash-layout">
+      <div class="card">
+        <div class="card-title">Hash Perceptual (pHash DCT 32×32)</div>
+        <div id="hash-empty" style="color:var(--muted);font-size:13px">Carregue uma imagem (JPEG ou PNG) para calcular o pHash.</div>
+        <div id="hash-result" style="display:none">
+          <img id="hash-img-preview" class="img-preview" alt="Preview">
+          <div class="hash-display" id="hash-value"></div>
+          <div style="margin-top:8px;font-size:12px;color:var(--muted)">64 bits · representação hexadecimal (big-endian)</div>
+          <button class="btn" style="margin-top:10px" onclick="copyHash()">📋 Copiar hash</button>
+        </div>
+        <canvas id="phash-canvas" width="32" height="32"></canvas>
+      </div>
+      <div class="card">
+        <div class="card-title">Comparar com Hash de Referência</div>
+        <div style="color:var(--muted);font-size:12px;margin-bottom:10px">Cole o hash (hex, 16 chars) de outro documento para calcular a distância de Hamming.</div>
+        <input type="text" class="inline" id="ref-hash-input" placeholder="ex: a3f5c2e1b8d40920" maxlength="16">
+        <button class="btn primary" style="margin-top:10px" onclick="compareHash()">Comparar</button>
+        <div id="cmp-result-area"></div>
+        <hr class="divider">
+        <div style="font-size:12px;color:var(--muted);line-height:1.8">
+          <b style="color:var(--text)">Distância Hamming:</b><br>
+          0 bits → Idênticas<br>1–10 bits → Muito similares<br>
+          11–20 bits → Alterações moderadas<br>&gt;20 bits → Imagens distintas
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div><!-- /container -->
+
+<script>
+// ═══════════════════════════════════════════
+// STATE
+// ═══════════════════════════════════════════
+let currentHash = null;
+let currentAnalysis = null; // { meta, flags, fileInfo, sha256 }
+
+// Live clock
+function updateClock() {
+  document.getElementById('ts-display').textContent =
+    new Date().toLocaleString('pt-BR', { dateStyle:'short', timeStyle:'medium' });
+}
+updateClock(); setInterval(updateClock, 1000);
+
+// ═══════════════════════════════════════════
+// TABS
+// ═══════════════════════════════════════════
+document.querySelectorAll('.tab-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+    btn.classList.add('active');
+    document.getElementById('tab-' + btn.dataset.tab).classList.add('active');
+  });
+});
+
+// ═══════════════════════════════════════════
+// DROP ZONE
+// ═══════════════════════════════════════════
+const dropzone = document.getElementById('dropzone');
+const fileInput = document.getElementById('file-input');
+dropzone.addEventListener('dragover', e => { e.preventDefault(); dropzone.classList.add('drag-over'); });
+dropzone.addEventListener('dragleave', () => dropzone.classList.remove('drag-over'));
+dropzone.addEventListener('drop', e => { e.preventDefault(); dropzone.classList.remove('drag-over'); const f = e.dataTransfer.files[0]; if (f) handleFile(f); });
+fileInput.addEventListener('change', () => { if (fileInput.files[0]) handleFile(fileInput.files[0]); });
+
+// ═══════════════════════════════════════════
+// FILE DISPATCH
+// ═══════════════════════════════════════════
+async function handleFile(file) {
+  const buf = await file.arrayBuffer();
+
+  // SHA-256 via Web Crypto
+  document.getElementById('sha-row').style.display = 'block';
+  document.getElementById('sha-value').textContent = 'calculando…';
+  const hashBuf = await crypto.subtle.digest('SHA-256', buf);
+  const sha256 = Array.from(new Uint8Array(hashBuf)).map(b => b.toString(16).padStart(2,'0')).join('');
+  document.getElementById('sha-value').textContent = sha256;
+
+  const ext = file.name.split('.').pop().toLowerCase();
+  let result;
+  if (ext === 'jpg' || ext === 'jpeg') result = parseJPEG(buf, file);
+  else if (ext === 'pdf')              result = parsePDF(buf, file);
+  else if (ext === 'docx' || ext === 'xlsx') result = await parseDOCX(buf, file);
+  else if (ext === 'png')              result = parsePNG(buf, file);
+  else { alert('Formato não suportado: ' + ext); return; }
+
+  const analysisTime = new Date().toLocaleString('pt-BR', { dateStyle:'short', timeStyle:'medium' });
+  currentAnalysis = { ...result, fileInfo: { name: file.name, size: file.size, lastModified: new Date(file.lastModified), ext, sha256, analysisTime } };
+  renderResults(result, file, ext, sha256, analysisTime);
+}
+
+// ═══════════════════════════════════════════
+// RENDER
+// ═══════════════════════════════════════════
+function renderResults({ meta, flags }, file, ext, sha256, analysisTime) {
+  document.getElementById('file-info-row').innerHTML = `
+    <div><div class="fi-label">Nome</div><div class="fi-value" style="max-width:300px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${file.name}</div></div>
+    <div><div class="fi-label">Tipo</div><div class="fi-value"><span class="tag ${ext}">${ext.toUpperCase()}</span></div></div>
+    <div><div class="fi-label">Tamanho</div><div class="fi-value">${formatBytes(file.size)}</div></div>
+    <div><div class="fi-label">Modificado (SO)</div><div class="fi-value">${new Date(file.lastModified).toLocaleString('pt-BR')}</div></div>
+    <div><div class="fi-label">Analisado em</div><div class="fi-value">${analysisTime}</div></div>
+  `;
+
+  const tb = document.getElementById('meta-table-body');
+  tb.innerHTML = '';
+  const entries = Object.entries(meta).filter(([,v]) => v !== null && v !== undefined && v !== '');
+  if (!entries.length) {
+    tb.innerHTML = '<tr><td colspan="2" style="color:var(--muted);padding:8px">Nenhum metadado encontrado.</td></tr>';
+  } else {
+    entries.forEach(([k, v]) => {
+      const tr = document.createElement('tr');
+      tr.innerHTML = `<td>${escHtml(k)}</td><td>${escHtml(String(v))}</td>`;
+      tb.appendChild(tr);
+    });
+  }
+
+  const score = calcFraudScore(flags);
+  const fc = document.getElementById('flags-container');
+  fc.innerHTML = '';
+  if (!flags.length) {
+    fc.innerHTML = '<span style="color:var(--muted);font-size:13px">Nenhum red flag detectado.</span>';
+  } else {
+    flags.forEach(f => {
+      const s = document.createElement('span');
+      s.className = 'flag ' + flagSeverity(f);
+      s.textContent = f;
+      fc.appendChild(s);
+    });
+  }
+
+  const cls = score >= 60 ? 'high' : score >= 30 ? 'medium' : 'low';
+  document.getElementById('score-num').textContent = score;
+  document.getElementById('score-num').className = 'score-num ' + cls;
+  document.getElementById('score-fill').className = 'score-fill ' + cls;
+  document.getElementById('score-fill').style.width = Math.min(score,100) + '%';
+  document.getElementById('score-lbl').textContent = `${flags.length} indicador(es) de risco`;
+  const vEl = document.getElementById('score-verdict');
+  vEl.textContent = score >= 60 ? '⚠ Alto risco — múltiplos indicadores de adulteração'
+    : score >= 30 ? '⚡ Risco moderado — verificação adicional recomendada'
+    : '✓ Baixo risco — nenhum indicador significativo detectado';
+  vEl.style.color = score >= 60 ? 'var(--danger)' : score >= 30 ? 'var(--warn)' : 'var(--accent)';
+
+  document.getElementById('meta-empty').style.display = 'none';
+  document.getElementById('meta-results').style.display = 'block';
+}
+
+// ═══════════════════════════════════════════
+// EXPORT — RELATÓRIO DE EVIDÊNCIAS (HTML/print)
+// ═══════════════════════════════════════════
+function exportReport() {
+  if (!currentAnalysis) return;
+  const { meta, flags, fileInfo } = currentAnalysis;
+  const perito = document.getElementById('perito-nome').value.trim() || '(não informado)';
+  const reg    = document.getElementById('perito-reg').value.trim()  || '(não informado)';
+  const caso   = document.getElementById('caso-num').value.trim()    || '—';
+  const obs    = document.getElementById('obs-text').value.trim();
+  const score  = calcFraudScore(flags);
+
+  const metaRows = Object.entries(meta)
+    .filter(([,v]) => v !== null && v !== undefined && v !== '')
+    .map(([k,v]) => `<tr><td style="padding:5px 10px;border:1px solid #ccc;font-weight:bold;background:#f5f5f5;width:200px">${escHtml(k)}</td><td style="padding:5px 10px;border:1px solid #ccc;font-family:monospace">${escHtml(String(v))}</td></tr>`)
+    .join('');
+
+  const flagsHtml = flags.length
+    ? flags.map(f => `<span style="display:inline-block;margin:3px 4px;padding:3px 10px;border-radius:12px;font-size:12px;font-weight:bold;background:${flagSeverity(f)==='high'?'#ffe0e0':flagSeverity(f)==='medium'?'#fff3cd':'#e0eaff'};color:${flagSeverity(f)==='high'?'#c00':flagSeverity(f)==='medium'?'#7a5200':'#004080'};border:1px solid ${flagSeverity(f)==='high'?'#f99':flagSeverity(f)==='medium'?'#f0c':''}">${f}</span>`).join('')
+    : '<em style="color:#555">Nenhum red flag detectado.</em>';
+
+  const hashSection = currentHash
+    ? `<h3 style="margin:18px 0 6px;font-size:13px;text-transform:uppercase;letter-spacing:.5px;color:#555">Hash Perceptual (pHash)</h3>
+       <p style="font-family:monospace;font-size:13px;background:#f0f0f0;padding:8px;border-radius:4px">${currentHash}</p>`
+    : '';
+
+  const obsSection = obs
+    ? `<h3 style="margin:18px 0 6px;font-size:13px;text-transform:uppercase;letter-spacing:.5px;color:#555">Observações do Perito</h3>
+       <p style="background:#f9f9f9;border-left:4px solid #333;padding:10px 14px;font-size:13px;line-height:1.6">${escHtml(obs).replace(/\n/g,'<br>')}</p>`
+    : '';
+
+  const scoreColor = score >= 60 ? '#c00' : score >= 30 ? '#7a5200' : '#155724';
+  const scoreBg    = score >= 60 ? '#ffe0e0' : score >= 30 ? '#fff3cd' : '#d4edda';
+
+  const html = `<!DOCTYPE html>
+<html lang="pt-BR"><head><meta charset="UTF-8">
+<title>Relatório PerDoc — ${escHtml(fileInfo.name)}</title>
+<style>
+  body { font-family: Arial, sans-serif; font-size: 13px; color: #1a1a1a; max-width: 900px; margin: 0 auto; padding: 30px 40px; }
+  @media print { body { padding: 10px 20px; } .no-print { display:none; } }
+  h1 { font-size: 20px; border-bottom: 3px solid #1a1a1a; padding-bottom: 6px; margin-bottom: 4px; }
+  h2 { font-size: 14px; text-transform: uppercase; letter-spacing: .6px; color: #555; margin: 20px 0 8px; }
+  table { width: 100%; border-collapse: collapse; }
+  .info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px 24px; }
+  .info-item { border-bottom: 1px solid #e0e0e0; padding: 5px 0; }
+  .info-item .lbl { font-size: 11px; color: #777; text-transform: uppercase; }
+  .info-item .val { font-weight: bold; font-size: 13px; }
+  .sha { font-family: monospace; font-size: 11px; background: #f0f0f0; padding: 8px 12px; border-radius: 4px; word-break:break-all; margin: 4px 0; }
+  footer { margin-top: 40px; border-top: 1px solid #ccc; padding-top: 12px; font-size: 11px; color: #777; }
+</style></head><body>
+
+<h1>PerDoc — Relatório de Evidências Documentoscópicas</h1>
+<p style="font-size:12px;color:#777;margin-bottom:20px">Documento gerado automaticamente pela ferramenta PerDoc v1.1</p>
+
+<h2>1. Identificação do Caso</h2>
+<div class="info-grid">
+  <div class="info-item"><div class="lbl">Número do Caso / Processo</div><div class="val">${escHtml(caso)}</div></div>
+  <div class="info-item"><div class="lbl">Data/Hora da Análise</div><div class="val">${fileInfo.analysisTime}</div></div>
+  <div class="info-item"><div class="lbl">Perito / Analista</div><div class="val">${escHtml(perito)}</div></div>
+  <div class="info-item"><div class="lbl">Matrícula / Registro</div><div class="val">${escHtml(reg)}</div></div>
+</div>
+
+<h2>2. Identificação do Documento Examinado</h2>
+<div class="info-grid">
+  <div class="info-item"><div class="lbl">Nome do Arquivo</div><div class="val">${escHtml(fileInfo.name)}</div></div>
+  <div class="info-item"><div class="lbl">Tipo</div><div class="val">${fileInfo.ext.toUpperCase()}</div></div>
+  <div class="info-item"><div class="lbl">Tamanho</div><div class="val">${formatBytes(fileInfo.size)}</div></div>
+  <div class="info-item"><div class="lbl">Última Modificação (SO)</div><div class="val">${fileInfo.lastModified.toLocaleString('pt-BR')}</div></div>
+</div>
+<div style="margin-top:10px">
+  <div style="font-size:11px;color:#777;text-transform:uppercase;letter-spacing:.5px">SHA-256 (integridade / cadeia de custódia)</div>
+  <div class="sha">${fileInfo.sha256}</div>
+</div>
+
+<h2>3. Metadados Extraídos</h2>
+<table>${metaRows || '<tr><td colspan="2" style="padding:8px;color:#777">Nenhum metadado encontrado.</td></tr>'}</table>
+
+<h2>4. Indicadores de Risco (Red Flags)</h2>
+<div style="margin-bottom:10px">${flagsHtml}</div>
+
+<h2>5. FraudScore</h2>
+<div style="display:flex;align-items:center;gap:16px">
+  <div style="font-size:42px;font-weight:bold;color:${scoreColor}">${score}<span style="font-size:18px">/100</span></div>
+  <div style="flex:1">
+    <div style="background:#e0e0e0;border-radius:5px;height:12px;overflow:hidden">
+      <div style="width:${Math.min(score,100)}%;height:100%;background:${scoreColor};border-radius:5px"></div>
+    </div>
+    <div style="margin-top:6px;padding:6px 12px;background:${scoreBg};border-radius:4px;font-weight:bold;color:${scoreColor};font-size:13px">
+      ${score >= 60 ? '⚠ Alto risco — documento apresenta múltiplos indicadores de adulteração'
+        : score >= 30 ? '⚡ Risco moderado — verificação adicional recomendada'
+        : '✓ Baixo risco — nenhum indicador significativo detectado'}
+    </div>
+  </div>
+</div>
+
+${hashSection}
+${obsSection}
+
+<footer>
+  <p><strong>PerDoc v1.1</strong> — Ferramenta de análise documentoscópica digital.</p>
+  <p>Este relatório foi gerado em ${new Date().toLocaleString('pt-BR')} e documenta os metadados encontrados no arquivo informado.</p>
+  <p>O hash SHA-256 acima identifica univocamente o arquivo examinado e permite verificar sua integridade.</p>
+  <p style="margin-top:8px;font-style:italic">As conclusões deste relatório devem ser interpretadas por perito habilitado no contexto do exame documentoscópico.</p>
+</footer>
+</body></html>`;
+
+  const blob = new Blob([html], { type: 'text/html;charset=utf-8' });
+  const url  = URL.createObjectURL(blob);
+  const win  = window.open(url, '_blank');
+  if (win) setTimeout(() => win.print(), 800);
+}
+
+// ═══════════════════════════════════════════
+// EXPORT — .TXT
+// ═══════════════════════════════════════════
+function exportTxt() {
+  if (!currentAnalysis) return;
+  const { meta, flags, fileInfo } = currentAnalysis;
+  const perito = document.getElementById('perito-nome').value.trim() || '(não informado)';
+  const reg    = document.getElementById('perito-reg').value.trim()  || '(não informado)';
+  const caso   = document.getElementById('caso-num').value.trim()    || '—';
+  const obs    = document.getElementById('obs-text').value.trim();
+  const score  = calcFraudScore(flags);
+  const sep    = '─'.repeat(60);
+
+  let txt = `PERDOC — RELATÓRIO DE EVIDÊNCIAS DOCUMENTOSCÓPICAS\n${sep}\n`;
+  txt += `Data/Hora da Análise : ${fileInfo.analysisTime}\n`;
+  txt += `Perito / Analista    : ${perito}\n`;
+  txt += `Matrícula / Registro : ${reg}\n`;
+  txt += `Número do Caso       : ${caso}\n\n`;
+  txt += `DOCUMENTO EXAMINADO\n${sep}\n`;
+  txt += `Nome     : ${fileInfo.name}\n`;
+  txt += `Tipo     : ${fileInfo.ext.toUpperCase()}\n`;
+  txt += `Tamanho  : ${formatBytes(fileInfo.size)}\n`;
+  txt += `Modif SO : ${fileInfo.lastModified.toLocaleString('pt-BR')}\n`;
+  txt += `SHA-256  : ${fileInfo.sha256}\n\n`;
+  txt += `METADADOS EXTRAÍDOS\n${sep}\n`;
+  Object.entries(meta).filter(([,v]) => v != null && v !== '').forEach(([k,v]) => {
+    txt += `${k.padEnd(30)}: ${v}\n`;
+  });
+  txt += `\nRED FLAGS\n${sep}\n`;
+  txt += flags.length ? flags.join('\n') : 'Nenhum.\n';
+  txt += `\n\nFRAUDSCORE: ${score}/100\n`;
+  if (currentHash) txt += `\npHASH DCT 32×32: ${currentHash}\n`;
+  if (obs) txt += `\nOBSERVAÇÕES DO PERITO\n${sep}\n${obs}\n`;
+  txt += `\n${sep}\nGerado por PerDoc v1.1 em ${new Date().toLocaleString('pt-BR')}\n`;
+
+  const blob = new Blob([txt], { type: 'text/plain;charset=utf-8' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'evidencias_' + fileInfo.name.replace(/\.[^.]+$/, '') + '_' + Date.now() + '.txt';
+  a.click();
+}
+
+// ═══════════════════════════════════════════
+// FRAUD SCORE
+// ═══════════════════════════════════════════
+const FLAG_WEIGHTS = {
+  'rf-ghostscript':35,'rf-datas-incompat':40,'rf-datas-iguais':20,
+  'rf-software-suspeito':20,'rf-inkscape':30,'rf-sem-datas':10,
+  'rf-gps-presente':5,'rf-software-edicao':15,'rf-revisoes-zero':8,
+};
+const calcFraudScore = flags => Math.min(flags.reduce((s,f) => s + (FLAG_WEIGHTS[f]||10), 0), 100);
+const flagSeverity   = f => { const w = FLAG_WEIGHTS[f]||10; return w>=30?'high':w>=15?'medium':'info'; };
+
+// ═══════════════════════════════════════════
+// JPEG / EXIF PARSER
+// ═══════════════════════════════════════════
+function parseJPEG(buffer, file) {
+  const view = new DataView(buffer);
+  const meta = {}, flags = [];
+  if (view.getUint16(0) !== 0xFFD8) return { meta: { Erro: 'Não é um JPEG válido' }, flags };
+  let offset = 2;
+  while (offset < view.byteLength - 1) {
+    if (view.getUint8(offset) !== 0xFF) break;
+    const marker = view.getUint16(offset); offset += 2;
+    if (marker === 0xFFD9 || marker === 0xFFDA) break;
+    const segLen = view.getUint16(offset); const segEnd = offset + segLen;
+    if (marker === 0xFFE1 && readString(view, offset+2, 4) === 'Exif')
+      parseExifIFD(view, offset+2, meta, flags);
+    offset = segEnd;
+  }
+  scheduleImageHash(buffer, file, 'jpeg');
+  if (!Object.keys(meta).length) meta['Aviso'] = 'Nenhum bloco EXIF encontrado';
+  return { meta, flags };
+}
+
+function parseExifIFD(view, exifStart, meta, flags) {
+  const tiffStart = exifStart + 6;
+  if (tiffStart + 8 > view.byteLength) return;
+  const le = view.getUint16(tiffStart) === 0x4949;
+  const g16 = o => le ? view.getUint16(o,true) : view.getUint16(o);
+  const g32 = o => le ? view.getUint32(o,true) : view.getUint32(o);
+  if (g16(tiffStart+2) !== 42) return;
+  parseIFD(tiffStart, g32(tiffStart+4), g16, g32, view, meta, flags, le, 0);
+}
+
+function parseIFD(ts, ifdOff, g16, g32, view, meta, flags, le, depth) {
+  if (depth > 3) return;
+  const abs = ts + ifdOff; if (abs + 2 > view.byteLength) return;
+  const n = g16(abs);
+  for (let i = 0; i < n; i++) {
+    const e = abs + 2 + i*12; if (e+12 > view.byteLength) break;
+    const tag=g16(e),type=g16(e+2),count=g32(e+4);
+    const bcount=(count*(TYPE_SIZES[type]||0));
+    const dataOff = bcount>4 ? ts+g32(e+8) : e+8;
+    const val = readExifValue(view,tag,type,count,dataOff,le);
+    if (val===null) continue;
+    switch(tag) {
+      case 0x010F: meta['Make (câmera)']=val; break;
+      case 0x0110: meta['Model (câmera)']=val; break;
+      case 0x0112: meta['Orientation']=orientLabel(val); break;
+      case 0x011A: meta['XResolution']=fmtRat(val); break;
+      case 0x011B: meta['YResolution']=fmtRat(val); break;
+      case 0x0128: meta['ResolutionUnit']=['','nenhuma','polegadas','cm'][val]||val; break;
+      case 0x0131: { meta['Software']=val; const vl=val.toLowerCase(); if(vl.includes('photoshop')||vl.includes('gimp')||vl.includes('lightroom')) flags.push('rf-software-edicao'); break; }
+      case 0x0132: meta['DateTime']=fmtExifDate(val); break;
+      case 0x013B: meta['Artist']=val; break;
+      case 0x8298: meta['Copyright']=val; break;
+      case 0x9003: meta['DateTimeOriginal']=fmtExifDate(val); break;
+      case 0x9004: meta['DateTimeDigitized']=fmtExifDate(val); break;
+      case 0xA420: meta['ImageUniqueID']=val; break;
+      case 0xA433: meta['LensMake']=val; break;
+      case 0xA434: meta['LensModel']=val; break;
+      case 0x8769: parseIFD(ts, le?view.getUint32(e+8,true):view.getUint32(e+8), g16,g32,view,meta,flags,le,depth+1); break;
+      case 0x8825: { const gps={}; parseGPSIFD(ts, le?view.getUint32(e+8,true):view.getUint32(e+8), g16,g32,view,le,gps); if(gps.lat&&gps.lon){meta['GPS Latitude']=gps.lat;meta['GPS Longitude']=gps.lon;if(gps.alt)meta['GPS Altitude']=gps.alt;flags.push('rf-gps-presente');} break; }
+    }
+  }
+}
+
+function parseGPSIFD(ts,off,g16,g32,view,le,gps) {
+  const abs=ts+off; if(abs+2>view.byteLength) return;
+  const n=g16(abs); let latRef='N',lonRef='E',latV=null,lonV=null,altRef=0,altV=null;
+  for(let i=0;i<n;i++){
+    const e=abs+2+i*12; if(e+12>view.byteLength) break;
+    const tag=g16(e),type=g16(e+2),count=g32(e+4);
+    const bc=count*(TYPE_SIZES[type]||1);
+    const dOff=bc>4?ts+g32(e+8):e+8;
+    if(tag===0x0001)latRef=readString(view,dOff,1);
+    else if(tag===0x0003)lonRef=readString(view,dOff,1);
+    else if(tag===0x0002&&count===3)latV=readRats(view,dOff,3,le);
+    else if(tag===0x0004&&count===3)lonV=readRats(view,dOff,3,le);
+    else if(tag===0x0005)altRef=view.getUint8(dOff);
+    else if(tag===0x0006){const nn=le?view.getUint32(dOff,true):view.getUint32(dOff);const dd=le?view.getUint32(dOff+4,true):view.getUint32(dOff+4);if(dd)altV=((nn/dd)*(altRef?-1:1)).toFixed(1)+' m';}
+  }
+  if(latV)gps.lat=dmsDeg(latV,latRef); if(lonV)gps.lon=dmsDeg(lonV,lonRef); if(altV)gps.alt=altV;
+}
+const dmsDeg=(v,r)=>{let d=v[0]+v[1]/60+v[2]/3600;if(r==='S'||r==='W')d=-d;return d.toFixed(6)+'° ('+r+')';};
+const readRats=(view,off,n,le)=>{const r=[];for(let i=0;i<n;i++){const a=le?view.getUint32(off+i*8,true):view.getUint32(off+i*8);const b=le?view.getUint32(off+i*8+4,true):view.getUint32(off+i*8+4);r.push(b?a/b:0);}return r;};
+const TYPE_SIZES={1:1,2:1,3:2,4:4,5:8,6:1,7:1,8:2,9:4,10:8,11:4,12:8};
+function readExifValue(view,tag,type,count,off,le){
+  try{
+    if(type===2){let s='';for(let i=0;i<count-1;i++)s+=String.fromCharCode(view.getUint8(off+i));return s.trim()||null;}
+    if(type===3)return le?view.getUint16(off,true):view.getUint16(off);
+    if(type===4)return le?view.getUint32(off,true):view.getUint32(off);
+    if(type===5&&count>=1){const a=le?view.getUint32(off,true):view.getUint32(off);const b=le?view.getUint32(off+4,true):view.getUint32(off+4);return[a,b];}
+  }catch(e){}return null;
+}
+const fmtRat=v=>!v||!Array.isArray(v)?String(v):v[1]?(v[0]/v[1]).toFixed(0)+' DPI':String(v[0]);
+const fmtExifDate=s=>{if(!s)return s;const m=s.match(/^(\d{4}):(\d{2}):(\d{2}) (\d{2}:\d{2}:\d{2})$/);return m?`${m[3]}/${m[2]}/${m[1]} ${m[4]}`:s;};
+const orientLabel=v=>({1:'Normal',2:'Flip H',3:'Rotação 180°',4:'Flip V',6:'Rotação 90° CW',8:'Rotação 90° CCW'}[v]||String(v));
+function readString(view,off,len){let s='';for(let i=0;i<len;i++){const c=view.getUint8(off+i);if(!c)break;s+=String.fromCharCode(c);}return s;}
+
+// ═══════════════════════════════════════════
+// PDF PARSER
+// ═══════════════════════════════════════════
+function parsePDF(buffer, file) {
+  const bytes = new Uint8Array(buffer);
+  let text = '';
+  for (let i = 0; i < Math.min(bytes.length, 500000); i++) text += String.fromCharCode(bytes[i]);
+  const meta = {}, flags = [];
+  if (!text.startsWith('%PDF')) return { meta:{Erro:'Não é um PDF válido'}, flags };
+  meta['Versão PDF'] = text.substring(1,8).trim();
+
+  const fields = ['Creator','Producer','Author','Title','Subject','Keywords','CreationDate','ModDate'];
+  fields.forEach(f => {
+    const m1 = new RegExp('/'+f+'\\s*\\(([\\s\\S]*?)(?<!\\\\)\\)').exec(text);
+    if (m1) { meta[f] = unescPDF(m1[1]); return; }
+    const m2 = new RegExp('/'+f+'\\s*<([0-9A-Fa-f\\s]*)>').exec(text);
+    if (m2) meta[f] = hexPDF(m2[1].replace(/\s/g,''));
+  });
+
+  const pm = text.match(/\/Type\s*\/Page(?!s)/g);
+  meta['Número de Páginas'] = pm ? pm.length : '(não determinado)';
+
+  const soft = ((meta['Producer']||'')+(meta['Creator']||'')).toLowerCase();
+  if (soft.includes('ghostscript'))    flags.push('rf-ghostscript');
+  else if (soft.includes('inkscape'))  flags.push('rf-inkscape');
+  else if (soft.includes('pdfcreator')||soft.includes('libreoffice')||soft.includes('openoffice')) flags.push('rf-software-suspeito');
+
+  const cd=meta['CreationDate'],md=meta['ModDate'];
+  if (cd&&md) {
+    const cdO=parsePDFDate(cd),mdO=parsePDFDate(md);
+    if (cdO&&mdO) {
+      if (mdO<cdO) flags.push('rf-datas-incompat');
+      if (cdO.getTime()===mdO.getTime()) flags.push('rf-datas-iguais');
+      meta['CreationDate']=cdO.toLocaleString('pt-BR')+' (criação)';
+      meta['ModDate']=mdO.toLocaleString('pt-BR')+' (modificação)';
+    }
+  } else if (!cd&&!md) flags.push('rf-sem-datas');
+
+  return { meta, flags };
+}
+const parsePDFDate=s=>{if(!s)return null;const m=s.match(/D:(\d{4})(\d{2})(\d{2})(\d{2})(\d{2})(\d{2})/);if(m)return new Date(+m[1],+m[2]-1,+m[3],+m[4],+m[5],+m[6]);const d=new Date(s);return isNaN(d)?null:d;};
+const unescPDF=s=>s.replace(/\\n/g,'\n').replace(/\\r/g,'\r').replace(/\\t/g,'\t').replace(/\\\\/g,'\\').replace(/\\\(/g,'(').replace(/\\\)/g,')').replace(/\\(\d{3})/g,(_,o)=>String.fromCharCode(parseInt(o,8)));
+const hexPDF=h=>{let s='';for(let i=0;i<h.length-1;i+=2)s+=String.fromCharCode(parseInt(h.substr(i,2),16));return s;};
+
+// ═══════════════════════════════════════════
+// DOCX / XLSX PARSER
+// ═══════════════════════════════════════════
+async function parseDOCX(buffer, file) {
+  const meta={},flags=[];
+  let zip; try{zip=await JSZip.loadAsync(buffer);}catch(e){return{meta:{Erro:'Não foi possível descompactar: '+e.message},flags};}
+  const coreFile=zip.file('docProps/core.xml');
+  if (!coreFile) { meta['Aviso']='docProps/core.xml não encontrado'; }
+  else {
+    const xml=await coreFile.async('string');
+    const doc=new DOMParser().parseFromString(xml,'application/xml');
+    const get=tag=>{const el=doc.getElementsByTagNameNS('*',tag)[0];return el?el.textContent.trim():null;};
+    const MAP={'creator':'Autor','lastModifiedBy':'Última Modificação por','created':'Data de Criação',
+      'modified':'Data de Modificação','revision':'Número de Revisões','description':'Descrição',
+      'subject':'Assunto','title':'Título','keywords':'Palavras-chave','category':'Categoria','contentStatus':'Status'};
+    for(const[t,l] of Object.entries(MAP)){const v=get(t);if(v)meta[l]=v;}
+
+    const cd=meta['Data de Criação'],md=meta['Data de Modificação'];
+    if(cd&&md){
+      const cdO=new Date(cd),mdO=new Date(md);
+      if(!isNaN(cdO)&&!isNaN(mdO)){
+        meta['Data de Criação']=cdO.toLocaleString('pt-BR');
+        meta['Data de Modificação']=mdO.toLocaleString('pt-BR');
+        if(mdO<cdO)flags.push('rf-datas-incompat');
+        if(cdO.getTime()===mdO.getTime())flags.push('rf-datas-iguais');
+      }
+    }
+    const rev=meta['Número de Revisões'];
+    if(rev==='0'||rev==='1')flags.push('rf-revisoes-zero');
+  }
+  const appFile=zip.file('docProps/app.xml');
+  if(appFile){
+    const xml=await appFile.async('string');
+    const doc=new DOMParser().parseFromString(xml,'application/xml');
+    const get=tag=>{const el=doc.getElementsByTagNameNS('*',tag)[0];return el?el.textContent.trim():null;};
+    const app=get('Application'),co=get('Company'),pages=get('Pages')||get('Slides')||get('Sheets'),words=get('Words');
+    if(app)meta['Aplicativo']=app;if(co)meta['Empresa']=co;if(pages)meta['Páginas/Planilhas']=pages;if(words)meta['Palavras']=words;
+  }
+  return{meta,flags};
+}
+
+// ═══════════════════════════════════════════
+// PNG PARSER
+// ═══════════════════════════════════════════
+function parsePNG(buffer, file) {
+  const view=new DataView(buffer),bytes=new Uint8Array(buffer),meta={},flags=[];
+  const sig=[137,80,78,71,13,10,26,10];
+  for(let i=0;i<8;i++)if(bytes[i]!==sig[i])return{meta:{Erro:'Não é um PNG válido'},flags};
+  let off=8;
+  while(off+12<=view.byteLength){
+    const len=view.getUint32(off);
+    const type=String.fromCharCode(...bytes.slice(off+4,off+8));
+    const ds=off+8;
+    if(type==='IHDR'&&len>=13){
+      meta['Largura']=view.getUint32(ds)+' px';meta['Altura']=view.getUint32(ds+4)+' px';
+      meta['Bit Depth']=bytes[ds+8];
+      meta['Color Type']={0:'Grayscale',2:'Truecolor (RGB)',3:'Indexed',4:'Grayscale+Alpha',6:'Truecolor+Alpha'}[bytes[ds+9]]||bytes[ds+9];
+      meta['Interlace']=bytes[ds+12]?'Sim (Adam7)':'Não';
+    }
+    if(type==='tEXt'){
+      let nul=ds;while(nul<ds+len&&bytes[nul]!==0)nul++;
+      const k=dc(bytes,ds,nul-ds),v=dc(bytes,nul+1,len-(nul-ds)-1);
+      meta['tEXt:'+k]=v;
+      if(k.toLowerCase().includes('software')&&(v.toLowerCase().includes('photoshop')||v.toLowerCase().includes('gimp')))flags.push('rf-software-edicao');
+    }
+    if(type==='iTXt'){
+      let pos=ds,kwEnd=ds;while(kwEnd<ds+len&&bytes[kwEnd]!==0)kwEnd++;
+      const k=dc(bytes,ds,kwEnd-ds);
+      pos=kwEnd+3;while(pos<ds+len&&bytes[pos]!==0)pos++;pos++;while(pos<ds+len&&bytes[pos]!==0)pos++;pos++;
+      const v=dc(bytes,pos,ds+len-pos);if(v.trim())meta['iTXt:'+k]=v.substring(0,200);
+    }
+    if(type==='pHYs'&&len>=9){
+      const ppuX=view.getUint32(ds),ppuY=view.getUint32(ds+4),unit=bytes[ds+8];
+      if(unit===1){meta['Resolução X']=Math.round(ppuX/39.3701)+' DPI';meta['Resolução Y']=Math.round(ppuY/39.3701)+' DPI';}
+    }
+    if(type==='tIME'&&len>=7){
+      const yr=view.getUint16(ds),mo=bytes[ds+2],dy=bytes[ds+3],hh=bytes[ds+4],mm=bytes[ds+5],ss=bytes[ds+6];
+      meta['tIME (Última Modificação)']=`${String(dy).padStart(2,'0')}/${String(mo).padStart(2,'0')}/${yr} ${String(hh).padStart(2,'0')}:${String(mm).padStart(2,'0')}:${String(ss).padStart(2,'0')}`;
+    }
+    if(type==='IEND')break;
+    off+=12+len;
+  }
+  scheduleImageHash(buffer,file,'png');
+  return{meta,flags};
+}
+const dc=(bytes,start,len)=>{let s='';for(let i=0;i<len;i++)s+=String.fromCharCode(bytes[start+i]);return s;};
+
+// ═══════════════════════════════════════════
+// pHASH
+// ═══════════════════════════════════════════
+function scheduleImageHash(buffer, file, ext) {
+  const blob=new Blob([buffer],{type:ext==='png'?'image/png':'image/jpeg'});
+  const url=URL.createObjectURL(blob);
+  const img=new Image();
+  img.onload=()=>{
+    document.getElementById('hash-empty').style.display='none';
+    document.getElementById('hash-result').style.display='block';
+    document.getElementById('hash-img-preview').src=url;
+    const h=computePHash(img); currentHash=h;
+    document.getElementById('hash-value').textContent=h;
+    document.getElementById('cmp-result-area').innerHTML='';
+    if(currentAnalysis)currentAnalysis.pHash=h;
+  };
+  img.src=url;
+}
+function computePHash(img){
+  const canvas=document.getElementById('phash-canvas'),ctx=canvas.getContext('2d');
+  ctx.drawImage(img,0,0,32,32);
+  const d=ctx.getImageData(0,0,32,32).data;
+  const gray=new Float64Array(1024);
+  for(let i=0;i<1024;i++){const b=i*4;gray[i]=.299*d[b]+.587*d[b+1]+.114*d[b+2];}
+  const dct=dct2D(gray,32);
+  const vals=[];
+  for(let y=0;y<8;y++)for(let x=0;x<8;x++){if(!x&&!y)continue;vals.push(dct[y*32+x]);}
+  const mean=vals.reduce((a,b)=>a+b,0)/vals.length;
+  const bits=vals.map(v=>v>=mean?1:0);bits.push(dct[0]>=0?1:0);
+  let hex='';
+  for(let i=0;i<8;i++){let byte=0;for(let b=0;b<8;b++)byte=(byte<<1)|bits[i*8+b];hex+=byte.toString(16).padStart(2,'0');}
+  return hex;
+}
+function dct2D(sig,n){
+  const temp=new Float64Array(n*n),res=new Float64Array(n*n);
+  for(let y=0;y<n;y++)dct1D(sig,temp,y*n,y*n,n);
+  for(let x=0;x<n;x++){const row=new Float64Array(n);for(let y=0;y<n;y++)row[y]=temp[y*n+x];const out=new Float64Array(n);dct1DArr(row,out,n);for(let y=0;y<n;y++)res[y*n+x]=out[y];}
+  return res;
+}
+function dct1D(src,dst,sO,dO,n){for(let k=0;k<n;k++){let s=0;for(let i=0;i<n;i++)s+=src[sO+i]*Math.cos(Math.PI/n*(i+.5)*k);dst[dO+k]=s*(k===0?Math.sqrt(1/n):Math.sqrt(2/n));}}
+function dct1DArr(src,dst,n){for(let k=0;k<n;k++){let s=0;for(let i=0;i<n;i++)s+=src[i]*Math.cos(Math.PI/n*(i+.5)*k);dst[k]=s*(k===0?Math.sqrt(1/n):Math.sqrt(2/n));}}
+function hammingDistance(h1,h2){let d=0;for(let i=0;i<h1.length;i+=2){let x=parseInt(h1.substr(i,2),16)^parseInt(h2.substr(i,2),16);while(x){d+=x&1;x>>=1;}}return d;}
+function compareHash(){
+  const ref=document.getElementById('ref-hash-input').value.trim().toLowerCase();
+  const area=document.getElementById('cmp-result-area');
+  if(!currentHash){area.innerHTML='<div class="cmp-result different">Nenhum hash calculado. Carregue uma imagem primeiro.</div>';return;}
+  if(!/^[0-9a-f]{16}$/.test(ref)){area.innerHTML='<div class="cmp-result different">Hash inválido. Informe 16 caracteres hexadecimais.</div>';return;}
+  const dist=hammingDistance(currentHash,ref);
+  let cls,label;
+  if(dist===0){cls='identical';label=`🟢 Idênticas (distância: ${dist}) — mesma imagem ou cópia exata`;}
+  else if(dist<=10){cls='similar';label=`🟡 Muito similares (distância: ${dist}) — possível compressão ou redimensionamento`;}
+  else if(dist<=20){cls='similar';label=`🟠 Alterações moderadas (distância: ${dist}) — filtros, recorte ou edição`;}
+  else{cls='different';label=`🔴 Imagens distintas (distância: ${dist}) — conteúdo visual diferente`;}
+  area.innerHTML=`<div class="cmp-result ${cls}">${label}</div>`;
+}
+function copyHash(){
+  if(!currentHash)return;
+  navigator.clipboard.writeText(currentHash).then(()=>{
+    const btn=document.querySelector('#hash-result .btn');const orig=btn.textContent;
+    btn.textContent='✓ Copiado';setTimeout(()=>{btn.textContent=orig;},1500);
+  });
+}
+
+// ═══════════════════════════════════════════
+// UTILS
+// ═══════════════════════════════════════════
+const formatBytes=b=>b<1024?b+' B':b<1048576?(b/1024).toFixed(1)+' KB':(b/1048576).toFixed(2)+' MB';
+const escHtml=s=>s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+</script>
+</body>
+</html>
