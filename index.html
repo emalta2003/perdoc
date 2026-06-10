@@ -549,6 +549,7 @@ function renderExames(meta,flags,ext){
   exames.forEach(e=>{
     const div=document.createElement('div');
     div.className='exame-card '+e.status;
+    if(e.id==='exame-sig') div.setAttribute('data-exame-sig','1');
     div.innerHTML=`
       <div class="exame-header">
         <div class="exame-icon">${e.icon}</div>
@@ -642,16 +643,6 @@ function updateExameSig(sigs){
 
 function statusLabel(s){return{ok:'Concluído ✓',warn:'Atenção ⚡',fail:'Falhou ⚠',na:'N/A'}[s]||s;}
 
-// Override renderExames to add data-exame-sig
-const _origRenderExames=renderExames;
-function renderExames(meta,flags,ext){
-  _origRenderExames(meta,flags,ext);
-  if(ext==='pdf'){
-    const grid=document.getElementById('exames-grid');
-    const cards=grid.querySelectorAll('.exame-card');
-    cards.forEach(c=>{if(c.querySelector('.exame-name')&&c.querySelector('.exame-name').textContent==='Assinaturas Digitais') c.setAttribute('data-exame-sig','1');});
-  }
-}
 
 // ═══════════════════════════════════
 // SCORE & FLAGS
