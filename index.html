@@ -9,193 +9,136 @@
         crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 <style>
 :root {
-  --bg:      #0d1117; --surface: #161b22; --border:  #30363d;
-  --accent:  #238636; --accent2: #1f6feb; --warn:    #d29922;
-  --danger:  #da3633; --text:    #e6edf3; --muted:   #8b949e;
-  --radius:  8px;     --font:    'Segoe UI', system-ui, sans-serif;
+  --bg:#0d1117;--surface:#161b22;--border:#30363d;
+  --accent:#238636;--accent2:#1f6feb;--warn:#d29922;
+  --danger:#da3633;--text:#e6edf3;--muted:#8b949e;
+  --radius:8px;--font:'Segoe UI',system-ui,sans-serif;
 }
-* { box-sizing: border-box; margin: 0; padding: 0; }
-body { background: var(--bg); color: var(--text); font-family: var(--font); font-size: 14px; min-height: 100vh; }
+*{box-sizing:border-box;margin:0;padding:0;}
+body{background:var(--bg);color:var(--text);font-family:var(--font);font-size:14px;min-height:100vh;}
+header{background:var(--surface);border-bottom:1px solid var(--border);padding:12px 24px;display:flex;align-items:center;gap:12px;}
+.logo{font-size:20px;font-weight:700;letter-spacing:-.5px;}.logo span{color:var(--accent2);}
+.badge{background:var(--border);color:var(--muted);font-size:11px;padding:2px 7px;border-radius:20px;}
+.container{max-width:1120px;margin:0 auto;padding:20px 16px;}
+.perito-bar{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:14px 18px;margin-bottom:16px;display:flex;flex-wrap:wrap;gap:12px;align-items:flex-end;}
+.perito-bar label{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;display:block;margin-bottom:4px;}
+.perito-bar input[type=text]{padding:6px 10px;border-radius:6px;border:1px solid var(--border);background:var(--bg);color:var(--text);font-size:13px;outline:none;width:220px;}
+.perito-bar input[type=text]:focus{border-color:var(--accent2);}
+#dropzone{border:2px dashed var(--border);border-radius:var(--radius);padding:36px 24px;text-align:center;cursor:pointer;transition:border-color .2s,background .2s;position:relative;}
+#dropzone.drag-over{border-color:var(--accent2);background:rgba(31,111,235,.06);}
+#dropzone input{position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%;}
+.drop-icon{font-size:32px;margin-bottom:6px;}.drop-title{font-size:15px;font-weight:600;margin-bottom:3px;}.drop-sub{color:var(--muted);font-size:12px;}
+#sha-row{display:none;margin-top:10px;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:10px 16px;font-family:'Cascadia Code','Consolas',monospace;font-size:12px;}
+#sha-row .sha-label{color:var(--muted);margin-right:8px;font-size:11px;font-family:var(--font);text-transform:uppercase;}
+#sha-value{color:var(--accent2);word-break:break-all;}
+.tabs{display:flex;gap:4px;border-bottom:1px solid var(--border);margin:20px 0 0;}
+.tab-btn{background:none;border:none;color:var(--muted);padding:8px 16px;cursor:pointer;font-size:14px;border-bottom:2px solid transparent;margin-bottom:-1px;transition:color .15s;}
+.tab-btn.active{color:var(--text);border-bottom-color:var(--accent2);}
+.tab-btn:hover:not(.active){color:var(--text);}
+.tab-panel{display:none;padding:18px 0;}.tab-panel.active{display:block;}
+.card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:18px;margin-bottom:14px;}
+.card-title{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.7px;color:var(--muted);margin-bottom:12px;}
+.meta-table{width:100%;border-collapse:collapse;}
+.meta-table tr{border-bottom:1px solid var(--border);}.meta-table tr:last-child{border-bottom:none;}
+.meta-table td{padding:7px 6px;vertical-align:top;}
+.meta-table td:first-child{color:var(--muted);font-size:12px;font-weight:500;white-space:nowrap;width:190px;padding-right:12px;}
+.meta-table td:last-child{word-break:break-all;font-family:'Cascadia Code','Consolas',monospace;font-size:12px;}
+.flags-list{display:flex;flex-wrap:wrap;gap:8px;}
+.flag{display:inline-flex;align-items:center;gap:5px;padding:4px 10px;border-radius:20px;font-size:12px;font-weight:600;}
+.flag::before{content:'⚑ ';}
+.flag.high{background:rgba(218,54,51,.18);color:#ff6b6b;border:1px solid rgba(218,54,51,.35);}
+.flag.medium{background:rgba(210,153,34,.15);color:#f0b429;border:1px solid rgba(210,153,34,.3);}
+.flag.info{background:rgba(31,111,235,.15);color:#79b8ff;border:1px solid rgba(31,111,235,.3);}
+.score-row{display:flex;align-items:center;gap:16px;}
+.score-num{font-size:38px;font-weight:700;min-width:56px;}
+.score-num.low{color:var(--accent);}.score-num.medium{color:var(--warn);}.score-num.high{color:var(--danger);}
+.score-bar-wrap{flex:1;}.score-lbl{font-size:12px;color:var(--muted);margin-bottom:5px;}
+.score-bar{height:9px;background:var(--border);border-radius:5px;overflow:hidden;}
+.score-fill{height:100%;border-radius:5px;transition:width .5s;}
+.score-fill.low{background:var(--accent);}.score-fill.medium{background:var(--warn);}.score-fill.high{background:var(--danger);}
+.score-verdict{font-size:13px;margin-top:6px;}
+.file-info{display:flex;flex-wrap:wrap;gap:20px;}
+.fi-label{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;}
+.fi-value{font-size:14px;font-weight:600;}
+.phash-layout{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+@media(max-width:600px){.phash-layout{grid-template-columns:1fr;}}
+#phash-canvas{display:none;}
+.hash-display{font-family:'Cascadia Code','Consolas',monospace;font-size:13px;word-break:break-all;background:var(--bg);padding:10px 12px;border-radius:6px;border:1px solid var(--border);color:var(--accent2);margin-top:8px;}
+.img-preview{max-width:100%;max-height:180px;border-radius:6px;border:1px solid var(--border);object-fit:contain;background:var(--bg);display:block;margin-top:8px;}
+.cmp-result{margin-top:10px;padding:10px 14px;border-radius:6px;font-size:13px;font-weight:600;}
+.cmp-result.identical{background:rgba(35,134,54,.18);color:#3fb950;border:1px solid rgba(35,134,54,.3);}
+.cmp-result.similar{background:rgba(210,153,34,.15);color:#f0b429;border:1px solid rgba(210,153,34,.3);}
+.cmp-result.different{background:rgba(218,54,51,.15);color:#ff6b6b;border:1px solid rgba(218,54,51,.3);}
+.btn{display:inline-flex;align-items:center;gap:6px;padding:7px 14px;border-radius:6px;border:1px solid var(--border);background:var(--surface);color:var(--text);cursor:pointer;font-size:13px;font-weight:500;transition:background .15s;}
+.btn:hover{background:var(--border);}
+.btn.primary{background:var(--accent2);border-color:transparent;}.btn.primary:hover{background:#388bfd;}
+.btn.success{background:var(--accent);border-color:transparent;}.btn.success:hover{background:#2ea043;}
+input[type=text].inline{width:100%;padding:8px 12px;border-radius:6px;border:1px solid var(--border);background:var(--bg);color:var(--text);font-size:13px;font-family:'Cascadia Code',monospace;outline:none;}
+input[type=text].inline:focus{border-color:var(--accent2);}
+textarea.obs{width:100%;min-height:80px;padding:10px 12px;border-radius:6px;border:1px solid var(--border);background:var(--bg);color:var(--text);font-size:13px;font-family:var(--font);resize:vertical;outline:none;}
+textarea.obs:focus{border-color:var(--accent2);}
+.tag{display:inline-block;padding:1px 7px;border-radius:4px;font-size:11px;font-weight:700;text-transform:uppercase;background:var(--border);color:var(--muted);}
+.tag.jpeg,.tag.jpg{background:rgba(31,111,235,.25);color:#79b8ff;}
+.tag.pdf{background:rgba(218,54,51,.2);color:#ff6b6b;}
+.tag.docx{background:rgba(35,134,54,.2);color:#3fb950;}
+.tag.xlsx{background:rgba(35,134,54,.2);color:#3fb950;}
+.tag.png{background:rgba(210,153,34,.2);color:#f0b429;}
+.two-col{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+@media(max-width:700px){.two-col{grid-template-columns:1fr;}}
+.empty-state{text-align:center;padding:50px 20px;color:var(--muted);}
+.empty-state .es-icon{font-size:44px;margin-bottom:10px;}
+hr.divider{border:none;border-top:1px solid var(--border);margin:14px 0;}
+.action-row{display:flex;gap:10px;flex-wrap:wrap;margin-top:6px;}
 
-header {
-  background: var(--surface); border-bottom: 1px solid var(--border);
-  padding: 12px 24px; display: flex; align-items: center; gap: 12px;
-}
-.logo { font-size: 20px; font-weight: 700; letter-spacing: -.5px; }
-.logo span { color: var(--accent2); }
-.badge { background: var(--border); color: var(--muted); font-size: 11px; padding: 2px 7px; border-radius: 20px; }
-.container { max-width: 1120px; margin: 0 auto; padding: 20px 16px; }
-
-/* Perito bar */
-.perito-bar {
-  background: var(--surface); border: 1px solid var(--border);
-  border-radius: var(--radius); padding: 14px 18px; margin-bottom: 16px;
-  display: flex; flex-wrap: wrap; gap: 12px; align-items: flex-end;
-}
-.perito-bar label { font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: .5px; display: block; margin-bottom: 4px; }
-.perito-bar input[type=text] {
-  padding: 6px 10px; border-radius: 6px; border: 1px solid var(--border);
-  background: var(--bg); color: var(--text); font-size: 13px; outline: none; width: 220px;
-}
-.perito-bar input[type=text]:focus { border-color: var(--accent2); }
-.perito-bar .pi-label { font-size: 11px; color: var(--muted); }
-
-/* Drop zone */
-#dropzone {
-  border: 2px dashed var(--border); border-radius: var(--radius);
-  padding: 36px 24px; text-align: center; cursor: pointer;
-  transition: border-color .2s, background .2s; position: relative;
-}
-#dropzone.drag-over { border-color: var(--accent2); background: rgba(31,111,235,.06); }
-#dropzone input { position: absolute; inset: 0; opacity: 0; cursor: pointer; width: 100%; height: 100%; }
-.drop-icon { font-size: 32px; margin-bottom: 6px; }
-.drop-title { font-size: 15px; font-weight: 600; margin-bottom: 3px; }
-.drop-sub { color: var(--muted); font-size: 12px; }
-
-/* SHA row */
-#sha-row {
-  display: none; margin-top: 10px;
-  background: var(--surface); border: 1px solid var(--border);
-  border-radius: var(--radius); padding: 10px 16px;
-  font-family: 'Cascadia Code','Consolas',monospace; font-size: 12px;
-}
-#sha-row .sha-label { color: var(--muted); margin-right: 8px; font-size: 11px; font-family: var(--font); text-transform: uppercase; }
-#sha-value { color: var(--accent2); word-break: break-all; }
-
-/* Tabs */
-.tabs { display: flex; gap: 4px; border-bottom: 1px solid var(--border); margin: 20px 0 0; }
-.tab-btn {
-  background: none; border: none; color: var(--muted);
-  padding: 8px 16px; cursor: pointer; font-size: 14px;
-  border-bottom: 2px solid transparent; margin-bottom: -1px; transition: color .15s;
-}
-.tab-btn.active { color: var(--text); border-bottom-color: var(--accent2); }
-.tab-btn:hover:not(.active) { color: var(--text); }
-.tab-panel { display: none; padding: 18px 0; }
-.tab-panel.active { display: block; }
-
-/* Cards */
-.card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 18px; margin-bottom: 14px; }
-.card-title { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: .7px; color: var(--muted); margin-bottom: 12px; }
-
-/* Meta table */
-.meta-table { width: 100%; border-collapse: collapse; }
-.meta-table tr { border-bottom: 1px solid var(--border); }
-.meta-table tr:last-child { border-bottom: none; }
-.meta-table td { padding: 7px 6px; vertical-align: top; }
-.meta-table td:first-child { color: var(--muted); font-size: 12px; font-weight: 500; white-space: nowrap; width: 190px; padding-right: 12px; }
-.meta-table td:last-child { word-break: break-all; font-family: 'Cascadia Code','Consolas',monospace; font-size: 12px; }
-
-/* Flags */
-.flags-list { display: flex; flex-wrap: wrap; gap: 8px; }
-.flag { display: inline-flex; align-items: center; gap: 5px; padding: 4px 10px; border-radius: 20px; font-size: 12px; font-weight: 600; }
-.flag::before { content: '⚑ '; }
-.flag.high   { background: rgba(218,54,51,.18); color: #ff6b6b; border: 1px solid rgba(218,54,51,.35); }
-.flag.medium { background: rgba(210,153,34,.15); color: #f0b429; border: 1px solid rgba(210,153,34,.3); }
-.flag.info   { background: rgba(31,111,235,.15); color: #79b8ff; border: 1px solid rgba(31,111,235,.3); }
-
-/* Score */
-.score-row { display: flex; align-items: center; gap: 16px; }
-.score-num { font-size: 38px; font-weight: 700; min-width: 56px; }
-.score-num.low { color: var(--accent); } .score-num.medium { color: var(--warn); } .score-num.high { color: var(--danger); }
-.score-bar-wrap { flex: 1; }
-.score-lbl { font-size: 12px; color: var(--muted); margin-bottom: 5px; }
-.score-bar { height: 9px; background: var(--border); border-radius: 5px; overflow: hidden; }
-.score-fill { height: 100%; border-radius: 5px; transition: width .5s; }
-.score-fill.low { background: var(--accent); } .score-fill.medium { background: var(--warn); } .score-fill.high { background: var(--danger); }
-.score-verdict { font-size: 13px; margin-top: 6px; }
-
-/* File info */
-.file-info { display: flex; flex-wrap: wrap; gap: 20px; }
-.fi-label { font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: .5px; }
-.fi-value { font-size: 14px; font-weight: 600; }
-
-/* pHash */
-.phash-layout { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
-@media (max-width: 600px) { .phash-layout { grid-template-columns: 1fr; } }
-#phash-canvas { display: none; }
-.hash-display { font-family: 'Cascadia Code','Consolas',monospace; font-size: 13px; word-break: break-all; background: var(--bg); padding: 10px 12px; border-radius: 6px; border: 1px solid var(--border); color: var(--accent2); margin-top: 8px; }
-.img-preview { max-width: 100%; max-height: 180px; border-radius: 6px; border: 1px solid var(--border); object-fit: contain; background: var(--bg); display: block; margin-top: 8px; }
-.cmp-result { margin-top: 10px; padding: 10px 14px; border-radius: 6px; font-size: 13px; font-weight: 600; }
-.cmp-result.identical { background: rgba(35,134,54,.18); color: #3fb950; border: 1px solid rgba(35,134,54,.3); }
-.cmp-result.similar   { background: rgba(210,153,34,.15); color: #f0b429; border: 1px solid rgba(210,153,34,.3); }
-.cmp-result.different { background: rgba(218,54,51,.15); color: #ff6b6b; border: 1px solid rgba(218,54,51,.3); }
-
-/* Buttons */
-.btn { display: inline-flex; align-items: center; gap: 6px; padding: 7px 14px; border-radius: 6px; border: 1px solid var(--border); background: var(--surface); color: var(--text); cursor: pointer; font-size: 13px; font-weight: 500; transition: background .15s; }
-.btn:hover { background: var(--border); }
-.btn.primary { background: var(--accent2); border-color: transparent; }
-.btn.primary:hover { background: #388bfd; }
-.btn.success { background: var(--accent); border-color: transparent; }
-.btn.success:hover { background: #2ea043; }
-input[type=text].inline { width: 100%; padding: 8px 12px; border-radius: 6px; border: 1px solid var(--border); background: var(--bg); color: var(--text); font-size: 13px; font-family: 'Cascadia Code',monospace; outline: none; }
-input[type=text].inline:focus { border-color: var(--accent2); }
-
-/* Observações */
-textarea.obs {
-  width: 100%; min-height: 80px; padding: 10px 12px;
-  border-radius: 6px; border: 1px solid var(--border);
-  background: var(--bg); color: var(--text); font-size: 13px;
-  font-family: var(--font); resize: vertical; outline: none;
-}
-textarea.obs:focus { border-color: var(--accent2); }
-
-/* Tags */
-.tag { display: inline-block; padding: 1px 7px; border-radius: 4px; font-size: 11px; font-weight: 700; text-transform: uppercase; background: var(--border); color: var(--muted); }
-.tag.jpeg,.tag.jpg { background: rgba(31,111,235,.25); color: #79b8ff; }
-.tag.pdf  { background: rgba(218,54,51,.2);   color: #ff6b6b; }
-.tag.docx { background: rgba(35,134,54,.2);   color: #3fb950; }
-.tag.xlsx { background: rgba(35,134,54,.2);   color: #3fb950; }
-.tag.png  { background: rgba(210,153,34,.2);  color: #f0b429; }
-
-.two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
-@media (max-width: 700px) { .two-col { grid-template-columns: 1fr; } }
-.empty-state { text-align: center; padding: 50px 20px; color: var(--muted); }
-.empty-state .es-icon { font-size: 44px; margin-bottom: 10px; }
-hr.divider { border: none; border-top: 1px solid var(--border); margin: 14px 0; }
-.action-row { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 6px; }
-
-/* ── PRINT / REPORT STYLES ── */
-@media print {
-  body { background: #fff !important; color: #000 !important; font-family: 'Times New Roman', serif; }
-  .no-print { display: none !important; }
-  .print-only { display: block !important; }
-  .report-page { padding: 0; }
-}
-.print-only { display: none; }
+/* ── Signature cards ── */
+.sig-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);margin-bottom:14px;overflow:hidden;}
+.sig-card-header{padding:14px 18px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;border-bottom:1px solid var(--border);}
+.sig-card-body{padding:14px 18px;}
+.sig-signer{font-size:15px;font-weight:600;}
+.sig-org{font-size:12px;color:var(--muted);margin-top:2px;}
+.sig-status{display:inline-flex;align-items:center;gap:5px;padding:4px 12px;border-radius:20px;font-size:12px;font-weight:700;}
+.sig-status.ok{background:rgba(35,134,54,.2);color:#3fb950;border:1px solid rgba(35,134,54,.3);}
+.sig-status.warn{background:rgba(210,153,34,.15);color:#f0b429;border:1px solid rgba(210,153,34,.3);}
+.sig-status.fail{background:rgba(218,54,51,.18);color:#ff6b6b;border:1px solid rgba(218,54,51,.35);}
+.sig-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px 20px;}
+@media(max-width:600px){.sig-grid{grid-template-columns:1fr;}}
+.sig-field .sf-label{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.4px;margin-bottom:2px;}
+.sig-field .sf-value{font-size:12px;font-family:'Cascadia Code','Consolas',monospace;word-break:break-all;}
+.cert-chain{margin-top:12px;}
+.cert-level{display:flex;align-items:flex-start;gap:8px;margin-bottom:6px;}
+.cert-icon{font-size:16px;min-width:20px;}
+.cert-info{font-size:12px;}
+.cert-info strong{color:var(--text);}
+.cert-info span{color:var(--muted);}
+.chain-line{width:1px;height:12px;background:var(--border);margin-left:10px;}
+.algo-badge{display:inline-block;padding:2px 8px;border-radius:4px;font-size:11px;font-weight:700;}
+.algo-badge.sha256{background:rgba(35,134,54,.2);color:#3fb950;}
+.algo-badge.sha1{background:rgba(218,54,51,.18);color:#ff6b6b;}
+.algo-badge.other{background:var(--border);color:var(--muted);}
+.no-sig{text-align:center;padding:40px 20px;color:var(--muted);}
+.sig-count{display:inline-flex;align-items:center;justify-content:center;background:var(--accent2);color:#fff;border-radius:20px;font-size:12px;font-weight:700;min-width:22px;height:22px;padding:0 6px;margin-left:6px;}
 </style>
 </head>
 <body>
 
-<header class="no-print">
+<header>
   <div class="logo">Per<span>Doc</span></div>
-  <div class="badge">v1.1</div>
-  <div style="margin-left:auto; color:var(--muted); font-size:12px;">Análise Documentoscópica Digital</div>
+  <div class="badge">v1.2</div>
+  <div style="margin-left:auto;color:var(--muted);font-size:12px;">Análise Documentoscópica Digital</div>
 </header>
 
-<div class="container no-print">
+<div class="container">
 
-  <!-- Perito identification -->
   <div class="perito-bar">
-    <div>
-      <label>Perito / Analista</label>
-      <input type="text" id="perito-nome" placeholder="Nome completo">
-    </div>
-    <div>
-      <label>Matrícula / CRF / Nº</label>
-      <input type="text" id="perito-reg" placeholder="ex: 12345-SP">
-    </div>
-    <div>
-      <label>Nº do Caso / Processo</label>
-      <input type="text" id="caso-num" placeholder="opcional">
-    </div>
-    <div style="margin-left:auto; text-align:right">
-      <div class="pi-label">Data/hora da análise</div>
-      <div id="ts-display" style="font-size:13px; font-weight:600"></div>
+    <div><label>Perito / Analista</label><input type="text" id="perito-nome" placeholder="Nome completo"></div>
+    <div><label>Matrícula / CRF / Nº</label><input type="text" id="perito-reg" placeholder="ex: 12345-SP"></div>
+    <div><label>Nº do Caso / Processo</label><input type="text" id="caso-num" placeholder="opcional"></div>
+    <div style="margin-left:auto;text-align:right">
+      <div style="font-size:11px;color:var(--muted)">Data/hora da análise</div>
+      <div id="ts-display" style="font-size:13px;font-weight:600"></div>
     </div>
   </div>
 
-  <!-- Drop zone -->
   <div id="dropzone">
     <input type="file" id="file-input" accept=".jpg,.jpeg,.pdf,.docx,.xlsx,.png">
     <div class="drop-icon">📂</div>
@@ -203,24 +146,20 @@ hr.divider { border: none; border-top: 1px solid var(--border); margin: 14px 0; 
     <div class="drop-sub">JPEG · PDF · DOCX · XLSX · PNG</div>
   </div>
 
-  <!-- SHA-256 integrity row -->
   <div id="sha-row">
     <span class="sha-label">SHA-256 (cadeia de custódia)</span>
     <span id="sha-value">calculando…</span>
   </div>
 
-  <!-- Tabs -->
   <div class="tabs">
     <button class="tab-btn active" data-tab="meta">📋 Metadados</button>
+    <button class="tab-btn" data-tab="sig">🔏 Assinaturas<span class="sig-count" id="sig-count" style="display:none">0</span></button>
     <button class="tab-btn" data-tab="hash">🔢 Hash Perceptual</button>
   </div>
 
-  <!-- ── Metadados Tab ── -->
+  <!-- METADADOS TAB -->
   <div id="tab-meta" class="tab-panel active">
-    <div id="meta-empty" class="empty-state">
-      <div class="es-icon">🔍</div>
-      <div>Carregue um documento para iniciar a análise</div>
-    </div>
+    <div id="meta-empty" class="empty-state"><div class="es-icon">🔍</div><div>Carregue um documento para iniciar a análise</div></div>
     <div id="meta-results" style="display:none">
       <div class="card">
         <div class="card-title">Identificação do Arquivo</div>
@@ -249,14 +188,10 @@ hr.divider { border: none; border-top: 1px solid var(--border); margin: 14px 0; 
           </div>
         </div>
       </div>
-
-      <!-- Observações -->
       <div class="card">
         <div class="card-title">Observações do Perito</div>
         <textarea class="obs" id="obs-text" placeholder="Anotações para o laudo…"></textarea>
       </div>
-
-      <!-- Export actions -->
       <div class="action-row">
         <button class="btn success" onclick="exportReport()">📄 Gerar Relatório de Evidências</button>
         <button class="btn" onclick="exportTxt()">⬇ Baixar .txt</button>
@@ -264,7 +199,15 @@ hr.divider { border: none; border-top: 1px solid var(--border); margin: 14px 0; 
     </div>
   </div>
 
-  <!-- ── Hash Tab ── -->
+  <!-- ASSINATURAS TAB -->
+  <div id="tab-sig" class="tab-panel">
+    <div id="sig-empty" class="empty-state"><div class="es-icon">🔏</div><div>Carregue um PDF para analisar as assinaturas digitais</div></div>
+    <div id="sig-not-pdf" style="display:none" class="no-sig">Este formato não suporta assinaturas digitais.<br><span style="font-size:12px">Assinaturas digitais estão disponíveis apenas em PDF.</span></div>
+    <div id="sig-none" style="display:none" class="no-sig">Nenhuma assinatura digital encontrada neste PDF.</div>
+    <div id="sig-results" style="display:none"></div>
+  </div>
+
+  <!-- HASH TAB -->
   <div id="tab-hash" class="tab-panel">
     <div class="phash-layout">
       <div class="card">
@@ -294,376 +237,792 @@ hr.divider { border: none; border-top: 1px solid var(--border); margin: 14px 0; 
     </div>
   </div>
 
-</div><!-- /container -->
+</div>
 
 <script>
 // ═══════════════════════════════════════════
 // STATE
 // ═══════════════════════════════════════════
 let currentHash = null;
-let currentAnalysis = null; // { meta, flags, fileInfo, sha256 }
+let currentAnalysis = null;
+let currentSigs = [];
 
-// Live clock
-function updateClock() {
-  document.getElementById('ts-display').textContent =
-    new Date().toLocaleString('pt-BR', { dateStyle:'short', timeStyle:'medium' });
-}
-updateClock(); setInterval(updateClock, 1000);
+function updateClock(){document.getElementById('ts-display').textContent=new Date().toLocaleString('pt-BR',{dateStyle:'short',timeStyle:'medium'});}
+updateClock();setInterval(updateClock,1000);
 
 // ═══════════════════════════════════════════
 // TABS
 // ═══════════════════════════════════════════
-document.querySelectorAll('.tab-btn').forEach(btn => {
-  btn.addEventListener('click', () => {
-    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-    document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+document.querySelectorAll('.tab-btn').forEach(btn=>{
+  btn.addEventListener('click',()=>{
+    document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
+    document.querySelectorAll('.tab-panel').forEach(p=>p.classList.remove('active'));
     btn.classList.add('active');
-    document.getElementById('tab-' + btn.dataset.tab).classList.add('active');
+    document.getElementById('tab-'+btn.dataset.tab).classList.add('active');
   });
 });
 
 // ═══════════════════════════════════════════
 // DROP ZONE
 // ═══════════════════════════════════════════
-const dropzone = document.getElementById('dropzone');
-const fileInput = document.getElementById('file-input');
-dropzone.addEventListener('dragover', e => { e.preventDefault(); dropzone.classList.add('drag-over'); });
-dropzone.addEventListener('dragleave', () => dropzone.classList.remove('drag-over'));
-dropzone.addEventListener('drop', e => { e.preventDefault(); dropzone.classList.remove('drag-over'); const f = e.dataTransfer.files[0]; if (f) handleFile(f); });
-fileInput.addEventListener('change', () => { if (fileInput.files[0]) handleFile(fileInput.files[0]); });
+const dropzone=document.getElementById('dropzone');
+const fileInput=document.getElementById('file-input');
+dropzone.addEventListener('dragover',e=>{e.preventDefault();dropzone.classList.add('drag-over');});
+dropzone.addEventListener('dragleave',()=>dropzone.classList.remove('drag-over'));
+dropzone.addEventListener('drop',e=>{e.preventDefault();dropzone.classList.remove('drag-over');const f=e.dataTransfer.files[0];if(f)handleFile(f);});
+fileInput.addEventListener('change',()=>{if(fileInput.files[0])handleFile(fileInput.files[0]);});
 
 // ═══════════════════════════════════════════
 // FILE DISPATCH
 // ═══════════════════════════════════════════
-async function handleFile(file) {
-  const buf = await file.arrayBuffer();
+async function handleFile(file){
+  const buf=await file.arrayBuffer();
+  document.getElementById('sha-row').style.display='block';
+  document.getElementById('sha-value').textContent='calculando…';
+  const hashBuf=await crypto.subtle.digest('SHA-256',buf);
+  const sha256=Array.from(new Uint8Array(hashBuf)).map(b=>b.toString(16).padStart(2,'0')).join('');
+  document.getElementById('sha-value').textContent=sha256;
 
-  // SHA-256 via Web Crypto
-  document.getElementById('sha-row').style.display = 'block';
-  document.getElementById('sha-value').textContent = 'calculando…';
-  const hashBuf = await crypto.subtle.digest('SHA-256', buf);
-  const sha256 = Array.from(new Uint8Array(hashBuf)).map(b => b.toString(16).padStart(2,'0')).join('');
-  document.getElementById('sha-value').textContent = sha256;
-
-  const ext = file.name.split('.').pop().toLowerCase();
+  const ext=file.name.split('.').pop().toLowerCase();
   let result;
-  if (ext === 'jpg' || ext === 'jpeg') result = parseJPEG(buf, file);
-  else if (ext === 'pdf')              result = parsePDF(buf, file);
-  else if (ext === 'docx' || ext === 'xlsx') result = await parseDOCX(buf, file);
-  else if (ext === 'png')              result = parsePNG(buf, file);
-  else { alert('Formato não suportado: ' + ext); return; }
+  if(ext==='jpg'||ext==='jpeg') result=parseJPEG(buf,file);
+  else if(ext==='pdf')          result=parsePDF(buf,file);
+  else if(ext==='docx'||ext==='xlsx') result=await parseDOCX(buf,file);
+  else if(ext==='png')          result=parsePNG(buf,file);
+  else{alert('Formato não suportado: '+ext);return;}
 
-  const analysisTime = new Date().toLocaleString('pt-BR', { dateStyle:'short', timeStyle:'medium' });
-  currentAnalysis = { ...result, fileInfo: { name: file.name, size: file.size, lastModified: new Date(file.lastModified), ext, sha256, analysisTime } };
-  renderResults(result, file, ext, sha256, analysisTime);
+  const analysisTime=new Date().toLocaleString('pt-BR',{dateStyle:'short',timeStyle:'medium'});
+  currentAnalysis={...result,fileInfo:{name:file.name,size:file.size,lastModified:new Date(file.lastModified),ext,sha256,analysisTime}};
+  renderResults(result,file,ext,sha256,analysisTime);
+
+  // Assinaturas
+  resetSigTab();
+  if(ext==='pdf'){
+    const sigs=await parsePDFSignatures(buf);
+    currentSigs=sigs;
+    renderSignatures(sigs);
+  } else {
+    document.getElementById('sig-empty').style.display='none';
+    document.getElementById('sig-not-pdf').style.display='block';
+  }
 }
 
 // ═══════════════════════════════════════════
-// RENDER
+// RENDER METADATA
 // ═══════════════════════════════════════════
-function renderResults({ meta, flags }, file, ext, sha256, analysisTime) {
-  document.getElementById('file-info-row').innerHTML = `
+function renderResults({meta,flags},file,ext,sha256,analysisTime){
+  document.getElementById('file-info-row').innerHTML=`
     <div><div class="fi-label">Nome</div><div class="fi-value" style="max-width:300px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${file.name}</div></div>
     <div><div class="fi-label">Tipo</div><div class="fi-value"><span class="tag ${ext}">${ext.toUpperCase()}</span></div></div>
     <div><div class="fi-label">Tamanho</div><div class="fi-value">${formatBytes(file.size)}</div></div>
     <div><div class="fi-label">Modificado (SO)</div><div class="fi-value">${new Date(file.lastModified).toLocaleString('pt-BR')}</div></div>
-    <div><div class="fi-label">Analisado em</div><div class="fi-value">${analysisTime}</div></div>
-  `;
+    <div><div class="fi-label">Analisado em</div><div class="fi-value">${analysisTime}</div></div>`;
 
-  const tb = document.getElementById('meta-table-body');
-  tb.innerHTML = '';
-  const entries = Object.entries(meta).filter(([,v]) => v !== null && v !== undefined && v !== '');
-  if (!entries.length) {
-    tb.innerHTML = '<tr><td colspan="2" style="color:var(--muted);padding:8px">Nenhum metadado encontrado.</td></tr>';
-  } else {
-    entries.forEach(([k, v]) => {
-      const tr = document.createElement('tr');
-      tr.innerHTML = `<td>${escHtml(k)}</td><td>${escHtml(String(v))}</td>`;
-      tb.appendChild(tr);
-    });
-  }
+  const tb=document.getElementById('meta-table-body');
+  tb.innerHTML='';
+  const entries=Object.entries(meta).filter(([,v])=>v!=null&&v!==undefined&&v!=='');
+  if(!entries.length){tb.innerHTML='<tr><td colspan="2" style="color:var(--muted);padding:8px">Nenhum metadado encontrado.</td></tr>';}
+  else{entries.forEach(([k,v])=>{const tr=document.createElement('tr');tr.innerHTML=`<td>${escHtml(k)}</td><td>${escHtml(String(v))}</td>`;tb.appendChild(tr);});}
 
-  const score = calcFraudScore(flags);
-  const fc = document.getElementById('flags-container');
-  fc.innerHTML = '';
-  if (!flags.length) {
-    fc.innerHTML = '<span style="color:var(--muted);font-size:13px">Nenhum red flag detectado.</span>';
-  } else {
-    flags.forEach(f => {
-      const s = document.createElement('span');
-      s.className = 'flag ' + flagSeverity(f);
-      s.textContent = f;
-      fc.appendChild(s);
-    });
-  }
+  const score=calcFraudScore(flags);
+  const fc=document.getElementById('flags-container');
+  fc.innerHTML='';
+  if(!flags.length){fc.innerHTML='<span style="color:var(--muted);font-size:13px">Nenhum red flag detectado.</span>';}
+  else{flags.forEach(f=>{const s=document.createElement('span');s.className='flag '+flagSeverity(f);s.textContent=f;fc.appendChild(s);});}
 
-  const cls = score >= 60 ? 'high' : score >= 30 ? 'medium' : 'low';
-  document.getElementById('score-num').textContent = score;
-  document.getElementById('score-num').className = 'score-num ' + cls;
-  document.getElementById('score-fill').className = 'score-fill ' + cls;
-  document.getElementById('score-fill').style.width = Math.min(score,100) + '%';
-  document.getElementById('score-lbl').textContent = `${flags.length} indicador(es) de risco`;
-  const vEl = document.getElementById('score-verdict');
-  vEl.textContent = score >= 60 ? '⚠ Alto risco — múltiplos indicadores de adulteração'
-    : score >= 30 ? '⚡ Risco moderado — verificação adicional recomendada'
-    : '✓ Baixo risco — nenhum indicador significativo detectado';
-  vEl.style.color = score >= 60 ? 'var(--danger)' : score >= 30 ? 'var(--warn)' : 'var(--accent)';
-
-  document.getElementById('meta-empty').style.display = 'none';
-  document.getElementById('meta-results').style.display = 'block';
-}
-
-// ═══════════════════════════════════════════
-// EXPORT — RELATÓRIO DE EVIDÊNCIAS (HTML/print)
-// ═══════════════════════════════════════════
-function exportReport() {
-  if (!currentAnalysis) return;
-  const { meta, flags, fileInfo } = currentAnalysis;
-  const perito = document.getElementById('perito-nome').value.trim() || '(não informado)';
-  const reg    = document.getElementById('perito-reg').value.trim()  || '(não informado)';
-  const caso   = document.getElementById('caso-num').value.trim()    || '—';
-  const obs    = document.getElementById('obs-text').value.trim();
-  const score  = calcFraudScore(flags);
-
-  const metaRows = Object.entries(meta)
-    .filter(([,v]) => v !== null && v !== undefined && v !== '')
-    .map(([k,v]) => `<tr><td style="padding:5px 10px;border:1px solid #ccc;font-weight:bold;background:#f5f5f5;width:200px">${escHtml(k)}</td><td style="padding:5px 10px;border:1px solid #ccc;font-family:monospace">${escHtml(String(v))}</td></tr>`)
-    .join('');
-
-  const flagsHtml = flags.length
-    ? flags.map(f => `<span style="display:inline-block;margin:3px 4px;padding:3px 10px;border-radius:12px;font-size:12px;font-weight:bold;background:${flagSeverity(f)==='high'?'#ffe0e0':flagSeverity(f)==='medium'?'#fff3cd':'#e0eaff'};color:${flagSeverity(f)==='high'?'#c00':flagSeverity(f)==='medium'?'#7a5200':'#004080'};border:1px solid ${flagSeverity(f)==='high'?'#f99':flagSeverity(f)==='medium'?'#f0c':''}">${f}</span>`).join('')
-    : '<em style="color:#555">Nenhum red flag detectado.</em>';
-
-  const hashSection = currentHash
-    ? `<h3 style="margin:18px 0 6px;font-size:13px;text-transform:uppercase;letter-spacing:.5px;color:#555">Hash Perceptual (pHash)</h3>
-       <p style="font-family:monospace;font-size:13px;background:#f0f0f0;padding:8px;border-radius:4px">${currentHash}</p>`
-    : '';
-
-  const obsSection = obs
-    ? `<h3 style="margin:18px 0 6px;font-size:13px;text-transform:uppercase;letter-spacing:.5px;color:#555">Observações do Perito</h3>
-       <p style="background:#f9f9f9;border-left:4px solid #333;padding:10px 14px;font-size:13px;line-height:1.6">${escHtml(obs).replace(/\n/g,'<br>')}</p>`
-    : '';
-
-  const scoreColor = score >= 60 ? '#c00' : score >= 30 ? '#7a5200' : '#155724';
-  const scoreBg    = score >= 60 ? '#ffe0e0' : score >= 30 ? '#fff3cd' : '#d4edda';
-
-  const html = `<!DOCTYPE html>
-<html lang="pt-BR"><head><meta charset="UTF-8">
-<title>Relatório PerDoc — ${escHtml(fileInfo.name)}</title>
-<style>
-  body { font-family: Arial, sans-serif; font-size: 13px; color: #1a1a1a; max-width: 900px; margin: 0 auto; padding: 30px 40px; }
-  @media print { body { padding: 10px 20px; } .no-print { display:none; } }
-  h1 { font-size: 20px; border-bottom: 3px solid #1a1a1a; padding-bottom: 6px; margin-bottom: 4px; }
-  h2 { font-size: 14px; text-transform: uppercase; letter-spacing: .6px; color: #555; margin: 20px 0 8px; }
-  table { width: 100%; border-collapse: collapse; }
-  .info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px 24px; }
-  .info-item { border-bottom: 1px solid #e0e0e0; padding: 5px 0; }
-  .info-item .lbl { font-size: 11px; color: #777; text-transform: uppercase; }
-  .info-item .val { font-weight: bold; font-size: 13px; }
-  .sha { font-family: monospace; font-size: 11px; background: #f0f0f0; padding: 8px 12px; border-radius: 4px; word-break:break-all; margin: 4px 0; }
-  footer { margin-top: 40px; border-top: 1px solid #ccc; padding-top: 12px; font-size: 11px; color: #777; }
-</style></head><body>
-
-<h1>PerDoc — Relatório de Evidências Documentoscópicas</h1>
-<p style="font-size:12px;color:#777;margin-bottom:20px">Documento gerado automaticamente pela ferramenta PerDoc v1.1</p>
-
-<h2>1. Identificação do Caso</h2>
-<div class="info-grid">
-  <div class="info-item"><div class="lbl">Número do Caso / Processo</div><div class="val">${escHtml(caso)}</div></div>
-  <div class="info-item"><div class="lbl">Data/Hora da Análise</div><div class="val">${fileInfo.analysisTime}</div></div>
-  <div class="info-item"><div class="lbl">Perito / Analista</div><div class="val">${escHtml(perito)}</div></div>
-  <div class="info-item"><div class="lbl">Matrícula / Registro</div><div class="val">${escHtml(reg)}</div></div>
-</div>
-
-<h2>2. Identificação do Documento Examinado</h2>
-<div class="info-grid">
-  <div class="info-item"><div class="lbl">Nome do Arquivo</div><div class="val">${escHtml(fileInfo.name)}</div></div>
-  <div class="info-item"><div class="lbl">Tipo</div><div class="val">${fileInfo.ext.toUpperCase()}</div></div>
-  <div class="info-item"><div class="lbl">Tamanho</div><div class="val">${formatBytes(fileInfo.size)}</div></div>
-  <div class="info-item"><div class="lbl">Última Modificação (SO)</div><div class="val">${fileInfo.lastModified.toLocaleString('pt-BR')}</div></div>
-</div>
-<div style="margin-top:10px">
-  <div style="font-size:11px;color:#777;text-transform:uppercase;letter-spacing:.5px">SHA-256 (integridade / cadeia de custódia)</div>
-  <div class="sha">${fileInfo.sha256}</div>
-</div>
-
-<h2>3. Metadados Extraídos</h2>
-<table>${metaRows || '<tr><td colspan="2" style="padding:8px;color:#777">Nenhum metadado encontrado.</td></tr>'}</table>
-
-<h2>4. Indicadores de Risco (Red Flags)</h2>
-<div style="margin-bottom:10px">${flagsHtml}</div>
-
-<h2>5. FraudScore</h2>
-<div style="display:flex;align-items:center;gap:16px">
-  <div style="font-size:42px;font-weight:bold;color:${scoreColor}">${score}<span style="font-size:18px">/100</span></div>
-  <div style="flex:1">
-    <div style="background:#e0e0e0;border-radius:5px;height:12px;overflow:hidden">
-      <div style="width:${Math.min(score,100)}%;height:100%;background:${scoreColor};border-radius:5px"></div>
-    </div>
-    <div style="margin-top:6px;padding:6px 12px;background:${scoreBg};border-radius:4px;font-weight:bold;color:${scoreColor};font-size:13px">
-      ${score >= 60 ? '⚠ Alto risco — documento apresenta múltiplos indicadores de adulteração'
-        : score >= 30 ? '⚡ Risco moderado — verificação adicional recomendada'
-        : '✓ Baixo risco — nenhum indicador significativo detectado'}
-    </div>
-  </div>
-</div>
-
-${hashSection}
-${obsSection}
-
-<footer>
-  <p><strong>PerDoc v1.1</strong> — Ferramenta de análise documentoscópica digital.</p>
-  <p>Este relatório foi gerado em ${new Date().toLocaleString('pt-BR')} e documenta os metadados encontrados no arquivo informado.</p>
-  <p>O hash SHA-256 acima identifica univocamente o arquivo examinado e permite verificar sua integridade.</p>
-  <p style="margin-top:8px;font-style:italic">As conclusões deste relatório devem ser interpretadas por perito habilitado no contexto do exame documentoscópico.</p>
-</footer>
-</body></html>`;
-
-  const blob = new Blob([html], { type: 'text/html;charset=utf-8' });
-  const url  = URL.createObjectURL(blob);
-  const win  = window.open(url, '_blank');
-  if (win) setTimeout(() => win.print(), 800);
-}
-
-// ═══════════════════════════════════════════
-// EXPORT — .TXT
-// ═══════════════════════════════════════════
-function exportTxt() {
-  if (!currentAnalysis) return;
-  const { meta, flags, fileInfo } = currentAnalysis;
-  const perito = document.getElementById('perito-nome').value.trim() || '(não informado)';
-  const reg    = document.getElementById('perito-reg').value.trim()  || '(não informado)';
-  const caso   = document.getElementById('caso-num').value.trim()    || '—';
-  const obs    = document.getElementById('obs-text').value.trim();
-  const score  = calcFraudScore(flags);
-  const sep    = '─'.repeat(60);
-
-  let txt = `PERDOC — RELATÓRIO DE EVIDÊNCIAS DOCUMENTOSCÓPICAS\n${sep}\n`;
-  txt += `Data/Hora da Análise : ${fileInfo.analysisTime}\n`;
-  txt += `Perito / Analista    : ${perito}\n`;
-  txt += `Matrícula / Registro : ${reg}\n`;
-  txt += `Número do Caso       : ${caso}\n\n`;
-  txt += `DOCUMENTO EXAMINADO\n${sep}\n`;
-  txt += `Nome     : ${fileInfo.name}\n`;
-  txt += `Tipo     : ${fileInfo.ext.toUpperCase()}\n`;
-  txt += `Tamanho  : ${formatBytes(fileInfo.size)}\n`;
-  txt += `Modif SO : ${fileInfo.lastModified.toLocaleString('pt-BR')}\n`;
-  txt += `SHA-256  : ${fileInfo.sha256}\n\n`;
-  txt += `METADADOS EXTRAÍDOS\n${sep}\n`;
-  Object.entries(meta).filter(([,v]) => v != null && v !== '').forEach(([k,v]) => {
-    txt += `${k.padEnd(30)}: ${v}\n`;
-  });
-  txt += `\nRED FLAGS\n${sep}\n`;
-  txt += flags.length ? flags.join('\n') : 'Nenhum.\n';
-  txt += `\n\nFRAUDSCORE: ${score}/100\n`;
-  if (currentHash) txt += `\npHASH DCT 32×32: ${currentHash}\n`;
-  if (obs) txt += `\nOBSERVAÇÕES DO PERITO\n${sep}\n${obs}\n`;
-  txt += `\n${sep}\nGerado por PerDoc v1.1 em ${new Date().toLocaleString('pt-BR')}\n`;
-
-  const blob = new Blob([txt], { type: 'text/plain;charset=utf-8' });
-  const a = document.createElement('a');
-  a.href = URL.createObjectURL(blob);
-  a.download = 'evidencias_' + fileInfo.name.replace(/\.[^.]+$/, '') + '_' + Date.now() + '.txt';
-  a.click();
+  const cls=score>=60?'high':score>=30?'medium':'low';
+  document.getElementById('score-num').textContent=score;
+  document.getElementById('score-num').className='score-num '+cls;
+  document.getElementById('score-fill').className='score-fill '+cls;
+  document.getElementById('score-fill').style.width=Math.min(score,100)+'%';
+  document.getElementById('score-lbl').textContent=`${flags.length} indicador(es) de risco`;
+  const vEl=document.getElementById('score-verdict');
+  vEl.textContent=score>=60?'⚠ Alto risco — múltiplos indicadores de adulteração':score>=30?'⚡ Risco moderado — verificação adicional recomendada':'✓ Baixo risco — nenhum indicador significativo detectado';
+  vEl.style.color=score>=60?'var(--danger)':score>=30?'var(--warn)':'var(--accent)';
+  document.getElementById('meta-empty').style.display='none';
+  document.getElementById('meta-results').style.display='block';
 }
 
 // ═══════════════════════════════════════════
 // FRAUD SCORE
 // ═══════════════════════════════════════════
-const FLAG_WEIGHTS = {
+const FLAG_WEIGHTS={
   'rf-ghostscript':35,'rf-datas-incompat':40,'rf-datas-iguais':20,
   'rf-software-suspeito':20,'rf-inkscape':30,'rf-sem-datas':10,
   'rf-gps-presente':5,'rf-software-edicao':15,'rf-revisoes-zero':8,
+  'rf-sha1-obsoleto':25,'rf-modificado-pos-assinatura':50,'rf-assinatura-invalida':60,
+  'rf-cert-expirado':30,'rf-cert-autoassinado':20,'rf-sem-horario-assinatura':10,
 };
-const calcFraudScore = flags => Math.min(flags.reduce((s,f) => s + (FLAG_WEIGHTS[f]||10), 0), 100);
-const flagSeverity   = f => { const w = FLAG_WEIGHTS[f]||10; return w>=30?'high':w>=15?'medium':'info'; };
+const calcFraudScore=flags=>Math.min(flags.reduce((s,f)=>s+(FLAG_WEIGHTS[f]||10),0),100);
+const flagSeverity=f=>{const w=FLAG_WEIGHTS[f]||10;return w>=30?'high':w>=15?'medium':'info';};
+
+// ═══════════════════════════════════════════
+// ═══ ASSINATURAS DIGITAIS ═══════════════════
+// ═══════════════════════════════════════════
+
+function resetSigTab(){
+  document.getElementById('sig-empty').style.display='none';
+  document.getElementById('sig-not-pdf').style.display='none';
+  document.getElementById('sig-none').style.display='none';
+  document.getElementById('sig-results').style.display='none';
+  document.getElementById('sig-results').innerHTML='';
+  const cnt=document.getElementById('sig-count');
+  cnt.style.display='none';cnt.textContent='0';
+}
+
+async function parsePDFSignatures(buffer){
+  const bytes=new Uint8Array(buffer);
+  const sigs=[];
+
+  // Decode PDF as latin-1 for text searching
+  let text='';
+  for(let i=0;i<Math.min(bytes.length,2000000);i++) text+=String.fromCharCode(bytes[i]);
+
+  // Find all /ByteRange arrays (each = one signature)
+  const brRe=/\/ByteRange\s*\[\s*(\d+)\s+(\d+)\s+(\d+)\s+(\d+)\s*\]/g;
+  let brMatch;
+  while((brMatch=brRe.exec(text))!==null){
+    const br=[+brMatch[1],+brMatch[2],+brMatch[3],+brMatch[4]];
+
+    // Extract the /Contents hex near this ByteRange
+    const searchStart=Math.max(0,brMatch.index-8000);
+    const searchEnd=Math.min(text.length,brMatch.index+8000);
+    const region=text.substring(searchStart,searchEnd);
+
+    const contRe=/\/Contents\s*<([0-9A-Fa-f\s]+)>/;
+    const contMatch=contRe.exec(region);
+    if(!contMatch) continue;
+
+    const hexStr=contMatch[1].replace(/\s/g,'');
+    if(hexStr.length<20) continue;
+
+    const pkcs7=hexToBytes(hexStr);
+
+    // Extract extra fields from same region
+    const getName=tag=>{const m=new RegExp('/'+tag+'\\s*\\(([^)]{0,200})\\)').exec(region);return m?unescPDF(m[1]):null;};
+    const getDate=tag=>{const m=new RegExp('/'+tag+'\\s*\\(([^)]+)\\)').exec(region);return m?parsePDFDate(m[1]):null;};
+    const filter=getName('Filter')||'';
+    const subfilter=getName('SubFilter')||'';
+    const pdfName=getName('Name');
+    const reason=getName('Reason');
+    const location=getName('Location');
+    const sigDate=getDate('M');
+
+    // Parse PKCS#7 / CMS
+    const certInfo=parsePKCS7(pkcs7);
+
+    // Verify byte range integrity
+    const integrity=await verifyDocumentIntegrity(buffer,br,pkcs7);
+
+    // Red flags
+    const flags=[];
+    if(integrity.hashMismatch) flags.push('rf-assinatura-invalida');
+    if(integrity.modifiedAfterSig) flags.push('rf-modificado-pos-assinatura');
+    if(certInfo.algorithm&&certInfo.algorithm.includes('sha1')) flags.push('rf-sha1-obsoleto');
+    if(certInfo.selfSigned) flags.push('rf-cert-autoassinado');
+    if(certInfo.expired) flags.push('rf-cert-expirado');
+    if(!sigDate&&!certInfo.signingTime) flags.push('rf-sem-horario-assinatura');
+
+    sigs.push({br,filter,subfilter,pdfName,reason,location,sigDate,certInfo,integrity,flags});
+  }
+  return sigs;
+}
+
+function renderSignatures(sigs){
+  const cntEl=document.getElementById('sig-count');
+  if(sigs.length===0){
+    document.getElementById('sig-none').style.display='block';
+    cntEl.style.display='none';
+    return;
+  }
+  cntEl.style.display='inline-flex';
+  cntEl.textContent=sigs.length;
+
+  const container=document.getElementById('sig-results');
+  container.style.display='block';
+
+  // Summary flags to push to metadata fraud score
+  const allSigFlags=sigs.flatMap(s=>s.flags);
+  if(allSigFlags.length&&currentAnalysis){
+    const existing=currentAnalysis.flags||[];
+    const merged=[...new Set([...existing,...allSigFlags])];
+    currentAnalysis.flags=merged;
+    // re-render score
+    const score=calcFraudScore(merged);
+    const cls=score>=60?'high':score>=30?'medium':'low';
+    document.getElementById('score-num').textContent=score;
+    document.getElementById('score-num').className='score-num '+cls;
+    document.getElementById('score-fill').className='score-fill '+cls;
+    document.getElementById('score-fill').style.width=Math.min(score,100)+'%';
+    const fc=document.getElementById('flags-container');
+    fc.innerHTML='';
+    merged.forEach(f=>{const s=document.createElement('span');s.className='flag '+flagSeverity(f);s.textContent=f;fc.appendChild(s);});
+  }
+
+  sigs.forEach((sig,idx)=>{
+    const cert=sig.certInfo;
+    const integ=sig.integrity;
+
+    let statusCls,statusTxt;
+    if(sig.flags.includes('rf-assinatura-invalida')||sig.flags.includes('rf-modificado-pos-assinatura')){
+      statusCls='fail';statusTxt='⚠ Integridade comprometida';
+    } else if(sig.flags.length>0){
+      statusCls='warn';statusTxt='⚡ Atenção';
+    } else {
+      statusCls='ok';statusTxt='✓ Íntegra';
+    }
+
+    const signer=cert.subject.CN||cert.subject.O||sig.pdfName||'(desconhecido)';
+    const org=cert.subject.O&&cert.subject.CN?cert.subject.O:'';
+
+    const algoBadge=cert.algorithm?
+      `<span class="algo-badge ${cert.algorithm.includes('sha256')||cert.algorithm.includes('sha384')||cert.algorithm.includes('sha512')?'sha256':cert.algorithm.includes('sha1')?'sha1':'other'}">${cert.algorithm.toUpperCase()}</span>`:'';
+
+    const sigTimeStr=(sig.sigDate||cert.signingTime)
+      ?(sig.sigDate||cert.signingTime).toLocaleString('pt-BR')
+      :'não informado';
+
+    const validFrom=cert.notBefore?cert.notBefore.toLocaleString('pt-BR'):'—';
+    const validTo=cert.notAfter?cert.notAfter.toLocaleString('pt-BR'):'—';
+    const certExpiredWarning=cert.expired?'<span style="color:var(--danger);font-size:11px"> ⚠ expirado</span>':'';
+
+    const issuerStr=[cert.issuer.CN,cert.issuer.O].filter(Boolean).join(' / ')||'(desconhecido)';
+    const selfSignedNote=cert.selfSigned?'<span style="color:var(--warn);font-size:11px"> (autoassinado)</span>':'';
+
+    const byteRangeNote=integ.coversFullFile?
+      '<span style="color:var(--accent);font-size:11px">✓ Cobre o arquivo inteiro</span>':
+      '<span style="color:var(--danger);font-size:11px">⚠ Conteúdo após a assinatura — possível adulteração</span>';
+
+    const hashNote=integ.hashVerified===true?'<span style="color:var(--accent);font-size:11px">✓ Hash verificado</span>':
+      integ.hashVerified===false?'<span style="color:var(--danger);font-size:11px">⚠ Hash não confere — documento adulterado</span>':
+      '<span style="color:var(--muted);font-size:11px">não verificado</span>';
+
+    const flagsHtml=sig.flags.length?sig.flags.map(f=>`<span class="flag ${flagSeverity(f)}" style="font-size:11px;padding:2px 8px">${f}</span>`).join(''):'<span style="color:var(--muted);font-size:12px">nenhum</span>';
+
+    const chainHtml=buildChainHtml(cert);
+
+    container.innerHTML+=`
+    <div class="sig-card">
+      <div class="sig-card-header">
+        <div>
+          <div class="sig-signer">🔏 Assinatura ${idx+1} — ${escHtml(signer)}</div>
+          ${org?`<div class="sig-org">${escHtml(org)}</div>`:''}
+        </div>
+        <div style="display:flex;align-items:center;gap:8px">
+          ${algoBadge}
+          <span class="sig-status ${statusCls}">${statusTxt}</span>
+        </div>
+      </div>
+      <div class="sig-card-body">
+        <div class="sig-grid">
+          <div class="sig-field"><div class="sf-label">Horário de assinatura</div><div class="sf-value">${escHtml(sigTimeStr)}</div></div>
+          <div class="sig-field"><div class="sf-label">Razão / Motivo</div><div class="sf-value">${escHtml(sig.reason||'—')}</div></div>
+          <div class="sig-field"><div class="sf-label">Localização</div><div class="sf-value">${escHtml(sig.location||'—')}</div></div>
+          <div class="sig-field"><div class="sf-label">SubFilter (padrão)</div><div class="sf-value">${escHtml(sig.subfilter||sig.filter||'—')}</div></div>
+          <div class="sig-field"><div class="sf-label">Emitente do certificado</div><div class="sf-value">${escHtml(issuerStr)}${selfSignedNote}</div></div>
+          <div class="sig-field"><div class="sf-label">Validade do certificado</div><div class="sf-value">${validFrom} → ${validTo}${certExpiredWarning}</div></div>
+          ${cert.serialNumber?`<div class="sig-field"><div class="sf-label">Número de série</div><div class="sf-value">${escHtml(cert.serialNumber)}</div></div>`:''}
+          ${cert.subject.E?`<div class="sig-field"><div class="sf-label">E-mail</div><div class="sf-value">${escHtml(cert.subject.E)}</div></div>`:''}
+        </div>
+        <hr class="divider">
+        <div style="display:flex;flex-wrap:wrap;gap:16px;align-items:center;margin-bottom:10px">
+          <div><span style="font-size:11px;color:var(--muted);text-transform:uppercase">ByteRange:</span><br>${byteRangeNote}</div>
+          <div><span style="font-size:11px;color:var(--muted);text-transform:uppercase">Integridade do hash:</span><br>${hashNote}</div>
+        </div>
+        ${chainHtml?`<div class="cert-chain"><div style="font-size:11px;color:var(--muted);text-transform:uppercase;margin-bottom:6px">Cadeia de Certificados</div>${chainHtml}</div>`:''}
+        <div style="margin-top:10px"><div style="font-size:11px;color:var(--muted);text-transform:uppercase;margin-bottom:5px">Red Flags</div><div class="flags-list">${flagsHtml}</div></div>
+      </div>
+    </div>`;
+  });
+}
+
+function buildChainHtml(cert){
+  if(!cert.chain||!cert.chain.length) return '';
+  return cert.chain.map((c,i)=>`
+    ${i>0?'<div class="chain-line"></div>':''}
+    <div class="cert-level">
+      <div class="cert-icon">${i===0?'👤':i===cert.chain.length-1?'🏛':'🔗'}</div>
+      <div class="cert-info">
+        <strong>${escHtml(c.CN||c.O||'desconhecido')}</strong>
+        ${c.O&&c.CN?`<span> — ${escHtml(c.O)}</span>`:''}
+        ${c.C?`<span> [${escHtml(c.C)}]</span>`:''}
+      </div>
+    </div>`).join('');
+}
+
+// ═══════════════════════════════════════════
+// PKCS#7 / CMS PARSER
+// ═══════════════════════════════════════════
+function parsePKCS7(bytes){
+  const result={
+    subject:{},issuer:{},chain:[],
+    algorithm:'',signingTime:null,
+    notBefore:null,notAfter:null,
+    serialNumber:null,selfSigned:false,expired:false
+  };
+  try{
+    const root=asn1At(bytes,0);
+    if(!root||root.tag!==0x30) return result;
+    // ContentInfo SEQUENCE
+    const ci=asn1Children(bytes,root.vs,root.ve);
+    if(ci.length<2) return result;
+    // ci[0] = OID (1.2.840.113549.1.7.2), ci[1] = [0] content
+    const content=asn1Children(bytes,ci[1].vs,ci[1].ve);
+    if(!content.length) return result;
+    const sd=asn1Children(bytes,content[0].vs,content[0].ve);
+    // SignedData: version, digestAlgs, encapCI, [0]certs, [1]crls, signerInfos
+    if(sd.length<4) return result;
+
+    // digestAlgorithms — sd[1]
+    const daSet=asn1Children(bytes,sd[1].vs,sd[1].ve);
+    if(daSet.length){
+      const daSeq=asn1Children(bytes,daSet[0].vs,daSet[0].ve);
+      if(daSeq.length) result.algorithm=oidName(parseOIDBytes(bytes,daSeq[0].vs,daSeq[0].ve-daSeq[0].vs));
+    }
+
+    // Find certificates — look for context tag [0] (0xA0) after encapCI
+    let certs=null;
+    for(let i=3;i<sd.length;i++){
+      if(sd[i].tag===0xA0){certs=sd[i];break;}
+    }
+    if(certs){
+      const certList=asn1Children(bytes,certs.vs,certs.ve);
+      const chain=[];
+      certList.forEach(c=>{
+        const parsed=parseCert(bytes,c.offset);
+        if(parsed) chain.push(parsed);
+      });
+      result.chain=chain;
+      if(chain.length){
+        Object.assign(result,chain[0]);
+        // last cert = root CA
+      }
+    }
+
+    // SignerInfos — last item in SignedData
+    const siSet=asn1Children(bytes,sd[sd.length-1].vs,sd[sd.length-1].ve);
+    if(siSet.length){
+      const si=asn1Children(bytes,siSet[0].vs,siSet[0].ve);
+      // Find authenticated attributes [0] (tag 0xA0)
+      for(const attr of si){
+        if(attr.tag===0xA0){
+          const attrs=asn1Children(bytes,attr.vs,attr.ve);
+          for(const a of attrs){
+            const aseq=asn1Children(bytes,a.vs,a.ve);
+            if(aseq.length>=2){
+              const oid=parseOIDBytes(bytes,aseq[0].vs,aseq[0].ve-aseq[0].vs);
+              if(oid==='1.2.840.113549.1.9.5'){
+                // signingTime
+                const vals=asn1Children(bytes,aseq[1].vs,aseq[1].ve);
+                if(vals.length) result.signingTime=parseASN1Time(bytes,vals[0]);
+              }
+              if(oid==='1.2.840.113549.1.9.4'){
+                // messageDigest
+                const vals=asn1Children(bytes,aseq[1].vs,aseq[1].ve);
+                if(vals.length){
+                  result.messageDigest=bytes.slice(vals[0].vs,vals[0].ve);
+                }
+              }
+            }
+          }
+          break;
+        }
+      }
+    }
+  }catch(e){}
+  return result;
+}
+
+function parseCert(bytes,offset){
+  try{
+    const cert=asn1At(bytes,offset);
+    if(!cert||cert.tag!==0x30) return null;
+    const parts=asn1Children(bytes,cert.vs,cert.ve);
+    if(!parts.length) return null;
+    const tbs=asn1Children(bytes,parts[0].vs,parts[0].ve);
+    if(tbs.length<7) return null;
+
+    let idx=0;
+    // Skip optional version [0]
+    if(tbs[idx].tag===0xA0) idx++;
+    const serialNode=tbs[idx++];
+    const serial=bytesToHex(bytes.slice(serialNode.vs,serialNode.ve));
+    idx++; // signature alg
+    const issuerNode=tbs[idx++];
+    const validityNode=tbs[idx++];
+    const subjectNode=tbs[idx++];
+
+    const subject=parseRDN(bytes,subjectNode.vs,subjectNode.ve);
+    const issuer=parseRDN(bytes,issuerNode.vs,issuerNode.ve);
+    const validity=asn1Children(bytes,validityNode.vs,validityNode.ve);
+    const notBefore=validity.length>0?parseASN1Time(bytes,validity[0]):null;
+    const notAfter=validity.length>1?parseASN1Time(bytes,validity[1]):null;
+
+    const selfSigned=JSON.stringify(subject)===JSON.stringify(issuer);
+    const now=new Date();
+    const expired=notAfter&&now>notAfter;
+
+    // Get signing algorithm from outer cert
+    let algorithm='';
+    if(parts.length>1){
+      const algNode=asn1Children(bytes,parts[1].vs,parts[1].ve);
+      if(algNode.length) algorithm=oidName(parseOIDBytes(bytes,algNode[0].vs,algNode[0].ve-algNode[0].vs));
+    }
+
+    return{subject,issuer,serialNumber:serial,notBefore,notAfter,selfSigned,expired,algorithm,
+      CN:subject.CN,O:subject.O,C:subject.C,E:subject.E||subject['emailAddress']};
+  }catch(e){return null;}
+}
+
+function parseRDN(bytes,start,end){
+  const rdn={};
+  const sets=asn1Children(bytes,start,end);
+  for(const set of sets){
+    const pairs=asn1Children(bytes,set.vs,set.ve);
+    for(const pair of pairs){
+      const seq=asn1Children(bytes,pair.vs,pair.ve);
+      if(seq.length>=2){
+        const oid=parseOIDBytes(bytes,seq[0].vs,seq[0].ve-seq[0].vs);
+        const name=OID_ATTR[oid]||oid;
+        const val=asn1String(bytes,seq[1]);
+        if(val) rdn[name]=val;
+      }
+    }
+  }
+  return rdn;
+}
+
+// ═══════════════════════════════════════════
+// INTEGRITY VERIFICATION
+// ═══════════════════════════════════════════
+async function verifyDocumentIntegrity(buffer,br,pkcs7){
+  const result={coversFullFile:false,hashVerified:null,hashMismatch:false,modifiedAfterSig:false};
+  try{
+    const bytes=new Uint8Array(buffer);
+    const fileSize=bytes.length;
+    const [o0,l0,o1,l1]=br;
+
+    // Check if ByteRange covers the full file
+    result.coversFullFile=(o1+l1>=fileSize-16);
+    if(!result.coversFullFile) result.modifiedAfterSig=true;
+
+    // Build signed content (two ranges concatenated)
+    const signed=new Uint8Array(l0+l1);
+    signed.set(bytes.subarray(o0,o0+l0),0);
+    signed.set(bytes.subarray(o1,o1+l1),l0);
+
+    // Get messageDigest from PKCS#7
+    const certInfo=parsePKCS7(pkcs7);
+    if(!certInfo.messageDigest||!certInfo.algorithm) return result;
+
+    const alg=certInfo.algorithm.toLowerCase();
+    let webAlg;
+    if(alg.includes('sha256')||alg.includes('sha-256')) webAlg='SHA-256';
+    else if(alg.includes('sha384')) webAlg='SHA-384';
+    else if(alg.includes('sha512')) webAlg='SHA-512';
+    else if(alg.includes('sha1')||alg.includes('sha-1')) webAlg='SHA-1';
+    else return result;
+
+    const computed=new Uint8Array(await crypto.subtle.digest(webAlg,signed));
+    const expected=certInfo.messageDigest;
+
+    if(computed.length===expected.length){
+      let match=true;
+      for(let i=0;i<computed.length;i++) if(computed[i]!==expected[i]){match=false;break;}
+      result.hashVerified=match;
+      result.hashMismatch=!match;
+    }
+  }catch(e){}
+  return result;
+}
+
+// ═══════════════════════════════════════════
+// ASN.1 UTILITIES
+// ═══════════════════════════════════════════
+function asn1At(bytes,offset){
+  if(offset>=bytes.length) return null;
+  const tag=bytes[offset];
+  let pos=offset+1;
+  let len;
+  if(bytes[pos]<0x80){len=bytes[pos++];}
+  else{const nb=bytes[pos++]&0x7f;len=0;for(let i=0;i<nb;i++)len=(len<<8)|bytes[pos++];}
+  const vs=pos,ve=pos+len;
+  return{tag,len,vs,ve,offset,totalLen:ve-offset};
+}
+function asn1Children(bytes,start,end){
+  const ch=[];
+  let pos=start;
+  while(pos<end-1){
+    const n=asn1At(bytes,pos);
+    if(!n||n.ve>end+4) break;
+    ch.push(n);
+    pos=n.ve;
+  }
+  return ch;
+}
+function parseOIDBytes(bytes,start,len){
+  let oid='',first=true,val=0;
+  for(let i=0;i<len;i++){
+    const b=bytes[start+i];
+    val=(val<<7)|(b&0x7f);
+    if(!(b&0x80)){
+      if(first){oid+=Math.floor(val/40)+'.'+val%40;first=false;}
+      else oid+='.'+val;
+      val=0;
+    }
+  }
+  return oid;
+}
+function asn1String(bytes,node){
+  const t=node.tag;
+  if(t===0x0C||t===0x13||t===0x16||t===0x1A||t===0x1E){
+    return new TextDecoder('utf-8',{fatal:false}).decode(bytes.slice(node.vs,node.ve));
+  }
+  if(t===0x1E){
+    // BMPString: 2-byte chars
+    let s='';
+    for(let i=node.vs;i<node.ve-1;i+=2) s+=String.fromCharCode((bytes[i]<<8)|bytes[i+1]);
+    return s;
+  }
+  return null;
+}
+function parseASN1Time(bytes,node){
+  try{
+    let s='';
+    for(let i=node.vs;i<node.ve;i++) s+=String.fromCharCode(bytes[i]);
+    if(node.tag===0x17){
+      // UTCTime: YYMMDDHHMMSSZ
+      const yy=+s.substring(0,2),mo=+s.substring(2,4)-1,dd=+s.substring(4,6);
+      const hh=+s.substring(6,8),mm=+s.substring(8,10),ss=+s.substring(10,12);
+      const yr=yy>=50?1900+yy:2000+yy;
+      return new Date(Date.UTC(yr,mo,dd,hh,mm,ss));
+    }
+    if(node.tag===0x18){
+      // GeneralizedTime: YYYYMMDDHHMMSSZ
+      const yr=+s.substring(0,4),mo=+s.substring(4,6)-1,dd=+s.substring(6,8);
+      const hh=+s.substring(8,10),mm=+s.substring(10,12),ss=+s.substring(12,14);
+      return new Date(Date.UTC(yr,mo,dd,hh,mm,ss));
+    }
+  }catch(e){}
+  return null;
+}
+function bytesToHex(bytes){return Array.from(bytes).map(b=>b.toString(16).padStart(2,'0')).join('');}
+function hexToBytes(hex){const b=new Uint8Array(hex.length/2);for(let i=0;i<b.length;i++)b[i]=parseInt(hex.substr(i*2,2),16);return b;}
+
+const OID_ATTR={'2.5.4.3':'CN','2.5.4.6':'C','2.5.4.7':'L','2.5.4.8':'ST','2.5.4.10':'O',
+  '2.5.4.11':'OU','1.2.840.113549.1.9.1':'emailAddress','2.5.4.5':'serialNumber',
+  '2.5.4.4':'SN','2.5.4.42':'GN'};
+const OID_ALG={'1.2.840.113549.1.1.5':'sha1WithRSA','1.2.840.113549.1.1.11':'sha256WithRSA',
+  '1.2.840.113549.1.1.12':'sha384WithRSA','1.2.840.113549.1.1.13':'sha512WithRSA',
+  '1.2.840.10045.4.3.2':'sha256WithECDSA','1.2.840.10045.4.3.3':'sha384WithECDSA',
+  '1.3.14.3.2.26':'sha1','2.16.840.1.101.3.4.2.1':'sha256','2.16.840.1.101.3.4.2.2':'sha384',
+  '2.16.840.1.101.3.4.2.3':'sha512'};
+function oidName(oid){return OID_ALG[oid]||OID_ATTR[oid]||oid;}
+
+// ═══════════════════════════════════════════
+// EXPORT — RELATÓRIO HTML
+// ═══════════════════════════════════════════
+function exportReport(){
+  if(!currentAnalysis) return;
+  const{meta,flags,fileInfo}=currentAnalysis;
+  const perito=document.getElementById('perito-nome').value.trim()||'(não informado)';
+  const reg=document.getElementById('perito-reg').value.trim()||'(não informado)';
+  const caso=document.getElementById('caso-num').value.trim()||'—';
+  const obs=document.getElementById('obs-text').value.trim();
+  const score=calcFraudScore(flags);
+
+  const metaRows=Object.entries(meta).filter(([,v])=>v!=null&&v!==undefined&&v!=='')
+    .map(([k,v])=>`<tr><td style="padding:5px 10px;border:1px solid #ccc;font-weight:bold;background:#f5f5f5;width:200px">${escHtml(k)}</td><td style="padding:5px 10px;border:1px solid #ccc;font-family:monospace">${escHtml(String(v))}</td></tr>`).join('');
+
+  const flagsHtml=flags.length
+    ?flags.map(f=>`<span style="display:inline-block;margin:3px;padding:3px 10px;border-radius:12px;font-size:12px;font-weight:bold;background:${flagSeverity(f)==='high'?'#ffe0e0':flagSeverity(f)==='medium'?'#fff3cd':'#e0eaff'};color:${flagSeverity(f)==='high'?'#c00':flagSeverity(f)==='medium'?'#7a5200':'#004080'}">${f}</span>`).join('')
+    :'<em style="color:#555">Nenhum.</em>';
+
+  const sigsHtml=currentSigs.length?currentSigs.map((sig,i)=>{
+    const c=sig.certInfo;
+    const signer=c.subject.CN||c.subject.O||sig.pdfName||'desconhecido';
+    const integrityTxt=sig.integrity.hashMismatch?'⚠ HASH NÃO CONFERE — ADULTERADO':
+      sig.integrity.modifiedAfterSig?'⚠ CONTEÚDO APÓS ASSINATURA':
+      sig.integrity.hashVerified===true?'✓ Íntegra':'(não verificada)';
+    return `<tr><td style="padding:6px;border:1px solid #ccc;font-weight:bold">${i+1}</td>
+      <td style="padding:6px;border:1px solid #ccc">${escHtml(signer)}</td>
+      <td style="padding:6px;border:1px solid #ccc">${escHtml(c.subject.O||'—')}</td>
+      <td style="padding:6px;border:1px solid #ccc">${sig.sigDate||c.signingTime?(sig.sigDate||c.signingTime).toLocaleString('pt-BR'):'—'}</td>
+      <td style="padding:6px;border:1px solid #ccc">${escHtml(c.algorithm||'—')}</td>
+      <td style="padding:6px;border:1px solid #ccc;color:${sig.integrity.hashMismatch||sig.integrity.modifiedAfterSig?'#c00':'#155724'}">${integrityTxt}</td></tr>`;
+  }).join(''):'';
+
+  const scoreColor=score>=60?'#c00':score>=30?'#7a5200':'#155724';
+  const scoreBg=score>=60?'#ffe0e0':score>=30?'#fff3cd':'#d4edda';
+  const hashSection=currentHash?`<h2>7. Hash Perceptual (pHash)</h2><p style="font-family:monospace;font-size:13px;background:#f0f0f0;padding:8px;border-radius:4px">${currentHash}</p>`:'';
+  const obsSection=obs?`<h2>${currentSigs.length?'8':'7'}. Observações do Perito</h2><p style="background:#f9f9f9;border-left:4px solid #333;padding:10px 14px;font-size:13px;line-height:1.6">${escHtml(obs).replace(/\n/g,'<br>')}</p>`:'';
+
+  const html=`<!DOCTYPE html><html lang="pt-BR"><head><meta charset="UTF-8">
+<title>Relatório PerDoc — ${escHtml(fileInfo.name)}</title>
+<style>body{font-family:Arial,sans-serif;font-size:13px;color:#1a1a1a;max-width:920px;margin:0 auto;padding:30px 40px;}
+@media print{body{padding:10px 20px;}.no-print{display:none;}}
+h1{font-size:20px;border-bottom:3px solid #1a1a1a;padding-bottom:6px;margin-bottom:4px;}
+h2{font-size:13px;text-transform:uppercase;letter-spacing:.6px;color:#555;margin:20px 0 8px;}
+table{width:100%;border-collapse:collapse;}
+.info-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px 24px;}
+.info-item{border-bottom:1px solid #e0e0e0;padding:5px 0;}
+.info-item .lbl{font-size:11px;color:#777;text-transform:uppercase;}
+.info-item .val{font-weight:bold;font-size:13px;}
+.sha{font-family:monospace;font-size:11px;background:#f0f0f0;padding:8px 12px;border-radius:4px;word-break:break-all;margin:4px 0;}
+footer{margin-top:40px;border-top:1px solid #ccc;padding-top:12px;font-size:11px;color:#777;}</style></head><body>
+<h1>PerDoc — Relatório de Evidências Documentoscópicas</h1>
+<p style="font-size:12px;color:#777;margin-bottom:20px">Gerado por PerDoc v1.2</p>
+<h2>1. Identificação do Caso</h2>
+<div class="info-grid">
+  <div class="info-item"><div class="lbl">Número do Caso</div><div class="val">${escHtml(caso)}</div></div>
+  <div class="info-item"><div class="lbl">Data/Hora da Análise</div><div class="val">${fileInfo.analysisTime}</div></div>
+  <div class="info-item"><div class="lbl">Perito / Analista</div><div class="val">${escHtml(perito)}</div></div>
+  <div class="info-item"><div class="lbl">Matrícula / Registro</div><div class="val">${escHtml(reg)}</div></div>
+</div>
+<h2>2. Identificação do Documento</h2>
+<div class="info-grid">
+  <div class="info-item"><div class="lbl">Nome</div><div class="val">${escHtml(fileInfo.name)}</div></div>
+  <div class="info-item"><div class="lbl">Tipo</div><div class="val">${fileInfo.ext.toUpperCase()}</div></div>
+  <div class="info-item"><div class="lbl">Tamanho</div><div class="val">${formatBytes(fileInfo.size)}</div></div>
+  <div class="info-item"><div class="lbl">Última Modificação (SO)</div><div class="val">${fileInfo.lastModified.toLocaleString('pt-BR')}</div></div>
+</div>
+<div style="margin-top:10px"><div style="font-size:11px;color:#777;text-transform:uppercase">SHA-256 (cadeia de custódia)</div><div class="sha">${fileInfo.sha256}</div></div>
+<h2>3. Metadados Extraídos</h2>
+<table>${metaRows||'<tr><td colspan="2" style="padding:8px;color:#777">Nenhum metadado encontrado.</td></tr>'}</table>
+<h2>4. Indicadores de Risco (Red Flags)</h2><div style="margin-bottom:10px">${flagsHtml}</div>
+<h2>5. FraudScore</h2>
+<div style="display:flex;align-items:center;gap:16px">
+  <div style="font-size:42px;font-weight:bold;color:${scoreColor}">${score}<span style="font-size:18px">/100</span></div>
+  <div style="flex:1"><div style="background:#e0e0e0;border-radius:5px;height:12px;overflow:hidden"><div style="width:${Math.min(score,100)}%;height:100%;background:${scoreColor};border-radius:5px"></div></div>
+  <div style="margin-top:6px;padding:6px 12px;background:${scoreBg};border-radius:4px;font-weight:bold;color:${scoreColor};font-size:13px">${score>=60?'⚠ Alto risco':score>=30?'⚡ Risco moderado':'✓ Baixo risco'}</div></div>
+</div>
+${sigsHtml?`<h2>6. Assinaturas Digitais</h2><table style="font-size:12px"><tr style="background:#f5f5f5"><th style="padding:6px;border:1px solid #ccc">Nº</th><th style="padding:6px;border:1px solid #ccc">Signatário</th><th style="padding:6px;border:1px solid #ccc">Organização</th><th style="padding:6px;border:1px solid #ccc">Data/Hora</th><th style="padding:6px;border:1px solid #ccc">Algoritmo</th><th style="padding:6px;border:1px solid #ccc">Integridade</th></tr>${sigsHtml}</table>`:''}
+${hashSection}${obsSection}
+<footer><p><strong>PerDoc v1.2</strong> — Análise documentoscópica digital. Gerado em ${new Date().toLocaleString('pt-BR')}.</p>
+<p style="margin-top:8px;font-style:italic">As conclusões deste relatório devem ser interpretadas por perito habilitado no contexto do exame documentoscópico.</p></footer>
+</body></html>`;
+
+  const blob=new Blob([html],{type:'text/html;charset=utf-8'});
+  const win=window.open(URL.createObjectURL(blob),'_blank');
+  if(win) setTimeout(()=>win.print(),800);
+}
+
+function exportTxt(){
+  if(!currentAnalysis) return;
+  const{meta,flags,fileInfo}=currentAnalysis;
+  const perito=document.getElementById('perito-nome').value.trim()||'(não informado)';
+  const reg=document.getElementById('perito-reg').value.trim()||'(não informado)';
+  const caso=document.getElementById('caso-num').value.trim()||'—';
+  const obs=document.getElementById('obs-text').value.trim();
+  const score=calcFraudScore(flags);
+  const sep='─'.repeat(60);
+  let txt=`PERDOC v1.2 — RELATÓRIO DE EVIDÊNCIAS DOCUMENTOSCÓPICAS\n${sep}\n`;
+  txt+=`Data/Hora da Análise : ${fileInfo.analysisTime}\nPerito               : ${perito}\nMatrícula            : ${reg}\nNº do Caso           : ${caso}\n\n`;
+  txt+=`DOCUMENTO\n${sep}\nNome     : ${fileInfo.name}\nTipo     : ${fileInfo.ext.toUpperCase()}\nTamanho  : ${formatBytes(fileInfo.size)}\nModif SO : ${fileInfo.lastModified.toLocaleString('pt-BR')}\nSHA-256  : ${fileInfo.sha256}\n\n`;
+  txt+=`METADADOS\n${sep}\n`;
+  Object.entries(meta).filter(([,v])=>v!=null&&v!=='').forEach(([k,v])=>{txt+=`${k.padEnd(30)}: ${v}\n`;});
+  txt+=`\nRED FLAGS\n${sep}\n${flags.length?flags.join('\n'):'Nenhum.'}\n\nFRAUDSCORE: ${score}/100\n`;
+  if(currentSigs.length){
+    txt+=`\nASSINATURAS DIGITAIS\n${sep}\n`;
+    currentSigs.forEach((sig,i)=>{
+      const c=sig.certInfo;
+      txt+=`\nAssinatura ${i+1}\n`;
+      txt+=`  Signatário : ${c.subject.CN||c.subject.O||sig.pdfName||'desconhecido'}\n`;
+      if(c.subject.O) txt+=`  Organização: ${c.subject.O}\n`;
+      const t=sig.sigDate||c.signingTime;
+      if(t) txt+=`  Data/Hora  : ${t.toLocaleString('pt-BR')}\n`;
+      txt+=`  Algoritmo  : ${c.algorithm||'—'}\n`;
+      txt+=`  Emitente   : ${c.issuer.CN||c.issuer.O||'desconhecido'}\n`;
+      txt+=`  Integridade: ${sig.integrity.hashMismatch?'FALHOU':sig.integrity.modifiedAfterSig?'MODIFICADO PÓS-ASSINATURA':sig.integrity.hashVerified===true?'OK':'não verificada'}\n`;
+      if(sig.flags.length) txt+=`  Flags      : ${sig.flags.join(', ')}\n`;
+    });
+  }
+  if(currentHash) txt+=`\npHASH DCT: ${currentHash}\n`;
+  if(obs) txt+=`\nOBSERVAÇÕES\n${sep}\n${obs}\n`;
+  txt+=`\n${sep}\nGerado por PerDoc v1.2 em ${new Date().toLocaleString('pt-BR')}\n`;
+
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(new Blob([txt],{type:'text/plain;charset=utf-8'}));
+  a.download='evidencias_'+fileInfo.name.replace(/\.[^.]+$/,'')+'_'+Date.now()+'.txt';
+  a.click();
+}
 
 // ═══════════════════════════════════════════
 // JPEG / EXIF PARSER
 // ═══════════════════════════════════════════
-function parseJPEG(buffer, file) {
-  const view = new DataView(buffer);
-  const meta = {}, flags = [];
-  if (view.getUint16(0) !== 0xFFD8) return { meta: { Erro: 'Não é um JPEG válido' }, flags };
-  let offset = 2;
-  while (offset < view.byteLength - 1) {
-    if (view.getUint8(offset) !== 0xFF) break;
-    const marker = view.getUint16(offset); offset += 2;
-    if (marker === 0xFFD9 || marker === 0xFFDA) break;
-    const segLen = view.getUint16(offset); const segEnd = offset + segLen;
-    if (marker === 0xFFE1 && readString(view, offset+2, 4) === 'Exif')
-      parseExifIFD(view, offset+2, meta, flags);
-    offset = segEnd;
+function parseJPEG(buffer,file){
+  const view=new DataView(buffer),meta={},flags=[];
+  if(view.getUint16(0)!==0xFFD8) return{meta:{Erro:'Não é um JPEG válido'},flags};
+  let offset=2;
+  while(offset<view.byteLength-1){
+    if(view.getUint8(offset)!==0xFF) break;
+    const marker=view.getUint16(offset);offset+=2;
+    if(marker===0xFFD9||marker===0xFFDA) break;
+    const segLen=view.getUint16(offset);const segEnd=offset+segLen;
+    if(marker===0xFFE1&&readStr(view,offset+2,4)==='Exif') parseExifIFD(view,offset+2,meta,flags);
+    offset=segEnd;
   }
-  scheduleImageHash(buffer, file, 'jpeg');
-  if (!Object.keys(meta).length) meta['Aviso'] = 'Nenhum bloco EXIF encontrado';
-  return { meta, flags };
+  scheduleImageHash(buffer,file,'jpeg');
+  if(!Object.keys(meta).length) meta['Aviso']='Nenhum bloco EXIF encontrado';
+  return{meta,flags};
 }
-
-function parseExifIFD(view, exifStart, meta, flags) {
-  const tiffStart = exifStart + 6;
-  if (tiffStart + 8 > view.byteLength) return;
-  const le = view.getUint16(tiffStart) === 0x4949;
-  const g16 = o => le ? view.getUint16(o,true) : view.getUint16(o);
-  const g32 = o => le ? view.getUint32(o,true) : view.getUint32(o);
-  if (g16(tiffStart+2) !== 42) return;
-  parseIFD(tiffStart, g32(tiffStart+4), g16, g32, view, meta, flags, le, 0);
+function parseExifIFD(view,es,meta,flags){
+  const ts=es+6;if(ts+8>view.byteLength)return;
+  const le=view.getUint16(ts)===0x4949;
+  const g16=o=>le?view.getUint16(o,true):view.getUint16(o);
+  const g32=o=>le?view.getUint32(o,true):view.getUint32(o);
+  if(g16(ts+2)!==42)return;
+  parseIFD(ts,g32(ts+4),g16,g32,view,meta,flags,le,0);
 }
-
-function parseIFD(ts, ifdOff, g16, g32, view, meta, flags, le, depth) {
-  if (depth > 3) return;
-  const abs = ts + ifdOff; if (abs + 2 > view.byteLength) return;
-  const n = g16(abs);
-  for (let i = 0; i < n; i++) {
-    const e = abs + 2 + i*12; if (e+12 > view.byteLength) break;
+function parseIFD(ts,ifdOff,g16,g32,view,meta,flags,le,depth){
+  if(depth>3)return;
+  const abs=ts+ifdOff;if(abs+2>view.byteLength)return;
+  const n=g16(abs);
+  for(let i=0;i<n;i++){
+    const e=abs+2+i*12;if(e+12>view.byteLength)break;
     const tag=g16(e),type=g16(e+2),count=g32(e+4);
-    const bcount=(count*(TYPE_SIZES[type]||0));
-    const dataOff = bcount>4 ? ts+g32(e+8) : e+8;
-    const val = readExifValue(view,tag,type,count,dataOff,le);
-    if (val===null) continue;
-    switch(tag) {
-      case 0x010F: meta['Make (câmera)']=val; break;
-      case 0x0110: meta['Model (câmera)']=val; break;
-      case 0x0112: meta['Orientation']=orientLabel(val); break;
-      case 0x011A: meta['XResolution']=fmtRat(val); break;
-      case 0x011B: meta['YResolution']=fmtRat(val); break;
-      case 0x0128: meta['ResolutionUnit']=['','nenhuma','polegadas','cm'][val]||val; break;
-      case 0x0131: { meta['Software']=val; const vl=val.toLowerCase(); if(vl.includes('photoshop')||vl.includes('gimp')||vl.includes('lightroom')) flags.push('rf-software-edicao'); break; }
-      case 0x0132: meta['DateTime']=fmtExifDate(val); break;
-      case 0x013B: meta['Artist']=val; break;
-      case 0x8298: meta['Copyright']=val; break;
-      case 0x9003: meta['DateTimeOriginal']=fmtExifDate(val); break;
-      case 0x9004: meta['DateTimeDigitized']=fmtExifDate(val); break;
-      case 0xA420: meta['ImageUniqueID']=val; break;
-      case 0xA433: meta['LensMake']=val; break;
-      case 0xA434: meta['LensModel']=val; break;
-      case 0x8769: parseIFD(ts, le?view.getUint32(e+8,true):view.getUint32(e+8), g16,g32,view,meta,flags,le,depth+1); break;
-      case 0x8825: { const gps={}; parseGPSIFD(ts, le?view.getUint32(e+8,true):view.getUint32(e+8), g16,g32,view,le,gps); if(gps.lat&&gps.lon){meta['GPS Latitude']=gps.lat;meta['GPS Longitude']=gps.lon;if(gps.alt)meta['GPS Altitude']=gps.alt;flags.push('rf-gps-presente');} break; }
+    const bc=count*(TYPE_SIZES[type]||0);
+    const dOff=bc>4?ts+g32(e+8):e+8;
+    const val=readExifVal(view,tag,type,count,dOff,le);
+    if(val===null)continue;
+    switch(tag){
+      case 0x010F:meta['Make (câmera)']=val;break;case 0x0110:meta['Model (câmera)']=val;break;
+      case 0x0112:meta['Orientation']=orientLabel(val);break;
+      case 0x011A:meta['XResolution']=fmtRat(val);break;case 0x011B:meta['YResolution']=fmtRat(val);break;
+      case 0x0128:meta['ResolutionUnit']=['','nenhuma','polegadas','cm'][val]||val;break;
+      case 0x0131:{meta['Software']=val;const vl=val.toLowerCase();if(vl.includes('photoshop')||vl.includes('gimp')||vl.includes('lightroom'))flags.push('rf-software-edicao');break;}
+      case 0x0132:meta['DateTime']=fmtExifDate(val);break;
+      case 0x013B:meta['Artist']=val;break;case 0x8298:meta['Copyright']=val;break;
+      case 0x9003:meta['DateTimeOriginal']=fmtExifDate(val);break;
+      case 0x9004:meta['DateTimeDigitized']=fmtExifDate(val);break;
+      case 0xA420:meta['ImageUniqueID']=val;break;
+      case 0xA433:meta['LensMake']=val;break;case 0xA434:meta['LensModel']=val;break;
+      case 0x8769:parseIFD(ts,le?view.getUint32(e+8,true):view.getUint32(e+8),g16,g32,view,meta,flags,le,depth+1);break;
+      case 0x8825:{const gps={};parseGPSIFD(ts,le?view.getUint32(e+8,true):view.getUint32(e+8),g16,g32,view,le,gps);if(gps.lat&&gps.lon){meta['GPS Latitude']=gps.lat;meta['GPS Longitude']=gps.lon;if(gps.alt)meta['GPS Altitude']=gps.alt;flags.push('rf-gps-presente');}break;}
     }
   }
 }
-
-function parseGPSIFD(ts,off,g16,g32,view,le,gps) {
-  const abs=ts+off; if(abs+2>view.byteLength) return;
-  const n=g16(abs); let latRef='N',lonRef='E',latV=null,lonV=null,altRef=0,altV=null;
+function parseGPSIFD(ts,off,g16,g32,view,le,gps){
+  const abs=ts+off;if(abs+2>view.byteLength)return;
+  const n=g16(abs);let latRef='N',lonRef='E',latV=null,lonV=null,altRef=0,altV=null;
   for(let i=0;i<n;i++){
-    const e=abs+2+i*12; if(e+12>view.byteLength) break;
+    const e=abs+2+i*12;if(e+12>view.byteLength)break;
     const tag=g16(e),type=g16(e+2),count=g32(e+4);
     const bc=count*(TYPE_SIZES[type]||1);
     const dOff=bc>4?ts+g32(e+8):e+8;
-    if(tag===0x0001)latRef=readString(view,dOff,1);
-    else if(tag===0x0003)lonRef=readString(view,dOff,1);
+    if(tag===0x0001)latRef=readStr(view,dOff,1);
+    else if(tag===0x0003)lonRef=readStr(view,dOff,1);
     else if(tag===0x0002&&count===3)latV=readRats(view,dOff,3,le);
     else if(tag===0x0004&&count===3)lonV=readRats(view,dOff,3,le);
     else if(tag===0x0005)altRef=view.getUint8(dOff);
     else if(tag===0x0006){const nn=le?view.getUint32(dOff,true):view.getUint32(dOff);const dd=le?view.getUint32(dOff+4,true):view.getUint32(dOff+4);if(dd)altV=((nn/dd)*(altRef?-1:1)).toFixed(1)+' m';}
   }
-  if(latV)gps.lat=dmsDeg(latV,latRef); if(lonV)gps.lon=dmsDeg(lonV,lonRef); if(altV)gps.alt=altV;
+  if(latV)gps.lat=dmsDeg(latV,latRef);if(lonV)gps.lon=dmsDeg(lonV,lonRef);if(altV)gps.alt=altV;
 }
 const dmsDeg=(v,r)=>{let d=v[0]+v[1]/60+v[2]/3600;if(r==='S'||r==='W')d=-d;return d.toFixed(6)+'° ('+r+')';};
 const readRats=(view,off,n,le)=>{const r=[];for(let i=0;i<n;i++){const a=le?view.getUint32(off+i*8,true):view.getUint32(off+i*8);const b=le?view.getUint32(off+i*8+4,true):view.getUint32(off+i*8+4);r.push(b?a/b:0);}return r;};
 const TYPE_SIZES={1:1,2:1,3:2,4:4,5:8,6:1,7:1,8:2,9:4,10:8,11:4,12:8};
-function readExifValue(view,tag,type,count,off,le){
+function readExifVal(view,tag,type,count,off,le){
   try{
     if(type===2){let s='';for(let i=0;i<count-1;i++)s+=String.fromCharCode(view.getUint8(off+i));return s.trim()||null;}
     if(type===3)return le?view.getUint16(off,true):view.getUint16(off);
@@ -674,47 +1033,42 @@ function readExifValue(view,tag,type,count,off,le){
 const fmtRat=v=>!v||!Array.isArray(v)?String(v):v[1]?(v[0]/v[1]).toFixed(0)+' DPI':String(v[0]);
 const fmtExifDate=s=>{if(!s)return s;const m=s.match(/^(\d{4}):(\d{2}):(\d{2}) (\d{2}:\d{2}:\d{2})$/);return m?`${m[3]}/${m[2]}/${m[1]} ${m[4]}`:s;};
 const orientLabel=v=>({1:'Normal',2:'Flip H',3:'Rotação 180°',4:'Flip V',6:'Rotação 90° CW',8:'Rotação 90° CCW'}[v]||String(v));
-function readString(view,off,len){let s='';for(let i=0;i<len;i++){const c=view.getUint8(off+i);if(!c)break;s+=String.fromCharCode(c);}return s;}
+function readStr(view,off,len){let s='';for(let i=0;i<len;i++){const c=view.getUint8(off+i);if(!c)break;s+=String.fromCharCode(c);}return s;}
 
 // ═══════════════════════════════════════════
-// PDF PARSER
+// PDF METADATA PARSER
 // ═══════════════════════════════════════════
-function parsePDF(buffer, file) {
-  const bytes = new Uint8Array(buffer);
-  let text = '';
-  for (let i = 0; i < Math.min(bytes.length, 500000); i++) text += String.fromCharCode(bytes[i]);
-  const meta = {}, flags = [];
-  if (!text.startsWith('%PDF')) return { meta:{Erro:'Não é um PDF válido'}, flags };
-  meta['Versão PDF'] = text.substring(1,8).trim();
-
-  const fields = ['Creator','Producer','Author','Title','Subject','Keywords','CreationDate','ModDate'];
-  fields.forEach(f => {
-    const m1 = new RegExp('/'+f+'\\s*\\(([\\s\\S]*?)(?<!\\\\)\\)').exec(text);
-    if (m1) { meta[f] = unescPDF(m1[1]); return; }
-    const m2 = new RegExp('/'+f+'\\s*<([0-9A-Fa-f\\s]*)>').exec(text);
-    if (m2) meta[f] = hexPDF(m2[1].replace(/\s/g,''));
+function parsePDF(buffer,file){
+  const bytes=new Uint8Array(buffer);
+  let text='';
+  for(let i=0;i<Math.min(bytes.length,500000);i++) text+=String.fromCharCode(bytes[i]);
+  const meta={},flags=[];
+  if(!text.startsWith('%PDF')) return{meta:{Erro:'Não é um PDF válido'},flags};
+  meta['Versão PDF']=text.substring(1,8).trim();
+  const fields=['Creator','Producer','Author','Title','Subject','Keywords','CreationDate','ModDate'];
+  fields.forEach(f=>{
+    const m1=new RegExp('/'+f+'\\s*\\(([\\s\\S]*?)(?<!\\\\)\\)').exec(text);
+    if(m1){meta[f]=unescPDF(m1[1]);return;}
+    const m2=new RegExp('/'+f+'\\s*<([0-9A-Fa-f\\s]*)>').exec(text);
+    if(m2) meta[f]=hexPDF(m2[1].replace(/\s/g,''));
   });
-
-  const pm = text.match(/\/Type\s*\/Page(?!s)/g);
-  meta['Número de Páginas'] = pm ? pm.length : '(não determinado)';
-
-  const soft = ((meta['Producer']||'')+(meta['Creator']||'')).toLowerCase();
-  if (soft.includes('ghostscript'))    flags.push('rf-ghostscript');
-  else if (soft.includes('inkscape'))  flags.push('rf-inkscape');
-  else if (soft.includes('pdfcreator')||soft.includes('libreoffice')||soft.includes('openoffice')) flags.push('rf-software-suspeito');
-
+  const pm=text.match(/\/Type\s*\/Page(?!s)/g);
+  meta['Número de Páginas']=pm?pm.length:'(não determinado)';
+  const soft=((meta['Producer']||'')+(meta['Creator']||'')).toLowerCase();
+  if(soft.includes('ghostscript'))flags.push('rf-ghostscript');
+  else if(soft.includes('inkscape'))flags.push('rf-inkscape');
+  else if(soft.includes('pdfcreator')||soft.includes('libreoffice')||soft.includes('openoffice'))flags.push('rf-software-suspeito');
   const cd=meta['CreationDate'],md=meta['ModDate'];
-  if (cd&&md) {
+  if(cd&&md){
     const cdO=parsePDFDate(cd),mdO=parsePDFDate(md);
-    if (cdO&&mdO) {
-      if (mdO<cdO) flags.push('rf-datas-incompat');
-      if (cdO.getTime()===mdO.getTime()) flags.push('rf-datas-iguais');
+    if(cdO&&mdO){
+      if(mdO<cdO)flags.push('rf-datas-incompat');
+      if(cdO.getTime()===mdO.getTime())flags.push('rf-datas-iguais');
       meta['CreationDate']=cdO.toLocaleString('pt-BR')+' (criação)';
       meta['ModDate']=mdO.toLocaleString('pt-BR')+' (modificação)';
     }
-  } else if (!cd&&!md) flags.push('rf-sem-datas');
-
-  return { meta, flags };
+  }else if(!cd&&!md)flags.push('rf-sem-datas');
+  return{meta,flags};
 }
 const parsePDFDate=s=>{if(!s)return null;const m=s.match(/D:(\d{4})(\d{2})(\d{2})(\d{2})(\d{2})(\d{2})/);if(m)return new Date(+m[1],+m[2]-1,+m[3],+m[4],+m[5],+m[6]);const d=new Date(s);return isNaN(d)?null:d;};
 const unescPDF=s=>s.replace(/\\n/g,'\n').replace(/\\r/g,'\r').replace(/\\t/g,'\t').replace(/\\\\/g,'\\').replace(/\\\(/g,'(').replace(/\\\)/g,')').replace(/\\(\d{3})/g,(_,o)=>String.fromCharCode(parseInt(o,8)));
@@ -723,32 +1077,27 @@ const hexPDF=h=>{let s='';for(let i=0;i<h.length-1;i+=2)s+=String.fromCharCode(p
 // ═══════════════════════════════════════════
 // DOCX / XLSX PARSER
 // ═══════════════════════════════════════════
-async function parseDOCX(buffer, file) {
+async function parseDOCX(buffer,file){
   const meta={},flags=[];
-  let zip; try{zip=await JSZip.loadAsync(buffer);}catch(e){return{meta:{Erro:'Não foi possível descompactar: '+e.message},flags};}
+  let zip;try{zip=await JSZip.loadAsync(buffer);}catch(e){return{meta:{Erro:'Não foi possível descompactar: '+e.message},flags};}
   const coreFile=zip.file('docProps/core.xml');
-  if (!coreFile) { meta['Aviso']='docProps/core.xml não encontrado'; }
-  else {
+  if(!coreFile){meta['Aviso']='docProps/core.xml não encontrado';}
+  else{
     const xml=await coreFile.async('string');
     const doc=new DOMParser().parseFromString(xml,'application/xml');
     const get=tag=>{const el=doc.getElementsByTagNameNS('*',tag)[0];return el?el.textContent.trim():null;};
-    const MAP={'creator':'Autor','lastModifiedBy':'Última Modificação por','created':'Data de Criação',
-      'modified':'Data de Modificação','revision':'Número de Revisões','description':'Descrição',
-      'subject':'Assunto','title':'Título','keywords':'Palavras-chave','category':'Categoria','contentStatus':'Status'};
+    const MAP={'creator':'Autor','lastModifiedBy':'Última Modificação por','created':'Data de Criação','modified':'Data de Modificação','revision':'Número de Revisões','description':'Descrição','subject':'Assunto','title':'Título','keywords':'Palavras-chave','category':'Categoria','contentStatus':'Status'};
     for(const[t,l] of Object.entries(MAP)){const v=get(t);if(v)meta[l]=v;}
-
     const cd=meta['Data de Criação'],md=meta['Data de Modificação'];
     if(cd&&md){
       const cdO=new Date(cd),mdO=new Date(md);
       if(!isNaN(cdO)&&!isNaN(mdO)){
-        meta['Data de Criação']=cdO.toLocaleString('pt-BR');
-        meta['Data de Modificação']=mdO.toLocaleString('pt-BR');
+        meta['Data de Criação']=cdO.toLocaleString('pt-BR');meta['Data de Modificação']=mdO.toLocaleString('pt-BR');
         if(mdO<cdO)flags.push('rf-datas-incompat');
         if(cdO.getTime()===mdO.getTime())flags.push('rf-datas-iguais');
       }
     }
-    const rev=meta['Número de Revisões'];
-    if(rev==='0'||rev==='1')flags.push('rf-revisoes-zero');
+    const rev=meta['Número de Revisões'];if(rev==='0'||rev==='1')flags.push('rf-revisoes-zero');
   }
   const appFile=zip.file('docProps/app.xml');
   if(appFile){
@@ -764,7 +1113,7 @@ async function parseDOCX(buffer, file) {
 // ═══════════════════════════════════════════
 // PNG PARSER
 // ═══════════════════════════════════════════
-function parsePNG(buffer, file) {
+function parsePNG(buffer,file){
   const view=new DataView(buffer),bytes=new Uint8Array(buffer),meta={},flags=[];
   const sig=[137,80,78,71,13,10,26,10];
   for(let i=0;i<8;i++)if(bytes[i]!==sig[i])return{meta:{Erro:'Não é um PNG válido'},flags};
@@ -810,7 +1159,7 @@ const dc=(bytes,start,len)=>{let s='';for(let i=0;i<len;i++)s+=String.fromCharCo
 // ═══════════════════════════════════════════
 // pHASH
 // ═══════════════════════════════════════════
-function scheduleImageHash(buffer, file, ext) {
+function scheduleImageHash(buffer,file,ext){
   const blob=new Blob([buffer],{type:ext==='png'?'image/png':'image/jpeg'});
   const url=URL.createObjectURL(blob);
   const img=new Image();
@@ -818,7 +1167,7 @@ function scheduleImageHash(buffer, file, ext) {
     document.getElementById('hash-empty').style.display='none';
     document.getElementById('hash-result').style.display='block';
     document.getElementById('hash-img-preview').src=url;
-    const h=computePHash(img); currentHash=h;
+    const h=computePHash(img);currentHash=h;
     document.getElementById('hash-value').textContent=h;
     document.getElementById('cmp-result-area').innerHTML='';
     if(currentAnalysis)currentAnalysis.pHash=h;
@@ -856,10 +1205,10 @@ function compareHash(){
   if(!/^[0-9a-f]{16}$/.test(ref)){area.innerHTML='<div class="cmp-result different">Hash inválido. Informe 16 caracteres hexadecimais.</div>';return;}
   const dist=hammingDistance(currentHash,ref);
   let cls,label;
-  if(dist===0){cls='identical';label=`🟢 Idênticas (distância: ${dist}) — mesma imagem ou cópia exata`;}
-  else if(dist<=10){cls='similar';label=`🟡 Muito similares (distância: ${dist}) — possível compressão ou redimensionamento`;}
-  else if(dist<=20){cls='similar';label=`🟠 Alterações moderadas (distância: ${dist}) — filtros, recorte ou edição`;}
-  else{cls='different';label=`🔴 Imagens distintas (distância: ${dist}) — conteúdo visual diferente`;}
+  if(dist===0){cls='identical';label=`🟢 Idênticas (distância: ${dist})`;}
+  else if(dist<=10){cls='similar';label=`🟡 Muito similares (distância: ${dist})`;}
+  else if(dist<=20){cls='similar';label=`🟠 Alterações moderadas (distância: ${dist})`;}
+  else{cls='different';label=`🔴 Imagens distintas (distância: ${dist})`;}
   area.innerHTML=`<div class="cmp-result ${cls}">${label}</div>`;
 }
 function copyHash(){
@@ -874,7 +1223,7 @@ function copyHash(){
 // UTILS
 // ═══════════════════════════════════════════
 const formatBytes=b=>b<1024?b+' B':b<1048576?(b/1024).toFixed(1)+' KB':(b/1048576).toFixed(2)+' MB';
-const escHtml=s=>s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+const escHtml=s=>String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
 </script>
 </body>
 </html>
