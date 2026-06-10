@@ -8,7 +8,7 @@
         integrity="sha512-XMVd28F1oH/O71fzwBnV7HucLxVwtxf26XV8P4wPk26EDxuGZ91N8bsOttmnomcCD3CS5ZMRL50H0GgOHvegtg=="
         crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 <style>
-:root {
+:root{
   --bg:#0d1117;--surface:#161b22;--border:#30363d;
   --accent:#238636;--accent2:#1f6feb;--warn:#d29922;
   --danger:#da3633;--text:#e6edf3;--muted:#8b949e;
@@ -22,14 +22,14 @@ header{background:var(--surface);border-bottom:1px solid var(--border);padding:1
 .container{max-width:1120px;margin:0 auto;padding:20px 16px;}
 .perito-bar{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:14px 18px;margin-bottom:16px;display:flex;flex-wrap:wrap;gap:12px;align-items:flex-end;}
 .perito-bar label{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;display:block;margin-bottom:4px;}
-.perito-bar input[type=text]{padding:6px 10px;border-radius:6px;border:1px solid var(--border);background:var(--bg);color:var(--text);font-size:13px;outline:none;width:220px;}
-.perito-bar input[type=text]:focus{border-color:var(--accent2);}
+.perito-bar input{padding:6px 10px;border-radius:6px;border:1px solid var(--border);background:var(--bg);color:var(--text);font-size:13px;outline:none;width:220px;}
+.perito-bar input:focus{border-color:var(--accent2);}
 #dropzone{border:2px dashed var(--border);border-radius:var(--radius);padding:36px 24px;text-align:center;cursor:pointer;transition:border-color .2s,background .2s;position:relative;}
 #dropzone.drag-over{border-color:var(--accent2);background:rgba(31,111,235,.06);}
 #dropzone input{position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%;}
 .drop-icon{font-size:32px;margin-bottom:6px;}.drop-title{font-size:15px;font-weight:600;margin-bottom:3px;}.drop-sub{color:var(--muted);font-size:12px;}
-#sha-row{display:none;margin-top:10px;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:10px 16px;font-family:'Cascadia Code','Consolas',monospace;font-size:12px;}
-#sha-row .sha-label{color:var(--muted);margin-right:8px;font-size:11px;font-family:var(--font);text-transform:uppercase;}
+#sha-row{display:none;margin-top:10px;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:10px 16px;font-family:'Cascadia Code',monospace;font-size:12px;}
+.sha-label{color:var(--muted);margin-right:8px;font-size:11px;font-family:var(--font);text-transform:uppercase;}
 #sha-value{color:var(--accent2);word-break:break-all;}
 .tabs{display:flex;gap:4px;border-bottom:1px solid var(--border);margin:20px 0 0;}
 .tab-btn{background:none;border:none;color:var(--muted);padding:8px 16px;cursor:pointer;font-size:14px;border-bottom:2px solid transparent;margin-bottom:-1px;transition:color .15s;}
@@ -37,44 +37,118 @@ header{background:var(--surface);border-bottom:1px solid var(--border);padding:1
 .tab-btn:hover:not(.active){color:var(--text);}
 .tab-panel{display:none;padding:18px 0;}.tab-panel.active{display:block;}
 .card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:18px;margin-bottom:14px;}
-.card-title{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.7px;color:var(--muted);margin-bottom:12px;}
+.card-title{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.7px;color:var(--muted);margin-bottom:14px;}
+
+/* ── Painel de Exames ── */
+.exames-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:10px;}
+.exame-card{background:var(--bg);border:1px solid var(--border);border-radius:var(--radius);padding:12px 14px;display:flex;flex-direction:column;gap:6px;}
+.exame-card.ok   {border-left:3px solid var(--accent);}
+.exame-card.warn {border-left:3px solid var(--warn);}
+.exame-card.fail {border-left:3px solid var(--danger);}
+.exame-card.na   {border-left:3px solid var(--border);opacity:.55;}
+.exame-header{display:flex;align-items:center;gap:8px;}
+.exame-icon{font-size:18px;min-width:22px;}
+.exame-name{font-size:12px;font-weight:600;color:var(--text);}
+.exame-status{font-size:11px;font-weight:700;padding:2px 7px;border-radius:10px;}
+.exame-status.ok  {background:rgba(35,134,54,.2);color:#3fb950;}
+.exame-status.warn{background:rgba(210,153,34,.15);color:#f0b429;}
+.exame-status.fail{background:rgba(218,54,51,.18);color:#ff6b6b;}
+.exame-status.na  {background:var(--border);color:var(--muted);}
+.exame-result{font-size:11px;color:var(--muted);line-height:1.4;word-break:break-word;}
+
+/* ── Image preview ── */
+.doc-preview{max-width:100%;max-height:260px;border-radius:var(--radius);border:1px solid var(--border);object-fit:contain;display:block;background:var(--bg);margin-bottom:14px;}
+
+/* ── Meta table ── */
 .meta-table{width:100%;border-collapse:collapse;}
 .meta-table tr{border-bottom:1px solid var(--border);}.meta-table tr:last-child{border-bottom:none;}
 .meta-table td{padding:7px 6px;vertical-align:top;}
 .meta-table td:first-child{color:var(--muted);font-size:12px;font-weight:500;white-space:nowrap;width:190px;padding-right:12px;}
-.meta-table td:last-child{word-break:break-all;font-family:'Cascadia Code','Consolas',monospace;font-size:12px;}
+.meta-table td:last-child{word-break:break-all;font-family:'Cascadia Code',monospace;font-size:12px;}
+
+/* ── Flags ── */
 .flags-list{display:flex;flex-wrap:wrap;gap:8px;}
-.flag{display:inline-flex;align-items:center;gap:5px;padding:4px 10px;border-radius:20px;font-size:12px;font-weight:600;}
-.flag::before{content:'⚑ ';}
-.flag.high{background:rgba(218,54,51,.18);color:#ff6b6b;border:1px solid rgba(218,54,51,.35);}
-.flag.medium{background:rgba(210,153,34,.15);color:#f0b429;border:1px solid rgba(210,153,34,.3);}
-.flag.info{background:rgba(31,111,235,.15);color:#79b8ff;border:1px solid rgba(31,111,235,.3);}
+.flag-item{border-radius:var(--radius);overflow:hidden;flex:1;min-width:200px;}
+.flag-bar{display:flex;align-items:center;gap:6px;padding:6px 10px;font-size:12px;font-weight:700;}
+.flag-desc{font-size:11px;padding:5px 10px;line-height:1.5;}
+.flag-item.high .flag-bar{background:rgba(218,54,51,.25);color:#ff6b6b;border:1px solid rgba(218,54,51,.35);border-bottom:none;}
+.flag-item.high .flag-desc{background:rgba(218,54,51,.08);border:1px solid rgba(218,54,51,.2);border-top:none;color:#e6b8b8;}
+.flag-item.medium .flag-bar{background:rgba(210,153,34,.2);color:#f0b429;border:1px solid rgba(210,153,34,.3);border-bottom:none;}
+.flag-item.medium .flag-desc{background:rgba(210,153,34,.07);border:1px solid rgba(210,153,34,.2);border-top:none;color:#d4b87a;}
+.flag-item.info .flag-bar{background:rgba(31,111,235,.18);color:#79b8ff;border:1px solid rgba(31,111,235,.3);border-bottom:none;}
+.flag-item.info .flag-desc{background:rgba(31,111,235,.06);border:1px solid rgba(31,111,235,.2);border-top:none;color:#7eb8e8;}
+
+/* ── Score ── */
 .score-row{display:flex;align-items:center;gap:16px;}
-.score-num{font-size:38px;font-weight:700;min-width:56px;}
+.score-num{font-size:42px;font-weight:700;min-width:60px;}
 .score-num.low{color:var(--accent);}.score-num.medium{color:var(--warn);}.score-num.high{color:var(--danger);}
 .score-bar-wrap{flex:1;}.score-lbl{font-size:12px;color:var(--muted);margin-bottom:5px;}
-.score-bar{height:9px;background:var(--border);border-radius:5px;overflow:hidden;}
-.score-fill{height:100%;border-radius:5px;transition:width .5s;}
+.score-bar{height:10px;background:var(--border);border-radius:5px;overflow:hidden;}
+.score-fill{height:100%;border-radius:5px;transition:width .6s;}
 .score-fill.low{background:var(--accent);}.score-fill.medium{background:var(--warn);}.score-fill.high{background:var(--danger);}
-.score-verdict{font-size:13px;margin-top:6px;}
+.score-verdict{font-size:13px;margin-top:8px;padding:8px 12px;border-radius:6px;}
+.score-verdict.low{background:rgba(35,134,54,.12);color:#3fb950;}
+.score-verdict.medium{background:rgba(210,153,34,.12);color:#f0b429;}
+.score-verdict.high{background:rgba(218,54,51,.12);color:#ff6b6b;}
+
+/* ── File info ── */
 .file-info{display:flex;flex-wrap:wrap;gap:20px;}
 .fi-label{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;}
 .fi-value{font-size:14px;font-weight:600;}
+
+/* ── Assinaturas ── */
+.sig-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);margin-bottom:14px;overflow:hidden;}
+.sig-card-header{padding:14px 18px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;border-bottom:1px solid var(--border);}
+.sig-card-body{padding:14px 18px;}
+.sig-signer{font-size:15px;font-weight:600;}
+.sig-org{font-size:12px;color:var(--muted);margin-top:2px;}
+.sig-status{display:inline-flex;align-items:center;gap:5px;padding:4px 12px;border-radius:20px;font-size:12px;font-weight:700;}
+.sig-status.ok{background:rgba(35,134,54,.2);color:#3fb950;border:1px solid rgba(35,134,54,.3);}
+.sig-status.warn{background:rgba(210,153,34,.15);color:#f0b429;border:1px solid rgba(210,153,34,.3);}
+.sig-status.fail{background:rgba(218,54,51,.18);color:#ff6b6b;border:1px solid rgba(218,54,51,.35);}
+.sig-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px 20px;}
+@media(max-width:600px){.sig-grid{grid-template-columns:1fr;}}
+.sig-field .sf-label{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.4px;margin-bottom:2px;}
+.sig-field .sf-value{font-size:12px;font-family:'Cascadia Code',monospace;word-break:break-all;}
+.cert-chain{margin-top:12px;}
+.cert-level{display:flex;align-items:flex-start;gap:8px;margin-bottom:6px;}
+.cert-icon{font-size:16px;min-width:20px;}
+.cert-info{font-size:12px;}
+.cert-info strong{color:var(--text);}
+.cert-info span{color:var(--muted);}
+.chain-line{width:1px;height:12px;background:var(--border);margin-left:10px;}
+.algo-badge{display:inline-block;padding:2px 8px;border-radius:4px;font-size:11px;font-weight:700;}
+.algo-badge.sha256{background:rgba(35,134,54,.2);color:#3fb950;}
+.algo-badge.sha1{background:rgba(218,54,51,.18);color:#ff6b6b;}
+.algo-badge.other{background:var(--border);color:var(--muted);}
+.sig-count{display:inline-flex;align-items:center;justify-content:center;background:var(--accent2);color:#fff;border-radius:20px;font-size:12px;font-weight:700;min-width:22px;height:22px;padding:0 6px;margin-left:6px;}
+
+/* ── ByteRange diagram ── */
+.byterange-wrap{margin:12px 0;}
+.byterange-label{font-size:11px;color:var(--muted);text-transform:uppercase;margin-bottom:6px;}
+.byterange-bar{height:24px;background:var(--bg);border:1px solid var(--border);border-radius:4px;overflow:hidden;display:flex;position:relative;}
+.br-signed{background:rgba(35,134,54,.4);display:flex;align-items:center;justify-content:center;font-size:10px;color:#3fb950;font-weight:700;}
+.br-sig{background:rgba(31,111,235,.35);display:flex;align-items:center;justify-content:center;font-size:9px;color:#79b8ff;font-weight:700;}
+.br-extra{background:rgba(218,54,51,.35);display:flex;align-items:center;justify-content:center;font-size:10px;color:#ff6b6b;font-weight:700;}
+
+/* ── pHash ── */
 .phash-layout{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
 @media(max-width:600px){.phash-layout{grid-template-columns:1fr;}}
 #phash-canvas{display:none;}
-.hash-display{font-family:'Cascadia Code','Consolas',monospace;font-size:13px;word-break:break-all;background:var(--bg);padding:10px 12px;border-radius:6px;border:1px solid var(--border);color:var(--accent2);margin-top:8px;}
+.hash-display{font-family:'Cascadia Code',monospace;font-size:13px;word-break:break-all;background:var(--bg);padding:10px 12px;border-radius:6px;border:1px solid var(--border);color:var(--accent2);margin-top:8px;}
 .img-preview{max-width:100%;max-height:180px;border-radius:6px;border:1px solid var(--border);object-fit:contain;background:var(--bg);display:block;margin-top:8px;}
 .cmp-result{margin-top:10px;padding:10px 14px;border-radius:6px;font-size:13px;font-weight:600;}
 .cmp-result.identical{background:rgba(35,134,54,.18);color:#3fb950;border:1px solid rgba(35,134,54,.3);}
 .cmp-result.similar{background:rgba(210,153,34,.15);color:#f0b429;border:1px solid rgba(210,153,34,.3);}
 .cmp-result.different{background:rgba(218,54,51,.15);color:#ff6b6b;border:1px solid rgba(218,54,51,.3);}
+
+/* ── Buttons ── */
 .btn{display:inline-flex;align-items:center;gap:6px;padding:7px 14px;border-radius:6px;border:1px solid var(--border);background:var(--surface);color:var(--text);cursor:pointer;font-size:13px;font-weight:500;transition:background .15s;}
 .btn:hover{background:var(--border);}
 .btn.primary{background:var(--accent2);border-color:transparent;}.btn.primary:hover{background:#388bfd;}
 .btn.success{background:var(--accent);border-color:transparent;}.btn.success:hover{background:#2ea043;}
-input[type=text].inline{width:100%;padding:8px 12px;border-radius:6px;border:1px solid var(--border);background:var(--bg);color:var(--text);font-size:13px;font-family:'Cascadia Code',monospace;outline:none;}
-input[type=text].inline:focus{border-color:var(--accent2);}
+input.inline{width:100%;padding:8px 12px;border-radius:6px;border:1px solid var(--border);background:var(--bg);color:var(--text);font-size:13px;font-family:'Cascadia Code',monospace;outline:none;}
+input.inline:focus{border-color:var(--accent2);}
 textarea.obs{width:100%;min-height:80px;padding:10px 12px;border-radius:6px;border:1px solid var(--border);background:var(--bg);color:var(--text);font-size:13px;font-family:var(--font);resize:vertical;outline:none;}
 textarea.obs:focus{border-color:var(--accent2);}
 .tag{display:inline-block;padding:1px 7px;border-radius:4px;font-size:11px;font-weight:700;text-transform:uppercase;background:var(--border);color:var(--muted);}
@@ -89,41 +163,14 @@ textarea.obs:focus{border-color:var(--accent2);}
 .empty-state .es-icon{font-size:44px;margin-bottom:10px;}
 hr.divider{border:none;border-top:1px solid var(--border);margin:14px 0;}
 .action-row{display:flex;gap:10px;flex-wrap:wrap;margin-top:6px;}
-
-/* ── Signature cards ── */
-.sig-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);margin-bottom:14px;overflow:hidden;}
-.sig-card-header{padding:14px 18px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;border-bottom:1px solid var(--border);}
-.sig-card-body{padding:14px 18px;}
-.sig-signer{font-size:15px;font-weight:600;}
-.sig-org{font-size:12px;color:var(--muted);margin-top:2px;}
-.sig-status{display:inline-flex;align-items:center;gap:5px;padding:4px 12px;border-radius:20px;font-size:12px;font-weight:700;}
-.sig-status.ok{background:rgba(35,134,54,.2);color:#3fb950;border:1px solid rgba(35,134,54,.3);}
-.sig-status.warn{background:rgba(210,153,34,.15);color:#f0b429;border:1px solid rgba(210,153,34,.3);}
-.sig-status.fail{background:rgba(218,54,51,.18);color:#ff6b6b;border:1px solid rgba(218,54,51,.35);}
-.sig-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px 20px;}
-@media(max-width:600px){.sig-grid{grid-template-columns:1fr;}}
-.sig-field .sf-label{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.4px;margin-bottom:2px;}
-.sig-field .sf-value{font-size:12px;font-family:'Cascadia Code','Consolas',monospace;word-break:break-all;}
-.cert-chain{margin-top:12px;}
-.cert-level{display:flex;align-items:flex-start;gap:8px;margin-bottom:6px;}
-.cert-icon{font-size:16px;min-width:20px;}
-.cert-info{font-size:12px;}
-.cert-info strong{color:var(--text);}
-.cert-info span{color:var(--muted);}
-.chain-line{width:1px;height:12px;background:var(--border);margin-left:10px;}
-.algo-badge{display:inline-block;padding:2px 8px;border-radius:4px;font-size:11px;font-weight:700;}
-.algo-badge.sha256{background:rgba(35,134,54,.2);color:#3fb950;}
-.algo-badge.sha1{background:rgba(218,54,51,.18);color:#ff6b6b;}
-.algo-badge.other{background:var(--border);color:var(--muted);}
 .no-sig{text-align:center;padding:40px 20px;color:var(--muted);}
-.sig-count{display:inline-flex;align-items:center;justify-content:center;background:var(--accent2);color:#fff;border-radius:20px;font-size:12px;font-weight:700;min-width:22px;height:22px;padding:0 6px;margin-left:6px;}
 </style>
 </head>
 <body>
 
 <header>
   <div class="logo">Per<span>Doc</span></div>
-  <div class="badge">v1.2</div>
+  <div class="badge">v1.3</div>
   <div style="margin-left:auto;color:var(--muted);font-size:12px;">Análise Documentoscópica Digital</div>
 </header>
 
@@ -157,41 +204,60 @@ hr.divider{border:none;border-top:1px solid var(--border);margin:14px 0;}
     <button class="tab-btn" data-tab="hash">🔢 Hash Perceptual</button>
   </div>
 
-  <!-- METADADOS TAB -->
+  <!-- ══ METADADOS TAB ══ -->
   <div id="tab-meta" class="tab-panel active">
     <div id="meta-empty" class="empty-state"><div class="es-icon">🔍</div><div>Carregue um documento para iniciar a análise</div></div>
     <div id="meta-results" style="display:none">
+
+      <!-- Arquivo -->
       <div class="card">
         <div class="card-title">Identificação do Arquivo</div>
         <div class="file-info" id="file-info-row"></div>
       </div>
-      <div class="two-col">
-        <div class="card">
-          <div class="card-title">Metadados Extraídos</div>
-          <table class="meta-table" id="meta-table-body"></table>
-        </div>
-        <div>
-          <div class="card">
-            <div class="card-title">Red Flags</div>
-            <div id="flags-container" class="flags-list"></div>
-          </div>
-          <div class="card">
-            <div class="card-title">Índice de Risco (FraudScore)</div>
-            <div class="score-row">
-              <div class="score-num" id="score-num">0</div>
-              <div class="score-bar-wrap">
-                <div class="score-lbl" id="score-lbl"></div>
-                <div class="score-bar"><div class="score-fill" id="score-fill" style="width:0%"></div></div>
-                <div class="score-verdict" id="score-verdict"></div>
-              </div>
-            </div>
-          </div>
-        </div>
+
+      <!-- Preview imagem -->
+      <div id="img-preview-card" class="card" style="display:none">
+        <div class="card-title">Imagem do Documento</div>
+        <img id="doc-img-preview" class="doc-preview" alt="Preview do documento">
       </div>
+
+      <!-- ★ EXAMES REALIZADOS ★ -->
+      <div class="card">
+        <div class="card-title">Exames Realizados</div>
+        <div class="exames-grid" id="exames-grid"></div>
+      </div>
+
+      <!-- FraudScore -->
+      <div class="card">
+        <div class="card-title">Índice de Risco — FraudScore</div>
+        <div class="score-row">
+          <div class="score-num" id="score-num">0</div>
+          <div class="score-bar-wrap">
+            <div class="score-lbl" id="score-lbl"></div>
+            <div class="score-bar"><div class="score-fill" id="score-fill" style="width:0%"></div></div>
+          </div>
+        </div>
+        <div class="score-verdict" id="score-verdict"></div>
+      </div>
+
+      <!-- Indicadores -->
+      <div class="card">
+        <div class="card-title">Indicadores de Risco (Red Flags)</div>
+        <div id="flags-container"></div>
+      </div>
+
+      <!-- Metadados brutos -->
+      <div class="card">
+        <div class="card-title">Metadados Extraídos</div>
+        <table class="meta-table" id="meta-table-body"></table>
+      </div>
+
+      <!-- Observações -->
       <div class="card">
         <div class="card-title">Observações do Perito</div>
         <textarea class="obs" id="obs-text" placeholder="Anotações para o laudo…"></textarea>
       </div>
+
       <div class="action-row">
         <button class="btn success" onclick="exportReport()">📄 Gerar Relatório de Evidências</button>
         <button class="btn" onclick="exportTxt()">⬇ Baixar .txt</button>
@@ -199,39 +265,39 @@ hr.divider{border:none;border-top:1px solid var(--border);margin:14px 0;}
     </div>
   </div>
 
-  <!-- ASSINATURAS TAB -->
+  <!-- ══ ASSINATURAS TAB ══ -->
   <div id="tab-sig" class="tab-panel">
-    <div id="sig-empty" class="empty-state"><div class="es-icon">🔏</div><div>Carregue um PDF para analisar as assinaturas digitais</div></div>
-    <div id="sig-not-pdf" style="display:none" class="no-sig">Este formato não suporta assinaturas digitais.<br><span style="font-size:12px">Assinaturas digitais estão disponíveis apenas em PDF.</span></div>
+    <div id="sig-empty" class="empty-state"><div class="es-icon">🔏</div><div>Carregue um PDF para analisar assinaturas digitais</div></div>
+    <div id="sig-not-pdf" style="display:none" class="no-sig">Assinaturas digitais disponíveis apenas em PDF.</div>
     <div id="sig-none" style="display:none" class="no-sig">Nenhuma assinatura digital encontrada neste PDF.</div>
     <div id="sig-results" style="display:none"></div>
   </div>
 
-  <!-- HASH TAB -->
+  <!-- ══ HASH TAB ══ -->
   <div id="tab-hash" class="tab-panel">
     <div class="phash-layout">
       <div class="card">
         <div class="card-title">Hash Perceptual (pHash DCT 32×32)</div>
-        <div id="hash-empty" style="color:var(--muted);font-size:13px">Carregue uma imagem (JPEG ou PNG) para calcular o pHash.</div>
+        <div id="hash-empty" style="color:var(--muted);font-size:13px">Carregue uma imagem JPEG ou PNG para calcular o pHash.</div>
         <div id="hash-result" style="display:none">
           <img id="hash-img-preview" class="img-preview" alt="Preview">
           <div class="hash-display" id="hash-value"></div>
-          <div style="margin-top:8px;font-size:12px;color:var(--muted)">64 bits · representação hexadecimal (big-endian)</div>
+          <div style="margin-top:8px;font-size:12px;color:var(--muted)">64 bits · hexadecimal (big-endian)</div>
           <button class="btn" style="margin-top:10px" onclick="copyHash()">📋 Copiar hash</button>
         </div>
         <canvas id="phash-canvas" width="32" height="32"></canvas>
       </div>
       <div class="card">
         <div class="card-title">Comparar com Hash de Referência</div>
-        <div style="color:var(--muted);font-size:12px;margin-bottom:10px">Cole o hash (hex, 16 chars) de outro documento para calcular a distância de Hamming.</div>
-        <input type="text" class="inline" id="ref-hash-input" placeholder="ex: a3f5c2e1b8d40920" maxlength="16">
+        <div style="color:var(--muted);font-size:12px;margin-bottom:10px">Cole o hash (16 chars hex) para calcular distância de Hamming.</div>
+        <input class="inline" id="ref-hash-input" placeholder="ex: a3f5c2e1b8d40920" maxlength="16">
         <button class="btn primary" style="margin-top:10px" onclick="compareHash()">Comparar</button>
         <div id="cmp-result-area"></div>
         <hr class="divider">
         <div style="font-size:12px;color:var(--muted);line-height:1.8">
           <b style="color:var(--text)">Distância Hamming:</b><br>
-          0 bits → Idênticas<br>1–10 bits → Muito similares<br>
-          11–20 bits → Alterações moderadas<br>&gt;20 bits → Imagens distintas
+          0 → Idênticas &nbsp;|&nbsp; 1–10 → Muito similares<br>
+          11–20 → Alterações moderadas &nbsp;|&nbsp; &gt;20 → Distintas
         </div>
       </div>
     </div>
@@ -240,19 +306,14 @@ hr.divider{border:none;border-top:1px solid var(--border);margin:14px 0;}
 </div>
 
 <script>
-// ═══════════════════════════════════════════
+// ═══════════════════════════════════
 // STATE
-// ═══════════════════════════════════════════
-let currentHash = null;
-let currentAnalysis = null;
-let currentSigs = [];
+// ═══════════════════════════════════
+let currentHash=null,currentAnalysis=null,currentSigs=[];
 
 function updateClock(){document.getElementById('ts-display').textContent=new Date().toLocaleString('pt-BR',{dateStyle:'short',timeStyle:'medium'});}
 updateClock();setInterval(updateClock,1000);
 
-// ═══════════════════════════════════════════
-// TABS
-// ═══════════════════════════════════════════
 document.querySelectorAll('.tab-btn').forEach(btn=>{
   btn.addEventListener('click',()=>{
     document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
@@ -262,9 +323,6 @@ document.querySelectorAll('.tab-btn').forEach(btn=>{
   });
 });
 
-// ═══════════════════════════════════════════
-// DROP ZONE
-// ═══════════════════════════════════════════
 const dropzone=document.getElementById('dropzone');
 const fileInput=document.getElementById('file-input');
 dropzone.addEventListener('dragover',e=>{e.preventDefault();dropzone.classList.add('drag-over');});
@@ -272,15 +330,14 @@ dropzone.addEventListener('dragleave',()=>dropzone.classList.remove('drag-over')
 dropzone.addEventListener('drop',e=>{e.preventDefault();dropzone.classList.remove('drag-over');const f=e.dataTransfer.files[0];if(f)handleFile(f);});
 fileInput.addEventListener('change',()=>{if(fileInput.files[0])handleFile(fileInput.files[0]);});
 
-// ═══════════════════════════════════════════
+// ═══════════════════════════════════
 // FILE DISPATCH
-// ═══════════════════════════════════════════
+// ═══════════════════════════════════
 async function handleFile(file){
   const buf=await file.arrayBuffer();
   document.getElementById('sha-row').style.display='block';
   document.getElementById('sha-value').textContent='calculando…';
-  const hashBuf=await crypto.subtle.digest('SHA-256',buf);
-  const sha256=Array.from(new Uint8Array(hashBuf)).map(b=>b.toString(16).padStart(2,'0')).join('');
+  const sha256=await calcSHA256(buf);
   document.getElementById('sha-value').textContent=sha256;
 
   const ext=file.name.split('.').pop().toLowerCase();
@@ -300,17 +357,25 @@ async function handleFile(file){
   if(ext==='pdf'){
     const sigs=await parsePDFSignatures(buf);
     currentSigs=sigs;
-    renderSignatures(sigs);
+    renderSignatures(sigs,buf);
+    // atualiza exame de assinaturas
+    updateExameSig(sigs);
   } else {
     document.getElementById('sig-empty').style.display='none';
     document.getElementById('sig-not-pdf').style.display='block';
   }
 }
 
-// ═══════════════════════════════════════════
-// RENDER METADATA
-// ═══════════════════════════════════════════
+async function calcSHA256(buf){
+  const h=await crypto.subtle.digest('SHA-256',buf);
+  return Array.from(new Uint8Array(h)).map(b=>b.toString(16).padStart(2,'0')).join('');
+}
+
+// ═══════════════════════════════════
+// RENDER RESULTS
+// ═══════════════════════════════════
 function renderResults({meta,flags},file,ext,sha256,analysisTime){
+  // File info
   document.getElementById('file-info-row').innerHTML=`
     <div><div class="fi-label">Nome</div><div class="fi-value" style="max-width:300px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${file.name}</div></div>
     <div><div class="fi-label">Tipo</div><div class="fi-value"><span class="tag ${ext}">${ext.toUpperCase()}</span></div></div>
@@ -318,34 +383,171 @@ function renderResults({meta,flags},file,ext,sha256,analysisTime){
     <div><div class="fi-label">Modificado (SO)</div><div class="fi-value">${new Date(file.lastModified).toLocaleString('pt-BR')}</div></div>
     <div><div class="fi-label">Analisado em</div><div class="fi-value">${analysisTime}</div></div>`;
 
+  // Image preview for JPEG/PNG
+  const prevCard=document.getElementById('img-preview-card');
+  if(ext==='jpg'||ext==='jpeg'||ext==='png'){
+    const blob=new Blob([currentAnalysis.fileInfo?new Uint8Array(0):new Uint8Array(0)]);
+    // Preview set by scheduleImageHash; use fileInput file
+    const url=URL.createObjectURL(fileInput.files[0]||new Blob());
+    document.getElementById('doc-img-preview').src=url;
+    prevCard.style.display='block';
+  } else { prevCard.style.display='none'; }
+
+  // Exames grid
+  renderExames(meta,flags,ext);
+
+  // Score
+  renderScore(flags);
+
+  // Flags with descriptions
+  renderFlags(flags);
+
+  // Meta table
   const tb=document.getElementById('meta-table-body');
   tb.innerHTML='';
   const entries=Object.entries(meta).filter(([,v])=>v!=null&&v!==undefined&&v!=='');
-  if(!entries.length){tb.innerHTML='<tr><td colspan="2" style="color:var(--muted);padding:8px">Nenhum metadado encontrado.</td></tr>';}
-  else{entries.forEach(([k,v])=>{const tr=document.createElement('tr');tr.innerHTML=`<td>${escHtml(k)}</td><td>${escHtml(String(v))}</td>`;tb.appendChild(tr);});}
+  if(!entries.length) tb.innerHTML='<tr><td colspan="2" style="color:var(--muted);padding:8px">Nenhum metadado encontrado.</td></tr>';
+  else entries.forEach(([k,v])=>{const tr=document.createElement('tr');tr.innerHTML=`<td>${escHtml(k)}</td><td>${escHtml(String(v))}</td>`;tb.appendChild(tr);});
 
-  const score=calcFraudScore(flags);
-  const fc=document.getElementById('flags-container');
-  fc.innerHTML='';
-  if(!flags.length){fc.innerHTML='<span style="color:var(--muted);font-size:13px">Nenhum red flag detectado.</span>';}
-  else{flags.forEach(f=>{const s=document.createElement('span');s.className='flag '+flagSeverity(f);s.textContent=f;fc.appendChild(s);});}
-
-  const cls=score>=60?'high':score>=30?'medium':'low';
-  document.getElementById('score-num').textContent=score;
-  document.getElementById('score-num').className='score-num '+cls;
-  document.getElementById('score-fill').className='score-fill '+cls;
-  document.getElementById('score-fill').style.width=Math.min(score,100)+'%';
-  document.getElementById('score-lbl').textContent=`${flags.length} indicador(es) de risco`;
-  const vEl=document.getElementById('score-verdict');
-  vEl.textContent=score>=60?'⚠ Alto risco — múltiplos indicadores de adulteração':score>=30?'⚡ Risco moderado — verificação adicional recomendada':'✓ Baixo risco — nenhum indicador significativo detectado';
-  vEl.style.color=score>=60?'var(--danger)':score>=30?'var(--warn)':'var(--accent)';
   document.getElementById('meta-empty').style.display='none';
   document.getElementById('meta-results').style.display='block';
 }
 
-// ═══════════════════════════════════════════
-// FRAUD SCORE
-// ═══════════════════════════════════════════
+// ═══════════════════════════════════
+// PAINEL DE EXAMES
+// ═══════════════════════════════════
+const FLAG_DESCS={
+  'rf-ghostscript':'Producer/Creator indica GhostScript — software de reprocessamento de PDF. Documentos originais raramente usam este software.',
+  'rf-datas-incompat':'Data de modificação anterior à criação — impossível em condições normais. Forte indício de adulteração dos metadados.',
+  'rf-datas-iguais':'CreationDate idêntica à ModDate em PDF — padrão incomum, pode indicar geração automática ou adulteração.',
+  'rf-software-suspeito':'Software identificado (LibreOffice, PDFCreator etc.) difere do declarado ou esperado para o tipo de documento.',
+  'rf-inkscape':'Inkscape detectado — editor de imagens vetoriais usado para criar/editar documentos, não para geração legítima de PDFs oficiais.',
+  'rf-sem-datas':'Ausência total de datas no documento — metadados de data removidos ou documento gerado sem registro temporal.',
+  'rf-gps-presente':'Coordenadas GPS embutidas na imagem — revela localização onde a foto foi tirada. Relevante para verificar consistência com o alegado.',
+  'rf-software-edicao':'Software de edição de imagem (Photoshop, GIMP, Lightroom) identificado nos metadados — imagem foi processada após a captura.',
+  'rf-revisoes-zero':'Número de revisões igual a zero ou um — documento pode ter sido criado e nunca editado, ou metadados de revisão foram resetados.',
+  'rf-sha1-obsoleto':'Algoritmo SHA-1 utilizado na assinatura digital — considerado criptograficamente inseguro desde 2017. Assinaturas SHA-1 não oferecem garantia adequada.',
+  'rf-modificado-pos-assinatura':'ByteRange não cobre o arquivo inteiro — conteúdo foi adicionado após a assinatura. A assinatura não cobre o documento completo.',
+  'rf-assinatura-invalida':'Hash calculado do documento não confere com o hash da assinatura — documento foi alterado após assinatura ou assinatura está corrompida.',
+  'rf-cert-expirado':'Certificado digital estava expirado na data de assinatura — assinatura sem validade jurídica conforme ICP-Brasil.',
+  'rf-cert-autoassinado':'Certificado autoassinado (emitente = titular) — não emitido por Autoridade Certificadora reconhecida. Qualquer pessoa pode criar este tipo de certificado.',
+  'rf-sem-horario-assinatura':'Horário de assinatura não encontrado nem no campo /M nem no atributo signingTime do CMS.',
+};
+
+function renderExames(meta,flags,ext){
+  const grid=document.getElementById('exames-grid');
+  grid.innerHTML='';
+  const exames=buildExames(meta,flags,ext);
+  exames.forEach(e=>{
+    const div=document.createElement('div');
+    div.className='exame-card '+e.status;
+    div.innerHTML=`
+      <div class="exame-header">
+        <div class="exame-icon">${e.icon}</div>
+        <div>
+          <div class="exame-name">${e.name}</div>
+          <span class="exame-status ${e.status}">${statusLabel(e.status)}</span>
+        </div>
+      </div>
+      <div class="exame-result">${e.result}</div>`;
+    grid.appendChild(div);
+  });
+}
+
+function buildExames(meta,flags,ext){
+  const exames=[];
+  const hasFlag=f=>flags.includes(f);
+  const val=k=>meta[k]||meta[Object.keys(meta).find(m=>m.toLowerCase()===k.toLowerCase())];
+
+  // SHA-256
+  exames.push({icon:'🔐',name:'Hash SHA-256',status:'ok',result:'Calculado — identifica univocamente este arquivo (cadeia de custódia)'});
+
+  // Metadados gerais
+  const nMeta=Object.keys(meta).filter(k=>meta[k]).length;
+  exames.push({icon:'📋',name:'Metadados',status:nMeta>0?'ok':'warn',result:nMeta>0?`${nMeta} campo(s) extraído(s)`:'Nenhum metadado encontrado'});
+
+  if(ext==='jpg'||ext==='jpeg'){
+    const cam=meta['Make (câmera)']||meta['Model (câmera)'];
+    exames.push({icon:'📷',name:'Câmera (EXIF)',status:cam?'ok':'warn',result:cam?`${meta['Make (câmera)']||''} ${meta['Model (câmera)']||''}`.trim():'Dados de câmera não encontrados'});
+    const dt=meta['DateTimeOriginal']||meta['DateTime'];
+    exames.push({icon:'📅',name:'Data/Hora EXIF',status:dt?'ok':'warn',result:dt||'Não encontrado'});
+    const soft=meta['Software'];
+    exames.push({icon:'🖥',name:'Software de Edição',status:hasFlag('rf-software-edicao')?'fail':'ok',result:soft?`Detectado: ${soft}`:'Sem software de edição identificado'});
+    const gps=meta['GPS Latitude'];
+    exames.push({icon:'📍',name:'Coordenadas GPS',status:gps?'warn':'ok',result:gps?`Lat: ${meta['GPS Latitude']} | Lon: ${meta['GPS Longitude']}`:'Sem GPS'});
+    exames.push({icon:'🔢',name:'Hash Perceptual (pHash)',status:'ok',result:'Calculado na aba Hash Perceptual'});
+  }
+
+  if(ext==='pdf'){
+    const creator=meta['Creator'],producer=meta['Producer'];
+    exames.push({icon:'🖨',name:'Software de Origem',status:hasFlag('rf-ghostscript')||hasFlag('rf-inkscape')||hasFlag('rf-software-suspeito')?'fail':'ok',result:[creator&&`Creator: ${creator}`,producer&&`Producer: ${producer}`].filter(Boolean).join(' | ')||'Não identificado'});
+    const pages=meta['Número de Páginas'];
+    exames.push({icon:'📄',name:'Número de Páginas',status:pages&&pages!=='(não determinado)'?'ok':'warn',result:pages?`${pages} página(s)`:'Não determinado'});
+    const cd=meta['CreationDate'],md=meta['ModDate'];
+    const dateStatus=hasFlag('rf-datas-incompat')?'fail':hasFlag('rf-datas-iguais')?'warn':cd||md?'ok':'warn';
+    exames.push({icon:'📅',name:'Análise de Datas',status:dateStatus,result:cd&&md?`Criação: ${cd.replace(' (criação)','')} | Modif: ${md.replace(' (modificação)','')}`:cd||md||'Datas não encontradas'});
+    // Sig placeholder (atualizado depois)
+    exames.push({icon:'🔏',name:'Assinaturas Digitais',status:'ok',result:'Analisando…',id:'exame-sig'});
+  }
+
+  if(ext==='docx'||ext==='xlsx'){
+    const author=meta['Autor'];
+    exames.push({icon:'👤',name:'Autor',status:author?'ok':'warn',result:author||'Não encontrado'});
+    const lastMod=meta['Última Modificação por'];
+    exames.push({icon:'✏️',name:'Último Editor',status:lastMod?'ok':'warn',result:lastMod||'Não encontrado'});
+    const rev=meta['Número de Revisões'];
+    exames.push({icon:'🔄',name:'Revisões',status:hasFlag('rf-revisoes-zero')?'warn':'ok',result:rev?`${rev} revisão(ões)`:'Não encontrado'});
+    const cd=meta['Data de Criação'],md=meta['Data de Modificação'];
+    const dateStatus=hasFlag('rf-datas-incompat')?'fail':hasFlag('rf-datas-iguais')?'warn':cd||md?'ok':'warn';
+    exames.push({icon:'📅',name:'Análise de Datas',status:dateStatus,result:cd&&md?`Criação: ${cd} | Modif: ${md}`:cd||md||'Não encontrado'});
+    const app=meta['Aplicativo'];
+    exames.push({icon:'🖥',name:'Aplicativo',status:'ok',result:app||'Não identificado'});
+  }
+
+  if(ext==='png'){
+    const w=meta['Largura'],h=meta['Altura'];
+    exames.push({icon:'📐',name:'Dimensões',status:w?'ok':'warn',result:w&&h?`${w} × ${h}`:'Não encontrado'});
+    const res=meta['Resolução X'];
+    exames.push({icon:'🔬',name:'Resolução',status:res?'ok':'warn',result:res||'Não encontrado'});
+    const soft=Object.entries(meta).find(([k])=>k.includes('Software')||k.includes('software'));
+    exames.push({icon:'🖥',name:'Software (chunks)',status:hasFlag('rf-software-edicao')?'fail':soft?'warn':'ok',result:soft?soft[1]:'Não identificado em chunks tEXt/iTXt'});
+    exames.push({icon:'🔢',name:'Hash Perceptual (pHash)',status:'ok',result:'Calculado na aba Hash Perceptual'});
+  }
+
+  return exames;
+}
+
+function updateExameSig(sigs){
+  // Atualiza o card de assinaturas no painel de exames
+  const grid=document.getElementById('exames-grid');
+  const el=grid.querySelector('[data-exame-sig]');
+  if(!el) return;
+  const hasFail=sigs.some(s=>s.flags.includes('rf-assinatura-invalida')||s.flags.includes('rf-modificado-pos-assinatura'));
+  const hasWarn=sigs.some(s=>s.flags.length>0);
+  const status=sigs.length===0?'warn':hasFail?'fail':hasWarn?'warn':'ok';
+  const result=sigs.length===0?'Nenhuma assinatura encontrada':`${sigs.length} assinatura(s) — ${hasFail?'FALHOU':hasWarn?'atenção necessária':'todas íntegras'}`;
+  el.className='exame-card '+status;
+  el.querySelector('.exame-status').className='exame-status '+status;
+  el.querySelector('.exame-status').textContent=statusLabel(status);
+  el.querySelector('.exame-result').textContent=result;
+}
+
+function statusLabel(s){return{ok:'Concluído ✓',warn:'Atenção ⚡',fail:'Falhou ⚠',na:'N/A'}[s]||s;}
+
+// Override renderExames to add data-exame-sig
+const _origRenderExames=renderExames;
+function renderExames(meta,flags,ext){
+  _origRenderExames(meta,flags,ext);
+  if(ext==='pdf'){
+    const grid=document.getElementById('exames-grid');
+    const cards=grid.querySelectorAll('.exame-card');
+    cards.forEach(c=>{if(c.querySelector('.exame-name')&&c.querySelector('.exame-name').textContent==='Assinaturas Digitais') c.setAttribute('data-exame-sig','1');});
+  }
+}
+
+// ═══════════════════════════════════
+// SCORE & FLAGS
+// ═══════════════════════════════════
 const FLAG_WEIGHTS={
   'rf-ghostscript':35,'rf-datas-incompat':40,'rf-datas-iguais':20,
   'rf-software-suspeito':20,'rf-inkscape':30,'rf-sem-datas':10,
@@ -356,49 +558,66 @@ const FLAG_WEIGHTS={
 const calcFraudScore=flags=>Math.min(flags.reduce((s,f)=>s+(FLAG_WEIGHTS[f]||10),0),100);
 const flagSeverity=f=>{const w=FLAG_WEIGHTS[f]||10;return w>=30?'high':w>=15?'medium':'info';};
 
-// ═══════════════════════════════════════════
-// ═══ ASSINATURAS DIGITAIS ═══════════════════
-// ═══════════════════════════════════════════
+function renderScore(flags){
+  const score=calcFraudScore(flags);
+  const cls=score>=60?'high':score>=30?'medium':'low';
+  document.getElementById('score-num').textContent=score;
+  document.getElementById('score-num').className='score-num '+cls;
+  document.getElementById('score-fill').className='score-fill '+cls;
+  document.getElementById('score-fill').style.width=Math.min(score,100)+'%';
+  document.getElementById('score-lbl').textContent=`${flags.length} indicador(es) detectado(s)`;
+  const vEl=document.getElementById('score-verdict');
+  vEl.className='score-verdict '+cls;
+  vEl.textContent=score>=60?'⚠ Alto risco — o documento apresenta múltiplos indicadores de adulteração. Recomenda-se análise pericial aprofundada.':
+    score>=30?'⚡ Risco moderado — foram detectados indicadores que requerem atenção. Verificação adicional recomendada.':
+    '✓ Baixo risco — nenhum indicador significativo de adulteração foi detectado nesta análise automática.';
+}
 
+function renderFlags(flags){
+  const fc=document.getElementById('flags-container');
+  fc.innerHTML='';
+  if(!flags.length){
+    fc.innerHTML='<div style="color:var(--muted);font-size:13px;padding:6px 0">Nenhum indicador de risco detectado.</div>';
+    return;
+  }
+  const wrap=document.createElement('div');
+  wrap.className='flags-list';
+  flags.forEach(f=>{
+    const sev=flagSeverity(f);
+    const desc=FLAG_DESCS[f]||'Indicador de risco detectado.';
+    const item=document.createElement('div');
+    item.className='flag-item '+sev;
+    item.innerHTML=`<div class="flag-bar">⚑ ${f}</div><div class="flag-desc">${desc}</div>`;
+    wrap.appendChild(item);
+  });
+  fc.appendChild(wrap);
+}
+
+// ═══════════════════════════════════
+// ASSINATURAS
+// ═══════════════════════════════════
 function resetSigTab(){
-  document.getElementById('sig-empty').style.display='none';
-  document.getElementById('sig-not-pdf').style.display='none';
-  document.getElementById('sig-none').style.display='none';
-  document.getElementById('sig-results').style.display='none';
-  document.getElementById('sig-results').innerHTML='';
-  const cnt=document.getElementById('sig-count');
-  cnt.style.display='none';cnt.textContent='0';
+  ['sig-empty','sig-not-pdf','sig-none'].forEach(id=>document.getElementById(id).style.display='none');
+  const r=document.getElementById('sig-results');r.style.display='none';r.innerHTML='';
+  const c=document.getElementById('sig-count');c.style.display='none';c.textContent='0';
 }
 
 async function parsePDFSignatures(buffer){
   const bytes=new Uint8Array(buffer);
   const sigs=[];
-
-  // Decode PDF as latin-1 for text searching
   let text='';
   for(let i=0;i<Math.min(bytes.length,2000000);i++) text+=String.fromCharCode(bytes[i]);
-
-  // Find all /ByteRange arrays (each = one signature)
   const brRe=/\/ByteRange\s*\[\s*(\d+)\s+(\d+)\s+(\d+)\s+(\d+)\s*\]/g;
   let brMatch;
   while((brMatch=brRe.exec(text))!==null){
     const br=[+brMatch[1],+brMatch[2],+brMatch[3],+brMatch[4]];
-
-    // Extract the /Contents hex near this ByteRange
-    const searchStart=Math.max(0,brMatch.index-8000);
-    const searchEnd=Math.min(text.length,brMatch.index+8000);
-    const region=text.substring(searchStart,searchEnd);
-
-    const contRe=/\/Contents\s*<([0-9A-Fa-f\s]+)>/;
-    const contMatch=contRe.exec(region);
+    const s=Math.max(0,brMatch.index-8000),e=Math.min(text.length,brMatch.index+8000);
+    const region=text.substring(s,e);
+    const contMatch=/\/Contents\s*<([0-9A-Fa-f\s]+)>/.exec(region);
     if(!contMatch) continue;
-
     const hexStr=contMatch[1].replace(/\s/g,'');
     if(hexStr.length<20) continue;
-
     const pkcs7=hexToBytes(hexStr);
-
-    // Extract extra fields from same region
     const getName=tag=>{const m=new RegExp('/'+tag+'\\s*\\(([^)]{0,200})\\)').exec(region);return m?unescPDF(m[1]):null;};
     const getDate=tag=>{const m=new RegExp('/'+tag+'\\s*\\(([^)]+)\\)').exec(region);return m?parsePDFDate(m[1]):null;};
     const filter=getName('Filter')||'';
@@ -407,99 +626,58 @@ async function parsePDFSignatures(buffer){
     const reason=getName('Reason');
     const location=getName('Location');
     const sigDate=getDate('M');
-
-    // Parse PKCS#7 / CMS
     const certInfo=parsePKCS7(pkcs7);
-
-    // Verify byte range integrity
     const integrity=await verifyDocumentIntegrity(buffer,br,pkcs7);
-
-    // Red flags
     const flags=[];
     if(integrity.hashMismatch) flags.push('rf-assinatura-invalida');
     if(integrity.modifiedAfterSig) flags.push('rf-modificado-pos-assinatura');
-    if(certInfo.algorithm&&certInfo.algorithm.includes('sha1')) flags.push('rf-sha1-obsoleto');
+    if(certInfo.algorithm&&certInfo.algorithm.toLowerCase().includes('sha1')) flags.push('rf-sha1-obsoleto');
     if(certInfo.selfSigned) flags.push('rf-cert-autoassinado');
     if(certInfo.expired) flags.push('rf-cert-expirado');
     if(!sigDate&&!certInfo.signingTime) flags.push('rf-sem-horario-assinatura');
-
-    sigs.push({br,filter,subfilter,pdfName,reason,location,sigDate,certInfo,integrity,flags});
+    sigs.push({br,filter,subfilter,pdfName,reason,location,sigDate,certInfo,integrity,flags,fileSize:buffer.byteLength});
   }
   return sigs;
 }
 
-function renderSignatures(sigs){
+function renderSignatures(sigs,buf){
   const cntEl=document.getElementById('sig-count');
-  if(sigs.length===0){
-    document.getElementById('sig-none').style.display='block';
-    cntEl.style.display='none';
-    return;
+  if(sigs.length===0){document.getElementById('sig-none').style.display='block';return;}
+  cntEl.style.display='inline-flex';cntEl.textContent=sigs.length;
+
+  // Merge sig flags into meta flags
+  const allSigFlags=sigs.flatMap(s=>s.flags);
+  if(allSigFlags.length&&currentAnalysis){
+    const merged=[...new Set([...(currentAnalysis.flags||[]),...allSigFlags])];
+    currentAnalysis.flags=merged;
+    renderScore(merged);
+    renderFlags(merged);
   }
-  cntEl.style.display='inline-flex';
-  cntEl.textContent=sigs.length;
 
   const container=document.getElementById('sig-results');
   container.style.display='block';
 
-  // Summary flags to push to metadata fraud score
-  const allSigFlags=sigs.flatMap(s=>s.flags);
-  if(allSigFlags.length&&currentAnalysis){
-    const existing=currentAnalysis.flags||[];
-    const merged=[...new Set([...existing,...allSigFlags])];
-    currentAnalysis.flags=merged;
-    // re-render score
-    const score=calcFraudScore(merged);
-    const cls=score>=60?'high':score>=30?'medium':'low';
-    document.getElementById('score-num').textContent=score;
-    document.getElementById('score-num').className='score-num '+cls;
-    document.getElementById('score-fill').className='score-fill '+cls;
-    document.getElementById('score-fill').style.width=Math.min(score,100)+'%';
-    const fc=document.getElementById('flags-container');
-    fc.innerHTML='';
-    merged.forEach(f=>{const s=document.createElement('span');s.className='flag '+flagSeverity(f);s.textContent=f;fc.appendChild(s);});
-  }
-
   sigs.forEach((sig,idx)=>{
     const cert=sig.certInfo;
     const integ=sig.integrity;
-
-    let statusCls,statusTxt;
-    if(sig.flags.includes('rf-assinatura-invalida')||sig.flags.includes('rf-modificado-pos-assinatura')){
-      statusCls='fail';statusTxt='⚠ Integridade comprometida';
-    } else if(sig.flags.length>0){
-      statusCls='warn';statusTxt='⚡ Atenção';
-    } else {
-      statusCls='ok';statusTxt='✓ Íntegra';
-    }
-
+    const hasFail=sig.flags.includes('rf-assinatura-invalida')||sig.flags.includes('rf-modificado-pos-assinatura');
+    const hasWarn=sig.flags.length>0;
+    const statusCls=hasFail?'fail':hasWarn?'warn':'ok';
+    const statusTxt=hasFail?'⚠ Integridade comprometida':hasWarn?'⚡ Atenção':'✓ Assinatura íntegra';
     const signer=cert.subject.CN||cert.subject.O||sig.pdfName||'(desconhecido)';
     const org=cert.subject.O&&cert.subject.CN?cert.subject.O:'';
-
-    const algoBadge=cert.algorithm?
-      `<span class="algo-badge ${cert.algorithm.includes('sha256')||cert.algorithm.includes('sha384')||cert.algorithm.includes('sha512')?'sha256':cert.algorithm.includes('sha1')?'sha1':'other'}">${cert.algorithm.toUpperCase()}</span>`:'';
-
-    const sigTimeStr=(sig.sigDate||cert.signingTime)
-      ?(sig.sigDate||cert.signingTime).toLocaleString('pt-BR')
-      :'não informado';
-
+    const algKey=cert.algorithm?cert.algorithm.toLowerCase():'';
+    const algoCls=algKey.includes('sha256')||algKey.includes('sha384')||algKey.includes('sha512')?'sha256':algKey.includes('sha1')?'sha1':'other';
+    const algoBadge=cert.algorithm?`<span class="algo-badge ${algoCls}">${cert.algorithm.toUpperCase()}</span>`:'';
+    const sigTimeStr=(sig.sigDate||cert.signingTime)?(sig.sigDate||cert.signingTime).toLocaleString('pt-BR'):'não informado';
     const validFrom=cert.notBefore?cert.notBefore.toLocaleString('pt-BR'):'—';
     const validTo=cert.notAfter?cert.notAfter.toLocaleString('pt-BR'):'—';
-    const certExpiredWarning=cert.expired?'<span style="color:var(--danger);font-size:11px"> ⚠ expirado</span>':'';
-
-    const issuerStr=[cert.issuer.CN,cert.issuer.O].filter(Boolean).join(' / ')||'(desconhecido)';
-    const selfSignedNote=cert.selfSigned?'<span style="color:var(--warn);font-size:11px"> (autoassinado)</span>':'';
-
-    const byteRangeNote=integ.coversFullFile?
-      '<span style="color:var(--accent);font-size:11px">✓ Cobre o arquivo inteiro</span>':
-      '<span style="color:var(--danger);font-size:11px">⚠ Conteúdo após a assinatura — possível adulteração</span>';
-
-    const hashNote=integ.hashVerified===true?'<span style="color:var(--accent);font-size:11px">✓ Hash verificado</span>':
-      integ.hashVerified===false?'<span style="color:var(--danger);font-size:11px">⚠ Hash não confere — documento adulterado</span>':
-      '<span style="color:var(--muted);font-size:11px">não verificado</span>';
-
-    const flagsHtml=sig.flags.length?sig.flags.map(f=>`<span class="flag ${flagSeverity(f)}" style="font-size:11px;padding:2px 8px">${f}</span>`).join(''):'<span style="color:var(--muted);font-size:12px">nenhum</span>';
-
+    const certExp=cert.expired?'<span style="color:var(--danger);font-size:11px"> ⚠ expirado</span>':'';
+    const issuerStr=[cert.issuer&&cert.issuer.CN,cert.issuer&&cert.issuer.O].filter(Boolean).join(' / ')||'(desconhecido)';
+    const selfNote=cert.selfSigned?'<span style="color:var(--warn);font-size:11px"> (autoassinado)</span>':'';
+    const byteRangeViz=buildByteRangeDiagram(sig.br,sig.fileSize);
     const chainHtml=buildChainHtml(cert);
+    const flagsHtml=sig.flags.length?sig.flags.map(f=>`<div class="flag-item ${flagSeverity(f)}" style="min-width:140px"><div class="flag-bar" style="font-size:11px;padding:4px 8px">⚑ ${f}</div><div class="flag-desc">${FLAG_DESCS[f]||''}</div></div>`).join(''):'<span style="color:var(--muted);font-size:12px">Nenhum</span>';
 
     container.innerHTML+=`
     <div class="sig-card">
@@ -508,32 +686,58 @@ function renderSignatures(sigs){
           <div class="sig-signer">🔏 Assinatura ${idx+1} — ${escHtml(signer)}</div>
           ${org?`<div class="sig-org">${escHtml(org)}</div>`:''}
         </div>
-        <div style="display:flex;align-items:center;gap:8px">
-          ${algoBadge}
-          <span class="sig-status ${statusCls}">${statusTxt}</span>
-        </div>
+        <div style="display:flex;align-items:center;gap:8px">${algoBadge}<span class="sig-status ${statusCls}">${statusTxt}</span></div>
       </div>
       <div class="sig-card-body">
         <div class="sig-grid">
           <div class="sig-field"><div class="sf-label">Horário de assinatura</div><div class="sf-value">${escHtml(sigTimeStr)}</div></div>
           <div class="sig-field"><div class="sf-label">Razão / Motivo</div><div class="sf-value">${escHtml(sig.reason||'—')}</div></div>
           <div class="sig-field"><div class="sf-label">Localização</div><div class="sf-value">${escHtml(sig.location||'—')}</div></div>
-          <div class="sig-field"><div class="sf-label">SubFilter (padrão)</div><div class="sf-value">${escHtml(sig.subfilter||sig.filter||'—')}</div></div>
-          <div class="sig-field"><div class="sf-label">Emitente do certificado</div><div class="sf-value">${escHtml(issuerStr)}${selfSignedNote}</div></div>
-          <div class="sig-field"><div class="sf-label">Validade do certificado</div><div class="sf-value">${validFrom} → ${validTo}${certExpiredWarning}</div></div>
-          ${cert.serialNumber?`<div class="sig-field"><div class="sf-label">Número de série</div><div class="sf-value">${escHtml(cert.serialNumber)}</div></div>`:''}
-          ${cert.subject.E?`<div class="sig-field"><div class="sf-label">E-mail</div><div class="sf-value">${escHtml(cert.subject.E)}</div></div>`:''}
+          <div class="sig-field"><div class="sf-label">Padrão (SubFilter)</div><div class="sf-value">${escHtml(sig.subfilter||sig.filter||'—')}</div></div>
+          <div class="sig-field"><div class="sf-label">Emitente do certificado</div><div class="sf-value">${escHtml(issuerStr)}${selfNote}</div></div>
+          <div class="sig-field"><div class="sf-label">Validade do certificado</div><div class="sf-value">${validFrom} → ${validTo}${certExp}</div></div>
+          ${cert.serialNumber?`<div class="sig-field"><div class="sf-label">Nº de série</div><div class="sf-value">${escHtml(cert.serialNumber)}</div></div>`:''}
+          ${cert.subject&&cert.subject.E?`<div class="sig-field"><div class="sf-label">E-mail</div><div class="sf-value">${escHtml(cert.subject.E)}</div></div>`:''}
         </div>
-        <hr class="divider">
-        <div style="display:flex;flex-wrap:wrap;gap:16px;align-items:center;margin-bottom:10px">
-          <div><span style="font-size:11px;color:var(--muted);text-transform:uppercase">ByteRange:</span><br>${byteRangeNote}</div>
-          <div><span style="font-size:11px;color:var(--muted);text-transform:uppercase">Integridade do hash:</span><br>${hashNote}</div>
+        <div class="byterange-wrap">
+          <div class="byterange-label">Cobertura da assinatura no arquivo (ByteRange)</div>
+          ${byteRangeViz}
+          <div style="display:flex;gap:12px;margin-top:5px;flex-wrap:wrap">
+            <span style="font-size:11px;color:var(--muted)"><span style="display:inline-block;width:10px;height:10px;background:rgba(35,134,54,.4);border-radius:2px;margin-right:3px"></span>Assinado</span>
+            <span style="font-size:11px;color:var(--muted)"><span style="display:inline-block;width:10px;height:10px;background:rgba(31,111,235,.35);border-radius:2px;margin-right:3px"></span>Blob da assinatura</span>
+            ${!integ.coversFullFile?'<span style="font-size:11px;color:var(--danger)"><span style="display:inline-block;width:10px;height:10px;background:rgba(218,54,51,.4);border-radius:2px;margin-right:3px"></span>Fora da cobertura ⚠</span>':''}
+          </div>
         </div>
-        ${chainHtml?`<div class="cert-chain"><div style="font-size:11px;color:var(--muted);text-transform:uppercase;margin-bottom:6px">Cadeia de Certificados</div>${chainHtml}</div>`:''}
-        <div style="margin-top:10px"><div style="font-size:11px;color:var(--muted);text-transform:uppercase;margin-bottom:5px">Red Flags</div><div class="flags-list">${flagsHtml}</div></div>
+        <div style="margin-bottom:10px;display:flex;gap:16px;flex-wrap:wrap">
+          <div><span style="font-size:11px;color:var(--muted);text-transform:uppercase">Verificação de hash:</span><br>
+            ${integ.hashVerified===true?'<span style="color:var(--accent);font-size:12px;font-weight:600">✓ Hash verificado — documento íntegro</span>':integ.hashVerified===false?'<span style="color:var(--danger);font-size:12px;font-weight:600">⚠ Hash não confere — documento adulterado</span>':'<span style="color:var(--muted);font-size:12px">não verificado</span>'}</div>
+        </div>
+        ${chainHtml?`<div class="cert-chain"><div style="font-size:11px;color:var(--muted);text-transform:uppercase;margin-bottom:6px">Cadeia de Certificados</div>${chainHtml}</div><hr class="divider">`:''}
+        <div><div style="font-size:11px;color:var(--muted);text-transform:uppercase;margin-bottom:8px">Indicadores de Risco desta Assinatura</div><div class="flags-list">${flagsHtml}</div></div>
       </div>
     </div>`;
   });
+}
+
+function buildByteRangeDiagram(br,fileSize){
+  if(!fileSize) return '';
+  const [o0,l0,o1,l1]=br;
+  const total=fileSize;
+  const pct=v=>Math.max(1,Math.round(v/total*100));
+  const extra=total-(o1+l1);
+  let html=`<div class="byterange-bar">`;
+  html+=`<div class="br-signed" style="width:${pct(l0)}%" title="Bytes ${o0}–${o0+l0}">`;
+  if(pct(l0)>8) html+=`${l0}B`;
+  html+=`</div>`;
+  html+=`<div class="br-sig" style="width:${pct(o1-o0-l0)}%" title="Assinatura PKCS#7">`;
+  if(pct(o1-o0-l0)>5) html+=`sig`;
+  html+=`</div>`;
+  html+=`<div class="br-signed" style="width:${pct(l1)}%" title="Bytes ${o1}–${o1+l1}">`;
+  if(pct(l1)>8) html+=`${l1}B`;
+  html+=`</div>`;
+  if(extra>0) html+=`<div class="br-extra" style="width:${pct(extra)}%" title="Fora da assinatura: ${extra} bytes">+${extra}B</div>`;
+  html+=`</div>`;
+  return html;
 }
 
 function buildChainHtml(cert){
@@ -550,60 +754,30 @@ function buildChainHtml(cert){
     </div>`).join('');
 }
 
-// ═══════════════════════════════════════════
-// PKCS#7 / CMS PARSER
-// ═══════════════════════════════════════════
+// ═══════════════════════════════════
+// PKCS#7 / ASN.1 / X.509
+// ═══════════════════════════════════
 function parsePKCS7(bytes){
-  const result={
-    subject:{},issuer:{},chain:[],
-    algorithm:'',signingTime:null,
-    notBefore:null,notAfter:null,
-    serialNumber:null,selfSigned:false,expired:false
-  };
+  const result={subject:{},issuer:{},chain:[],algorithm:'',signingTime:null,notBefore:null,notAfter:null,serialNumber:null,selfSigned:false,expired:false};
   try{
-    const root=asn1At(bytes,0);
-    if(!root||root.tag!==0x30) return result;
-    // ContentInfo SEQUENCE
-    const ci=asn1Children(bytes,root.vs,root.ve);
-    if(ci.length<2) return result;
-    // ci[0] = OID (1.2.840.113549.1.7.2), ci[1] = [0] content
-    const content=asn1Children(bytes,ci[1].vs,ci[1].ve);
-    if(!content.length) return result;
-    const sd=asn1Children(bytes,content[0].vs,content[0].ve);
-    // SignedData: version, digestAlgs, encapCI, [0]certs, [1]crls, signerInfos
-    if(sd.length<4) return result;
-
-    // digestAlgorithms — sd[1]
+    const root=asn1At(bytes,0);if(!root||root.tag!==0x30) return result;
+    const ci=asn1Children(bytes,root.vs,root.ve);if(ci.length<2) return result;
+    const content=asn1Children(bytes,ci[1].vs,ci[1].ve);if(!content.length) return result;
+    const sd=asn1Children(bytes,content[0].vs,content[0].ve);if(sd.length<4) return result;
     const daSet=asn1Children(bytes,sd[1].vs,sd[1].ve);
-    if(daSet.length){
-      const daSeq=asn1Children(bytes,daSet[0].vs,daSet[0].ve);
-      if(daSeq.length) result.algorithm=oidName(parseOIDBytes(bytes,daSeq[0].vs,daSeq[0].ve-daSeq[0].vs));
-    }
-
-    // Find certificates — look for context tag [0] (0xA0) after encapCI
+    if(daSet.length){const daSeq=asn1Children(bytes,daSet[0].vs,daSet[0].ve);if(daSeq.length)result.algorithm=oidName(parseOIDBytes(bytes,daSeq[0].vs,daSeq[0].ve-daSeq[0].vs));}
     let certs=null;
-    for(let i=3;i<sd.length;i++){
-      if(sd[i].tag===0xA0){certs=sd[i];break;}
-    }
+    for(let i=3;i<sd.length;i++){if(sd[i].tag===0xA0){certs=sd[i];break;}}
     if(certs){
       const certList=asn1Children(bytes,certs.vs,certs.ve);
       const chain=[];
-      certList.forEach(c=>{
-        const parsed=parseCert(bytes,c.offset);
-        if(parsed) chain.push(parsed);
-      });
+      certList.forEach(c=>{const p=parseCert(bytes,c.offset);if(p)chain.push(p);});
       result.chain=chain;
-      if(chain.length){
-        Object.assign(result,chain[0]);
-        // last cert = root CA
-      }
+      if(chain.length) Object.assign(result,chain[0]);
     }
-
-    // SignerInfos — last item in SignedData
     const siSet=asn1Children(bytes,sd[sd.length-1].vs,sd[sd.length-1].ve);
     if(siSet.length){
       const si=asn1Children(bytes,siSet[0].vs,siSet[0].ve);
-      // Find authenticated attributes [0] (tag 0xA0)
       for(const attr of si){
         if(attr.tag===0xA0){
           const attrs=asn1Children(bytes,attr.vs,attr.ve);
@@ -611,18 +785,8 @@ function parsePKCS7(bytes){
             const aseq=asn1Children(bytes,a.vs,a.ve);
             if(aseq.length>=2){
               const oid=parseOIDBytes(bytes,aseq[0].vs,aseq[0].ve-aseq[0].vs);
-              if(oid==='1.2.840.113549.1.9.5'){
-                // signingTime
-                const vals=asn1Children(bytes,aseq[1].vs,aseq[1].ve);
-                if(vals.length) result.signingTime=parseASN1Time(bytes,vals[0]);
-              }
-              if(oid==='1.2.840.113549.1.9.4'){
-                // messageDigest
-                const vals=asn1Children(bytes,aseq[1].vs,aseq[1].ve);
-                if(vals.length){
-                  result.messageDigest=bytes.slice(vals[0].vs,vals[0].ve);
-                }
-              }
+              if(oid==='1.2.840.113549.1.9.5'){const vals=asn1Children(bytes,aseq[1].vs,aseq[1].ve);if(vals.length)result.signingTime=parseASN1Time(bytes,vals[0]);}
+              if(oid==='1.2.840.113549.1.9.4'){const vals=asn1Children(bytes,aseq[1].vs,aseq[1].ve);if(vals.length)result.messageDigest=bytes.slice(vals[0].vs,vals[0].ve);}
             }
           }
           break;
@@ -635,335 +799,93 @@ function parsePKCS7(bytes){
 
 function parseCert(bytes,offset){
   try{
-    const cert=asn1At(bytes,offset);
-    if(!cert||cert.tag!==0x30) return null;
-    const parts=asn1Children(bytes,cert.vs,cert.ve);
-    if(!parts.length) return null;
-    const tbs=asn1Children(bytes,parts[0].vs,parts[0].ve);
-    if(tbs.length<7) return null;
-
+    const cert=asn1At(bytes,offset);if(!cert||cert.tag!==0x30)return null;
+    const parts=asn1Children(bytes,cert.vs,cert.ve);if(!parts.length)return null;
+    const tbs=asn1Children(bytes,parts[0].vs,parts[0].ve);if(tbs.length<7)return null;
     let idx=0;
-    // Skip optional version [0]
-    if(tbs[idx].tag===0xA0) idx++;
+    if(tbs[idx].tag===0xA0)idx++;
     const serialNode=tbs[idx++];
     const serial=bytesToHex(bytes.slice(serialNode.vs,serialNode.ve));
-    idx++; // signature alg
-    const issuerNode=tbs[idx++];
-    const validityNode=tbs[idx++];
-    const subjectNode=tbs[idx++];
-
+    idx++;
+    const issuerNode=tbs[idx++],validityNode=tbs[idx++],subjectNode=tbs[idx++];
     const subject=parseRDN(bytes,subjectNode.vs,subjectNode.ve);
     const issuer=parseRDN(bytes,issuerNode.vs,issuerNode.ve);
     const validity=asn1Children(bytes,validityNode.vs,validityNode.ve);
     const notBefore=validity.length>0?parseASN1Time(bytes,validity[0]):null;
     const notAfter=validity.length>1?parseASN1Time(bytes,validity[1]):null;
-
     const selfSigned=JSON.stringify(subject)===JSON.stringify(issuer);
-    const now=new Date();
-    const expired=notAfter&&now>notAfter;
-
-    // Get signing algorithm from outer cert
+    const expired=notAfter&&new Date()>notAfter;
     let algorithm='';
-    if(parts.length>1){
-      const algNode=asn1Children(bytes,parts[1].vs,parts[1].ve);
-      if(algNode.length) algorithm=oidName(parseOIDBytes(bytes,algNode[0].vs,algNode[0].ve-algNode[0].vs));
-    }
-
-    return{subject,issuer,serialNumber:serial,notBefore,notAfter,selfSigned,expired,algorithm,
-      CN:subject.CN,O:subject.O,C:subject.C,E:subject.E||subject['emailAddress']};
+    if(parts.length>1){const an=asn1Children(bytes,parts[1].vs,parts[1].ve);if(an.length)algorithm=oidName(parseOIDBytes(bytes,an[0].vs,an[0].ve-an[0].vs));}
+    return{subject,issuer,serialNumber:serial,notBefore,notAfter,selfSigned,expired,algorithm,CN:subject.CN,O:subject.O,C:subject.C,E:subject.E||subject['emailAddress']};
   }catch(e){return null;}
 }
 
 function parseRDN(bytes,start,end){
   const rdn={};
-  const sets=asn1Children(bytes,start,end);
-  for(const set of sets){
-    const pairs=asn1Children(bytes,set.vs,set.ve);
-    for(const pair of pairs){
+  asn1Children(bytes,start,end).forEach(set=>{
+    asn1Children(bytes,set.vs,set.ve).forEach(pair=>{
       const seq=asn1Children(bytes,pair.vs,pair.ve);
-      if(seq.length>=2){
-        const oid=parseOIDBytes(bytes,seq[0].vs,seq[0].ve-seq[0].vs);
-        const name=OID_ATTR[oid]||oid;
-        const val=asn1String(bytes,seq[1]);
-        if(val) rdn[name]=val;
-      }
-    }
-  }
+      if(seq.length>=2){const oid=parseOIDBytes(bytes,seq[0].vs,seq[0].ve-seq[0].vs);const name=OID_ATTR[oid]||oid;const val=asn1String(bytes,seq[1]);if(val)rdn[name]=val;}
+    });
+  });
   return rdn;
 }
 
-// ═══════════════════════════════════════════
-// INTEGRITY VERIFICATION
-// ═══════════════════════════════════════════
 async function verifyDocumentIntegrity(buffer,br,pkcs7){
   const result={coversFullFile:false,hashVerified:null,hashMismatch:false,modifiedAfterSig:false};
   try{
     const bytes=new Uint8Array(buffer);
-    const fileSize=bytes.length;
-    const [o0,l0,o1,l1]=br;
-
-    // Check if ByteRange covers the full file
-    result.coversFullFile=(o1+l1>=fileSize-16);
+    const[o0,l0,o1,l1]=br;
+    result.coversFullFile=(o1+l1>=bytes.length-16);
     if(!result.coversFullFile) result.modifiedAfterSig=true;
-
-    // Build signed content (two ranges concatenated)
     const signed=new Uint8Array(l0+l1);
     signed.set(bytes.subarray(o0,o0+l0),0);
     signed.set(bytes.subarray(o1,o1+l1),l0);
-
-    // Get messageDigest from PKCS#7
     const certInfo=parsePKCS7(pkcs7);
     if(!certInfo.messageDigest||!certInfo.algorithm) return result;
-
     const alg=certInfo.algorithm.toLowerCase();
-    let webAlg;
-    if(alg.includes('sha256')||alg.includes('sha-256')) webAlg='SHA-256';
-    else if(alg.includes('sha384')) webAlg='SHA-384';
-    else if(alg.includes('sha512')) webAlg='SHA-512';
-    else if(alg.includes('sha1')||alg.includes('sha-1')) webAlg='SHA-1';
-    else return result;
-
+    let webAlg=alg.includes('sha256')||alg.includes('sha-256')?'SHA-256':alg.includes('sha384')?'SHA-384':alg.includes('sha512')?'SHA-512':alg.includes('sha1')||alg.includes('sha-1')?'SHA-1':null;
+    if(!webAlg) return result;
     const computed=new Uint8Array(await crypto.subtle.digest(webAlg,signed));
     const expected=certInfo.messageDigest;
-
     if(computed.length===expected.length){
-      let match=true;
-      for(let i=0;i<computed.length;i++) if(computed[i]!==expected[i]){match=false;break;}
-      result.hashVerified=match;
-      result.hashMismatch=!match;
+      let match=true;for(let i=0;i<computed.length;i++)if(computed[i]!==expected[i]){match=false;break;}
+      result.hashVerified=match;result.hashMismatch=!match;
     }
   }catch(e){}
   return result;
 }
 
-// ═══════════════════════════════════════════
-// ASN.1 UTILITIES
-// ═══════════════════════════════════════════
-function asn1At(bytes,offset){
-  if(offset>=bytes.length) return null;
-  const tag=bytes[offset];
-  let pos=offset+1;
-  let len;
-  if(bytes[pos]<0x80){len=bytes[pos++];}
-  else{const nb=bytes[pos++]&0x7f;len=0;for(let i=0;i<nb;i++)len=(len<<8)|bytes[pos++];}
-  const vs=pos,ve=pos+len;
-  return{tag,len,vs,ve,offset,totalLen:ve-offset};
-}
-function asn1Children(bytes,start,end){
-  const ch=[];
-  let pos=start;
-  while(pos<end-1){
-    const n=asn1At(bytes,pos);
-    if(!n||n.ve>end+4) break;
-    ch.push(n);
-    pos=n.ve;
-  }
-  return ch;
-}
-function parseOIDBytes(bytes,start,len){
-  let oid='',first=true,val=0;
-  for(let i=0;i<len;i++){
-    const b=bytes[start+i];
-    val=(val<<7)|(b&0x7f);
-    if(!(b&0x80)){
-      if(first){oid+=Math.floor(val/40)+'.'+val%40;first=false;}
-      else oid+='.'+val;
-      val=0;
-    }
-  }
-  return oid;
-}
-function asn1String(bytes,node){
-  const t=node.tag;
-  if(t===0x0C||t===0x13||t===0x16||t===0x1A||t===0x1E){
-    return new TextDecoder('utf-8',{fatal:false}).decode(bytes.slice(node.vs,node.ve));
-  }
-  if(t===0x1E){
-    // BMPString: 2-byte chars
-    let s='';
-    for(let i=node.vs;i<node.ve-1;i+=2) s+=String.fromCharCode((bytes[i]<<8)|bytes[i+1]);
-    return s;
-  }
-  return null;
-}
-function parseASN1Time(bytes,node){
-  try{
-    let s='';
-    for(let i=node.vs;i<node.ve;i++) s+=String.fromCharCode(bytes[i]);
-    if(node.tag===0x17){
-      // UTCTime: YYMMDDHHMMSSZ
-      const yy=+s.substring(0,2),mo=+s.substring(2,4)-1,dd=+s.substring(4,6);
-      const hh=+s.substring(6,8),mm=+s.substring(8,10),ss=+s.substring(10,12);
-      const yr=yy>=50?1900+yy:2000+yy;
-      return new Date(Date.UTC(yr,mo,dd,hh,mm,ss));
-    }
-    if(node.tag===0x18){
-      // GeneralizedTime: YYYYMMDDHHMMSSZ
-      const yr=+s.substring(0,4),mo=+s.substring(4,6)-1,dd=+s.substring(6,8);
-      const hh=+s.substring(8,10),mm=+s.substring(10,12),ss=+s.substring(12,14);
-      return new Date(Date.UTC(yr,mo,dd,hh,mm,ss));
-    }
-  }catch(e){}
-  return null;
-}
+// ASN.1 primitives
+function asn1At(bytes,offset){if(offset>=bytes.length)return null;const tag=bytes[offset];let pos=offset+1;let len;if(bytes[pos]<0x80){len=bytes[pos++];}else{const nb=bytes[pos++]&0x7f;len=0;for(let i=0;i<nb;i++)len=(len<<8)|bytes[pos++];}return{tag,len,vs:pos,ve:pos+len,offset,totalLen:pos+len-offset};}
+function asn1Children(bytes,start,end){const ch=[];let pos=start;while(pos<end-1){const n=asn1At(bytes,pos);if(!n||n.ve>end+4)break;ch.push(n);pos=n.ve;}return ch;}
+function parseOIDBytes(bytes,start,len){let oid='',first=true,val=0;for(let i=0;i<len;i++){const b=bytes[start+i];val=(val<<7)|(b&0x7f);if(!(b&0x80)){if(first){oid+=Math.floor(val/40)+'.'+val%40;first=false;}else oid+='.'+val;val=0;}}return oid;}
+function asn1String(bytes,node){const t=node.tag;if(t===0x0C||t===0x13||t===0x16||t===0x1A)return new TextDecoder('utf-8',{fatal:false}).decode(bytes.slice(node.vs,node.ve));if(t===0x1E){let s='';for(let i=node.vs;i<node.ve-1;i+=2)s+=String.fromCharCode((bytes[i]<<8)|bytes[i+1]);return s;}return null;}
+function parseASN1Time(bytes,node){try{let s='';for(let i=node.vs;i<node.ve;i++)s+=String.fromCharCode(bytes[i]);if(node.tag===0x17){const yy=+s.substring(0,2),mo=+s.substring(2,4)-1,dd=+s.substring(4,6),hh=+s.substring(6,8),mm=+s.substring(8,10),ss=+s.substring(10,12);return new Date(Date.UTC(yy>=50?1900+yy:2000+yy,mo,dd,hh,mm,ss));}if(node.tag===0x18){const yr=+s.substring(0,4),mo=+s.substring(4,6)-1,dd=+s.substring(6,8),hh=+s.substring(8,10),mm=+s.substring(10,12),ss=+s.substring(12,14);return new Date(Date.UTC(yr,mo,dd,hh,mm,ss));}}catch(e){}return null;}
 function bytesToHex(bytes){return Array.from(bytes).map(b=>b.toString(16).padStart(2,'0')).join('');}
 function hexToBytes(hex){const b=new Uint8Array(hex.length/2);for(let i=0;i<b.length;i++)b[i]=parseInt(hex.substr(i*2,2),16);return b;}
+const OID_ATTR={'2.5.4.3':'CN','2.5.4.6':'C','2.5.4.7':'L','2.5.4.8':'ST','2.5.4.10':'O','2.5.4.11':'OU','1.2.840.113549.1.9.1':'E','2.5.4.5':'serialNumber','2.5.4.4':'SN','2.5.4.42':'GN'};
+const OID_ALG={'1.2.840.113549.1.1.5':'sha1WithRSA','1.2.840.113549.1.1.11':'sha256WithRSA','1.2.840.113549.1.1.12':'sha384WithRSA','1.2.840.113549.1.1.13':'sha512WithRSA','1.2.840.10045.4.3.2':'sha256WithECDSA','1.2.840.10045.4.3.3':'sha384WithECDSA','1.3.14.3.2.26':'sha1','2.16.840.1.101.3.4.2.1':'sha256','2.16.840.1.101.3.4.2.2':'sha384','2.16.840.1.101.3.4.2.3':'sha512'};
+const oidName=oid=>OID_ALG[oid]||OID_ATTR[oid]||oid;
 
-const OID_ATTR={'2.5.4.3':'CN','2.5.4.6':'C','2.5.4.7':'L','2.5.4.8':'ST','2.5.4.10':'O',
-  '2.5.4.11':'OU','1.2.840.113549.1.9.1':'emailAddress','2.5.4.5':'serialNumber',
-  '2.5.4.4':'SN','2.5.4.42':'GN'};
-const OID_ALG={'1.2.840.113549.1.1.5':'sha1WithRSA','1.2.840.113549.1.1.11':'sha256WithRSA',
-  '1.2.840.113549.1.1.12':'sha384WithRSA','1.2.840.113549.1.1.13':'sha512WithRSA',
-  '1.2.840.10045.4.3.2':'sha256WithECDSA','1.2.840.10045.4.3.3':'sha384WithECDSA',
-  '1.3.14.3.2.26':'sha1','2.16.840.1.101.3.4.2.1':'sha256','2.16.840.1.101.3.4.2.2':'sha384',
-  '2.16.840.1.101.3.4.2.3':'sha512'};
-function oidName(oid){return OID_ALG[oid]||OID_ATTR[oid]||oid;}
-
-// ═══════════════════════════════════════════
-// EXPORT — RELATÓRIO HTML
-// ═══════════════════════════════════════════
-function exportReport(){
-  if(!currentAnalysis) return;
-  const{meta,flags,fileInfo}=currentAnalysis;
-  const perito=document.getElementById('perito-nome').value.trim()||'(não informado)';
-  const reg=document.getElementById('perito-reg').value.trim()||'(não informado)';
-  const caso=document.getElementById('caso-num').value.trim()||'—';
-  const obs=document.getElementById('obs-text').value.trim();
-  const score=calcFraudScore(flags);
-
-  const metaRows=Object.entries(meta).filter(([,v])=>v!=null&&v!==undefined&&v!=='')
-    .map(([k,v])=>`<tr><td style="padding:5px 10px;border:1px solid #ccc;font-weight:bold;background:#f5f5f5;width:200px">${escHtml(k)}</td><td style="padding:5px 10px;border:1px solid #ccc;font-family:monospace">${escHtml(String(v))}</td></tr>`).join('');
-
-  const flagsHtml=flags.length
-    ?flags.map(f=>`<span style="display:inline-block;margin:3px;padding:3px 10px;border-radius:12px;font-size:12px;font-weight:bold;background:${flagSeverity(f)==='high'?'#ffe0e0':flagSeverity(f)==='medium'?'#fff3cd':'#e0eaff'};color:${flagSeverity(f)==='high'?'#c00':flagSeverity(f)==='medium'?'#7a5200':'#004080'}">${f}</span>`).join('')
-    :'<em style="color:#555">Nenhum.</em>';
-
-  const sigsHtml=currentSigs.length?currentSigs.map((sig,i)=>{
-    const c=sig.certInfo;
-    const signer=c.subject.CN||c.subject.O||sig.pdfName||'desconhecido';
-    const integrityTxt=sig.integrity.hashMismatch?'⚠ HASH NÃO CONFERE — ADULTERADO':
-      sig.integrity.modifiedAfterSig?'⚠ CONTEÚDO APÓS ASSINATURA':
-      sig.integrity.hashVerified===true?'✓ Íntegra':'(não verificada)';
-    return `<tr><td style="padding:6px;border:1px solid #ccc;font-weight:bold">${i+1}</td>
-      <td style="padding:6px;border:1px solid #ccc">${escHtml(signer)}</td>
-      <td style="padding:6px;border:1px solid #ccc">${escHtml(c.subject.O||'—')}</td>
-      <td style="padding:6px;border:1px solid #ccc">${sig.sigDate||c.signingTime?(sig.sigDate||c.signingTime).toLocaleString('pt-BR'):'—'}</td>
-      <td style="padding:6px;border:1px solid #ccc">${escHtml(c.algorithm||'—')}</td>
-      <td style="padding:6px;border:1px solid #ccc;color:${sig.integrity.hashMismatch||sig.integrity.modifiedAfterSig?'#c00':'#155724'}">${integrityTxt}</td></tr>`;
-  }).join(''):'';
-
-  const scoreColor=score>=60?'#c00':score>=30?'#7a5200':'#155724';
-  const scoreBg=score>=60?'#ffe0e0':score>=30?'#fff3cd':'#d4edda';
-  const hashSection=currentHash?`<h2>7. Hash Perceptual (pHash)</h2><p style="font-family:monospace;font-size:13px;background:#f0f0f0;padding:8px;border-radius:4px">${currentHash}</p>`:'';
-  const obsSection=obs?`<h2>${currentSigs.length?'8':'7'}. Observações do Perito</h2><p style="background:#f9f9f9;border-left:4px solid #333;padding:10px 14px;font-size:13px;line-height:1.6">${escHtml(obs).replace(/\n/g,'<br>')}</p>`:'';
-
-  const html=`<!DOCTYPE html><html lang="pt-BR"><head><meta charset="UTF-8">
-<title>Relatório PerDoc — ${escHtml(fileInfo.name)}</title>
-<style>body{font-family:Arial,sans-serif;font-size:13px;color:#1a1a1a;max-width:920px;margin:0 auto;padding:30px 40px;}
-@media print{body{padding:10px 20px;}.no-print{display:none;}}
-h1{font-size:20px;border-bottom:3px solid #1a1a1a;padding-bottom:6px;margin-bottom:4px;}
-h2{font-size:13px;text-transform:uppercase;letter-spacing:.6px;color:#555;margin:20px 0 8px;}
-table{width:100%;border-collapse:collapse;}
-.info-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px 24px;}
-.info-item{border-bottom:1px solid #e0e0e0;padding:5px 0;}
-.info-item .lbl{font-size:11px;color:#777;text-transform:uppercase;}
-.info-item .val{font-weight:bold;font-size:13px;}
-.sha{font-family:monospace;font-size:11px;background:#f0f0f0;padding:8px 12px;border-radius:4px;word-break:break-all;margin:4px 0;}
-footer{margin-top:40px;border-top:1px solid #ccc;padding-top:12px;font-size:11px;color:#777;}</style></head><body>
-<h1>PerDoc — Relatório de Evidências Documentoscópicas</h1>
-<p style="font-size:12px;color:#777;margin-bottom:20px">Gerado por PerDoc v1.2</p>
-<h2>1. Identificação do Caso</h2>
-<div class="info-grid">
-  <div class="info-item"><div class="lbl">Número do Caso</div><div class="val">${escHtml(caso)}</div></div>
-  <div class="info-item"><div class="lbl">Data/Hora da Análise</div><div class="val">${fileInfo.analysisTime}</div></div>
-  <div class="info-item"><div class="lbl">Perito / Analista</div><div class="val">${escHtml(perito)}</div></div>
-  <div class="info-item"><div class="lbl">Matrícula / Registro</div><div class="val">${escHtml(reg)}</div></div>
-</div>
-<h2>2. Identificação do Documento</h2>
-<div class="info-grid">
-  <div class="info-item"><div class="lbl">Nome</div><div class="val">${escHtml(fileInfo.name)}</div></div>
-  <div class="info-item"><div class="lbl">Tipo</div><div class="val">${fileInfo.ext.toUpperCase()}</div></div>
-  <div class="info-item"><div class="lbl">Tamanho</div><div class="val">${formatBytes(fileInfo.size)}</div></div>
-  <div class="info-item"><div class="lbl">Última Modificação (SO)</div><div class="val">${fileInfo.lastModified.toLocaleString('pt-BR')}</div></div>
-</div>
-<div style="margin-top:10px"><div style="font-size:11px;color:#777;text-transform:uppercase">SHA-256 (cadeia de custódia)</div><div class="sha">${fileInfo.sha256}</div></div>
-<h2>3. Metadados Extraídos</h2>
-<table>${metaRows||'<tr><td colspan="2" style="padding:8px;color:#777">Nenhum metadado encontrado.</td></tr>'}</table>
-<h2>4. Indicadores de Risco (Red Flags)</h2><div style="margin-bottom:10px">${flagsHtml}</div>
-<h2>5. FraudScore</h2>
-<div style="display:flex;align-items:center;gap:16px">
-  <div style="font-size:42px;font-weight:bold;color:${scoreColor}">${score}<span style="font-size:18px">/100</span></div>
-  <div style="flex:1"><div style="background:#e0e0e0;border-radius:5px;height:12px;overflow:hidden"><div style="width:${Math.min(score,100)}%;height:100%;background:${scoreColor};border-radius:5px"></div></div>
-  <div style="margin-top:6px;padding:6px 12px;background:${scoreBg};border-radius:4px;font-weight:bold;color:${scoreColor};font-size:13px">${score>=60?'⚠ Alto risco':score>=30?'⚡ Risco moderado':'✓ Baixo risco'}</div></div>
-</div>
-${sigsHtml?`<h2>6. Assinaturas Digitais</h2><table style="font-size:12px"><tr style="background:#f5f5f5"><th style="padding:6px;border:1px solid #ccc">Nº</th><th style="padding:6px;border:1px solid #ccc">Signatário</th><th style="padding:6px;border:1px solid #ccc">Organização</th><th style="padding:6px;border:1px solid #ccc">Data/Hora</th><th style="padding:6px;border:1px solid #ccc">Algoritmo</th><th style="padding:6px;border:1px solid #ccc">Integridade</th></tr>${sigsHtml}</table>`:''}
-${hashSection}${obsSection}
-<footer><p><strong>PerDoc v1.2</strong> — Análise documentoscópica digital. Gerado em ${new Date().toLocaleString('pt-BR')}.</p>
-<p style="margin-top:8px;font-style:italic">As conclusões deste relatório devem ser interpretadas por perito habilitado no contexto do exame documentoscópico.</p></footer>
-</body></html>`;
-
-  const blob=new Blob([html],{type:'text/html;charset=utf-8'});
-  const win=window.open(URL.createObjectURL(blob),'_blank');
-  if(win) setTimeout(()=>win.print(),800);
-}
-
-function exportTxt(){
-  if(!currentAnalysis) return;
-  const{meta,flags,fileInfo}=currentAnalysis;
-  const perito=document.getElementById('perito-nome').value.trim()||'(não informado)';
-  const reg=document.getElementById('perito-reg').value.trim()||'(não informado)';
-  const caso=document.getElementById('caso-num').value.trim()||'—';
-  const obs=document.getElementById('obs-text').value.trim();
-  const score=calcFraudScore(flags);
-  const sep='─'.repeat(60);
-  let txt=`PERDOC v1.2 — RELATÓRIO DE EVIDÊNCIAS DOCUMENTOSCÓPICAS\n${sep}\n`;
-  txt+=`Data/Hora da Análise : ${fileInfo.analysisTime}\nPerito               : ${perito}\nMatrícula            : ${reg}\nNº do Caso           : ${caso}\n\n`;
-  txt+=`DOCUMENTO\n${sep}\nNome     : ${fileInfo.name}\nTipo     : ${fileInfo.ext.toUpperCase()}\nTamanho  : ${formatBytes(fileInfo.size)}\nModif SO : ${fileInfo.lastModified.toLocaleString('pt-BR')}\nSHA-256  : ${fileInfo.sha256}\n\n`;
-  txt+=`METADADOS\n${sep}\n`;
-  Object.entries(meta).filter(([,v])=>v!=null&&v!=='').forEach(([k,v])=>{txt+=`${k.padEnd(30)}: ${v}\n`;});
-  txt+=`\nRED FLAGS\n${sep}\n${flags.length?flags.join('\n'):'Nenhum.'}\n\nFRAUDSCORE: ${score}/100\n`;
-  if(currentSigs.length){
-    txt+=`\nASSINATURAS DIGITAIS\n${sep}\n`;
-    currentSigs.forEach((sig,i)=>{
-      const c=sig.certInfo;
-      txt+=`\nAssinatura ${i+1}\n`;
-      txt+=`  Signatário : ${c.subject.CN||c.subject.O||sig.pdfName||'desconhecido'}\n`;
-      if(c.subject.O) txt+=`  Organização: ${c.subject.O}\n`;
-      const t=sig.sigDate||c.signingTime;
-      if(t) txt+=`  Data/Hora  : ${t.toLocaleString('pt-BR')}\n`;
-      txt+=`  Algoritmo  : ${c.algorithm||'—'}\n`;
-      txt+=`  Emitente   : ${c.issuer.CN||c.issuer.O||'desconhecido'}\n`;
-      txt+=`  Integridade: ${sig.integrity.hashMismatch?'FALHOU':sig.integrity.modifiedAfterSig?'MODIFICADO PÓS-ASSINATURA':sig.integrity.hashVerified===true?'OK':'não verificada'}\n`;
-      if(sig.flags.length) txt+=`  Flags      : ${sig.flags.join(', ')}\n`;
-    });
-  }
-  if(currentHash) txt+=`\npHASH DCT: ${currentHash}\n`;
-  if(obs) txt+=`\nOBSERVAÇÕES\n${sep}\n${obs}\n`;
-  txt+=`\n${sep}\nGerado por PerDoc v1.2 em ${new Date().toLocaleString('pt-BR')}\n`;
-
-  const a=document.createElement('a');
-  a.href=URL.createObjectURL(new Blob([txt],{type:'text/plain;charset=utf-8'}));
-  a.download='evidencias_'+fileInfo.name.replace(/\.[^.]+$/,'')+'_'+Date.now()+'.txt';
-  a.click();
-}
-
-// ═══════════════════════════════════════════
-// JPEG / EXIF PARSER
-// ═══════════════════════════════════════════
+// ═══════════════════════════════════
+// JPEG / EXIF
+// ═══════════════════════════════════
 function parseJPEG(buffer,file){
   const view=new DataView(buffer),meta={},flags=[];
-  if(view.getUint16(0)!==0xFFD8) return{meta:{Erro:'Não é um JPEG válido'},flags};
+  if(view.getUint16(0)!==0xFFD8)return{meta:{Erro:'Não é um JPEG válido'},flags};
   let offset=2;
   while(offset<view.byteLength-1){
-    if(view.getUint8(offset)!==0xFF) break;
+    if(view.getUint8(offset)!==0xFF)break;
     const marker=view.getUint16(offset);offset+=2;
-    if(marker===0xFFD9||marker===0xFFDA) break;
+    if(marker===0xFFD9||marker===0xFFDA)break;
     const segLen=view.getUint16(offset);const segEnd=offset+segLen;
-    if(marker===0xFFE1&&readStr(view,offset+2,4)==='Exif') parseExifIFD(view,offset+2,meta,flags);
+    if(marker===0xFFE1&&readStr(view,offset+2,4)==='Exif')parseExifIFD(view,offset+2,meta,flags);
     offset=segEnd;
   }
   scheduleImageHash(buffer,file,'jpeg');
-  if(!Object.keys(meta).length) meta['Aviso']='Nenhum bloco EXIF encontrado';
+  if(!Object.keys(meta).length)meta['Aviso']='Nenhum bloco EXIF encontrado';
   return{meta,flags};
 }
 function parseExifIFD(view,es,meta,flags){
@@ -993,10 +915,8 @@ function parseIFD(ts,ifdOff,g16,g32,view,meta,flags,le,depth){
       case 0x0131:{meta['Software']=val;const vl=val.toLowerCase();if(vl.includes('photoshop')||vl.includes('gimp')||vl.includes('lightroom'))flags.push('rf-software-edicao');break;}
       case 0x0132:meta['DateTime']=fmtExifDate(val);break;
       case 0x013B:meta['Artist']=val;break;case 0x8298:meta['Copyright']=val;break;
-      case 0x9003:meta['DateTimeOriginal']=fmtExifDate(val);break;
-      case 0x9004:meta['DateTimeDigitized']=fmtExifDate(val);break;
-      case 0xA420:meta['ImageUniqueID']=val;break;
-      case 0xA433:meta['LensMake']=val;break;case 0xA434:meta['LensModel']=val;break;
+      case 0x9003:meta['DateTimeOriginal']=fmtExifDate(val);break;case 0x9004:meta['DateTimeDigitized']=fmtExifDate(val);break;
+      case 0xA420:meta['ImageUniqueID']=val;break;case 0xA433:meta['LensMake']=val;break;case 0xA434:meta['LensModel']=val;break;
       case 0x8769:parseIFD(ts,le?view.getUint32(e+8,true):view.getUint32(e+8),g16,g32,view,meta,flags,le,depth+1);break;
       case 0x8825:{const gps={};parseGPSIFD(ts,le?view.getUint32(e+8,true):view.getUint32(e+8),g16,g32,view,le,gps);if(gps.lat&&gps.lon){meta['GPS Latitude']=gps.lat;meta['GPS Longitude']=gps.lon;if(gps.alt)meta['GPS Altitude']=gps.alt;flags.push('rf-gps-presente');}break;}
     }
@@ -1008,12 +928,9 @@ function parseGPSIFD(ts,off,g16,g32,view,le,gps){
   for(let i=0;i<n;i++){
     const e=abs+2+i*12;if(e+12>view.byteLength)break;
     const tag=g16(e),type=g16(e+2),count=g32(e+4);
-    const bc=count*(TYPE_SIZES[type]||1);
-    const dOff=bc>4?ts+g32(e+8):e+8;
-    if(tag===0x0001)latRef=readStr(view,dOff,1);
-    else if(tag===0x0003)lonRef=readStr(view,dOff,1);
-    else if(tag===0x0002&&count===3)latV=readRats(view,dOff,3,le);
-    else if(tag===0x0004&&count===3)lonV=readRats(view,dOff,3,le);
+    const bc=count*(TYPE_SIZES[type]||1);const dOff=bc>4?ts+g32(e+8):e+8;
+    if(tag===0x0001)latRef=readStr(view,dOff,1);else if(tag===0x0003)lonRef=readStr(view,dOff,1);
+    else if(tag===0x0002&&count===3)latV=readRats(view,dOff,3,le);else if(tag===0x0004&&count===3)lonV=readRats(view,dOff,3,le);
     else if(tag===0x0005)altRef=view.getUint8(dOff);
     else if(tag===0x0006){const nn=le?view.getUint32(dOff,true):view.getUint32(dOff);const dd=le?view.getUint32(dOff+4,true):view.getUint32(dOff+4);if(dd)altV=((nn/dd)*(altRef?-1:1)).toFixed(1)+' m';}
   }
@@ -1022,35 +939,26 @@ function parseGPSIFD(ts,off,g16,g32,view,le,gps){
 const dmsDeg=(v,r)=>{let d=v[0]+v[1]/60+v[2]/3600;if(r==='S'||r==='W')d=-d;return d.toFixed(6)+'° ('+r+')';};
 const readRats=(view,off,n,le)=>{const r=[];for(let i=0;i<n;i++){const a=le?view.getUint32(off+i*8,true):view.getUint32(off+i*8);const b=le?view.getUint32(off+i*8+4,true):view.getUint32(off+i*8+4);r.push(b?a/b:0);}return r;};
 const TYPE_SIZES={1:1,2:1,3:2,4:4,5:8,6:1,7:1,8:2,9:4,10:8,11:4,12:8};
-function readExifVal(view,tag,type,count,off,le){
-  try{
-    if(type===2){let s='';for(let i=0;i<count-1;i++)s+=String.fromCharCode(view.getUint8(off+i));return s.trim()||null;}
-    if(type===3)return le?view.getUint16(off,true):view.getUint16(off);
-    if(type===4)return le?view.getUint32(off,true):view.getUint32(off);
-    if(type===5&&count>=1){const a=le?view.getUint32(off,true):view.getUint32(off);const b=le?view.getUint32(off+4,true):view.getUint32(off+4);return[a,b];}
-  }catch(e){}return null;
-}
+function readExifVal(view,tag,type,count,off,le){try{if(type===2){let s='';for(let i=0;i<count-1;i++)s+=String.fromCharCode(view.getUint8(off+i));return s.trim()||null;}if(type===3)return le?view.getUint16(off,true):view.getUint16(off);if(type===4)return le?view.getUint32(off,true):view.getUint32(off);if(type===5&&count>=1){const a=le?view.getUint32(off,true):view.getUint32(off);const b=le?view.getUint32(off+4,true):view.getUint32(off+4);return[a,b];}}catch(e){}return null;}
 const fmtRat=v=>!v||!Array.isArray(v)?String(v):v[1]?(v[0]/v[1]).toFixed(0)+' DPI':String(v[0]);
 const fmtExifDate=s=>{if(!s)return s;const m=s.match(/^(\d{4}):(\d{2}):(\d{2}) (\d{2}:\d{2}:\d{2})$/);return m?`${m[3]}/${m[2]}/${m[1]} ${m[4]}`:s;};
 const orientLabel=v=>({1:'Normal',2:'Flip H',3:'Rotação 180°',4:'Flip V',6:'Rotação 90° CW',8:'Rotação 90° CCW'}[v]||String(v));
 function readStr(view,off,len){let s='';for(let i=0;i<len;i++){const c=view.getUint8(off+i);if(!c)break;s+=String.fromCharCode(c);}return s;}
 
-// ═══════════════════════════════════════════
-// PDF METADATA PARSER
-// ═══════════════════════════════════════════
+// ═══════════════════════════════════
+// PDF METADATA
+// ═══════════════════════════════════
 function parsePDF(buffer,file){
   const bytes=new Uint8Array(buffer);
-  let text='';
-  for(let i=0;i<Math.min(bytes.length,500000);i++) text+=String.fromCharCode(bytes[i]);
+  let text='';for(let i=0;i<Math.min(bytes.length,500000);i++)text+=String.fromCharCode(bytes[i]);
   const meta={},flags=[];
-  if(!text.startsWith('%PDF')) return{meta:{Erro:'Não é um PDF válido'},flags};
+  if(!text.startsWith('%PDF'))return{meta:{Erro:'Não é um PDF válido'},flags};
   meta['Versão PDF']=text.substring(1,8).trim();
-  const fields=['Creator','Producer','Author','Title','Subject','Keywords','CreationDate','ModDate'];
-  fields.forEach(f=>{
+  ['Creator','Producer','Author','Title','Subject','Keywords','CreationDate','ModDate'].forEach(f=>{
     const m1=new RegExp('/'+f+'\\s*\\(([\\s\\S]*?)(?<!\\\\)\\)').exec(text);
     if(m1){meta[f]=unescPDF(m1[1]);return;}
     const m2=new RegExp('/'+f+'\\s*<([0-9A-Fa-f\\s]*)>').exec(text);
-    if(m2) meta[f]=hexPDF(m2[1].replace(/\s/g,''));
+    if(m2)meta[f]=hexPDF(m2[1].replace(/\s/g,''));
   });
   const pm=text.match(/\/Type\s*\/Page(?!s)/g);
   meta['Número de Páginas']=pm?pm.length:'(não determinado)';
@@ -1074,35 +982,33 @@ const parsePDFDate=s=>{if(!s)return null;const m=s.match(/D:(\d{4})(\d{2})(\d{2}
 const unescPDF=s=>s.replace(/\\n/g,'\n').replace(/\\r/g,'\r').replace(/\\t/g,'\t').replace(/\\\\/g,'\\').replace(/\\\(/g,'(').replace(/\\\)/g,')').replace(/\\(\d{3})/g,(_,o)=>String.fromCharCode(parseInt(o,8)));
 const hexPDF=h=>{let s='';for(let i=0;i<h.length-1;i+=2)s+=String.fromCharCode(parseInt(h.substr(i,2),16));return s;};
 
-// ═══════════════════════════════════════════
-// DOCX / XLSX PARSER
-// ═══════════════════════════════════════════
+// ═══════════════════════════════════
+// DOCX / XLSX
+// ═══════════════════════════════════
 async function parseDOCX(buffer,file){
   const meta={},flags=[];
   let zip;try{zip=await JSZip.loadAsync(buffer);}catch(e){return{meta:{Erro:'Não foi possível descompactar: '+e.message},flags};}
   const coreFile=zip.file('docProps/core.xml');
-  if(!coreFile){meta['Aviso']='docProps/core.xml não encontrado';}
+  if(!coreFile)meta['Aviso']='docProps/core.xml não encontrado';
   else{
     const xml=await coreFile.async('string');
     const doc=new DOMParser().parseFromString(xml,'application/xml');
     const get=tag=>{const el=doc.getElementsByTagNameNS('*',tag)[0];return el?el.textContent.trim():null;};
     const MAP={'creator':'Autor','lastModifiedBy':'Última Modificação por','created':'Data de Criação','modified':'Data de Modificação','revision':'Número de Revisões','description':'Descrição','subject':'Assunto','title':'Título','keywords':'Palavras-chave','category':'Categoria','contentStatus':'Status'};
-    for(const[t,l] of Object.entries(MAP)){const v=get(t);if(v)meta[l]=v;}
+    for(const[t,l]of Object.entries(MAP)){const v=get(t);if(v)meta[l]=v;}
     const cd=meta['Data de Criação'],md=meta['Data de Modificação'];
     if(cd&&md){
       const cdO=new Date(cd),mdO=new Date(md);
       if(!isNaN(cdO)&&!isNaN(mdO)){
         meta['Data de Criação']=cdO.toLocaleString('pt-BR');meta['Data de Modificação']=mdO.toLocaleString('pt-BR');
-        if(mdO<cdO)flags.push('rf-datas-incompat');
-        if(cdO.getTime()===mdO.getTime())flags.push('rf-datas-iguais');
+        if(mdO<cdO)flags.push('rf-datas-incompat');if(cdO.getTime()===mdO.getTime())flags.push('rf-datas-iguais');
       }
     }
     const rev=meta['Número de Revisões'];if(rev==='0'||rev==='1')flags.push('rf-revisoes-zero');
   }
   const appFile=zip.file('docProps/app.xml');
   if(appFile){
-    const xml=await appFile.async('string');
-    const doc=new DOMParser().parseFromString(xml,'application/xml');
+    const xml=await appFile.async('string');const doc=new DOMParser().parseFromString(xml,'application/xml');
     const get=tag=>{const el=doc.getElementsByTagNameNS('*',tag)[0];return el?el.textContent.trim():null;};
     const app=get('Application'),co=get('Company'),pages=get('Pages')||get('Slides')||get('Sheets'),words=get('Words');
     if(app)meta['Aplicativo']=app;if(co)meta['Empresa']=co;if(pages)meta['Páginas/Planilhas']=pages;if(words)meta['Palavras']=words;
@@ -1110,58 +1016,33 @@ async function parseDOCX(buffer,file){
   return{meta,flags};
 }
 
-// ═══════════════════════════════════════════
-// PNG PARSER
-// ═══════════════════════════════════════════
+// ═══════════════════════════════════
+// PNG
+// ═══════════════════════════════════
 function parsePNG(buffer,file){
   const view=new DataView(buffer),bytes=new Uint8Array(buffer),meta={},flags=[];
   const sig=[137,80,78,71,13,10,26,10];
   for(let i=0;i<8;i++)if(bytes[i]!==sig[i])return{meta:{Erro:'Não é um PNG válido'},flags};
   let off=8;
   while(off+12<=view.byteLength){
-    const len=view.getUint32(off);
-    const type=String.fromCharCode(...bytes.slice(off+4,off+8));
-    const ds=off+8;
-    if(type==='IHDR'&&len>=13){
-      meta['Largura']=view.getUint32(ds)+' px';meta['Altura']=view.getUint32(ds+4)+' px';
-      meta['Bit Depth']=bytes[ds+8];
-      meta['Color Type']={0:'Grayscale',2:'Truecolor (RGB)',3:'Indexed',4:'Grayscale+Alpha',6:'Truecolor+Alpha'}[bytes[ds+9]]||bytes[ds+9];
-      meta['Interlace']=bytes[ds+12]?'Sim (Adam7)':'Não';
-    }
-    if(type==='tEXt'){
-      let nul=ds;while(nul<ds+len&&bytes[nul]!==0)nul++;
-      const k=dc(bytes,ds,nul-ds),v=dc(bytes,nul+1,len-(nul-ds)-1);
-      meta['tEXt:'+k]=v;
-      if(k.toLowerCase().includes('software')&&(v.toLowerCase().includes('photoshop')||v.toLowerCase().includes('gimp')))flags.push('rf-software-edicao');
-    }
-    if(type==='iTXt'){
-      let pos=ds,kwEnd=ds;while(kwEnd<ds+len&&bytes[kwEnd]!==0)kwEnd++;
-      const k=dc(bytes,ds,kwEnd-ds);
-      pos=kwEnd+3;while(pos<ds+len&&bytes[pos]!==0)pos++;pos++;while(pos<ds+len&&bytes[pos]!==0)pos++;pos++;
-      const v=dc(bytes,pos,ds+len-pos);if(v.trim())meta['iTXt:'+k]=v.substring(0,200);
-    }
-    if(type==='pHYs'&&len>=9){
-      const ppuX=view.getUint32(ds),ppuY=view.getUint32(ds+4),unit=bytes[ds+8];
-      if(unit===1){meta['Resolução X']=Math.round(ppuX/39.3701)+' DPI';meta['Resolução Y']=Math.round(ppuY/39.3701)+' DPI';}
-    }
-    if(type==='tIME'&&len>=7){
-      const yr=view.getUint16(ds),mo=bytes[ds+2],dy=bytes[ds+3],hh=bytes[ds+4],mm=bytes[ds+5],ss=bytes[ds+6];
-      meta['tIME (Última Modificação)']=`${String(dy).padStart(2,'0')}/${String(mo).padStart(2,'0')}/${yr} ${String(hh).padStart(2,'0')}:${String(mm).padStart(2,'0')}:${String(ss).padStart(2,'0')}`;
-    }
-    if(type==='IEND')break;
-    off+=12+len;
+    const len=view.getUint32(off);const type=String.fromCharCode(...bytes.slice(off+4,off+8));const ds=off+8;
+    if(type==='IHDR'&&len>=13){meta['Largura']=view.getUint32(ds)+' px';meta['Altura']=view.getUint32(ds+4)+' px';meta['Bit Depth']=bytes[ds+8];meta['Color Type']={0:'Grayscale',2:'Truecolor (RGB)',3:'Indexed',4:'Grayscale+Alpha',6:'Truecolor+Alpha'}[bytes[ds+9]]||bytes[ds+9];meta['Interlace']=bytes[ds+12]?'Sim (Adam7)':'Não';}
+    if(type==='tEXt'){let nul=ds;while(nul<ds+len&&bytes[nul]!==0)nul++;const k=dc(bytes,ds,nul-ds),v=dc(bytes,nul+1,len-(nul-ds)-1);meta['tEXt:'+k]=v;if(k.toLowerCase().includes('software')&&(v.toLowerCase().includes('photoshop')||v.toLowerCase().includes('gimp')))flags.push('rf-software-edicao');}
+    if(type==='iTXt'){let pos=ds,kwEnd=ds;while(kwEnd<ds+len&&bytes[kwEnd]!==0)kwEnd++;const k=dc(bytes,ds,kwEnd-ds);pos=kwEnd+3;while(pos<ds+len&&bytes[pos]!==0)pos++;pos++;while(pos<ds+len&&bytes[pos]!==0)pos++;pos++;const v=dc(bytes,pos,ds+len-pos);if(v.trim())meta['iTXt:'+k]=v.substring(0,200);}
+    if(type==='pHYs'&&len>=9){const ppuX=view.getUint32(ds),ppuY=view.getUint32(ds+4),unit=bytes[ds+8];if(unit===1){meta['Resolução X']=Math.round(ppuX/39.3701)+' DPI';meta['Resolução Y']=Math.round(ppuY/39.3701)+' DPI';}}
+    if(type==='tIME'&&len>=7){const yr=view.getUint16(ds),mo=bytes[ds+2],dy=bytes[ds+3],hh=bytes[ds+4],mm=bytes[ds+5],ss=bytes[ds+6];meta['tIME (Última Modificação)']=`${String(dy).padStart(2,'0')}/${String(mo).padStart(2,'0')}/${yr} ${String(hh).padStart(2,'0')}:${String(mm).padStart(2,'0')}:${String(ss).padStart(2,'0')}`;}
+    if(type==='IEND')break;off+=12+len;
   }
   scheduleImageHash(buffer,file,'png');
   return{meta,flags};
 }
 const dc=(bytes,start,len)=>{let s='';for(let i=0;i<len;i++)s+=String.fromCharCode(bytes[start+i]);return s;};
 
-// ═══════════════════════════════════════════
+// ═══════════════════════════════════
 // pHASH
-// ═══════════════════════════════════════════
+// ═══════════════════════════════════
 function scheduleImageHash(buffer,file,ext){
-  const blob=new Blob([buffer],{type:ext==='png'?'image/png':'image/jpeg'});
-  const url=URL.createObjectURL(blob);
+  const url=URL.createObjectURL(new Blob([buffer],{type:ext==='png'?'image/png':'image/jpeg'}));
   const img=new Image();
   img.onload=()=>{
     document.getElementById('hash-empty').style.display='none';
@@ -1176,52 +1057,119 @@ function scheduleImageHash(buffer,file,ext){
 }
 function computePHash(img){
   const canvas=document.getElementById('phash-canvas'),ctx=canvas.getContext('2d');
-  ctx.drawImage(img,0,0,32,32);
-  const d=ctx.getImageData(0,0,32,32).data;
-  const gray=new Float64Array(1024);
-  for(let i=0;i<1024;i++){const b=i*4;gray[i]=.299*d[b]+.587*d[b+1]+.114*d[b+2];}
-  const dct=dct2D(gray,32);
-  const vals=[];
+  ctx.drawImage(img,0,0,32,32);const d=ctx.getImageData(0,0,32,32).data;
+  const gray=new Float64Array(1024);for(let i=0;i<1024;i++){const b=i*4;gray[i]=.299*d[b]+.587*d[b+1]+.114*d[b+2];}
+  const dct=dct2D(gray,32);const vals=[];
   for(let y=0;y<8;y++)for(let x=0;x<8;x++){if(!x&&!y)continue;vals.push(dct[y*32+x]);}
   const mean=vals.reduce((a,b)=>a+b,0)/vals.length;
   const bits=vals.map(v=>v>=mean?1:0);bits.push(dct[0]>=0?1:0);
-  let hex='';
-  for(let i=0;i<8;i++){let byte=0;for(let b=0;b<8;b++)byte=(byte<<1)|bits[i*8+b];hex+=byte.toString(16).padStart(2,'0');}
+  let hex='';for(let i=0;i<8;i++){let byte=0;for(let b=0;b<8;b++)byte=(byte<<1)|bits[i*8+b];hex+=byte.toString(16).padStart(2,'0');}
   return hex;
 }
-function dct2D(sig,n){
-  const temp=new Float64Array(n*n),res=new Float64Array(n*n);
-  for(let y=0;y<n;y++)dct1D(sig,temp,y*n,y*n,n);
-  for(let x=0;x<n;x++){const row=new Float64Array(n);for(let y=0;y<n;y++)row[y]=temp[y*n+x];const out=new Float64Array(n);dct1DArr(row,out,n);for(let y=0;y<n;y++)res[y*n+x]=out[y];}
-  return res;
-}
+function dct2D(sig,n){const temp=new Float64Array(n*n),res=new Float64Array(n*n);for(let y=0;y<n;y++)dct1D(sig,temp,y*n,y*n,n);for(let x=0;x<n;x++){const row=new Float64Array(n);for(let y=0;y<n;y++)row[y]=temp[y*n+x];const out=new Float64Array(n);dct1DArr(row,out,n);for(let y=0;y<n;y++)res[y*n+x]=out[y];}return res;}
 function dct1D(src,dst,sO,dO,n){for(let k=0;k<n;k++){let s=0;for(let i=0;i<n;i++)s+=src[sO+i]*Math.cos(Math.PI/n*(i+.5)*k);dst[dO+k]=s*(k===0?Math.sqrt(1/n):Math.sqrt(2/n));}}
 function dct1DArr(src,dst,n){for(let k=0;k<n;k++){let s=0;for(let i=0;i<n;i++)s+=src[i]*Math.cos(Math.PI/n*(i+.5)*k);dst[k]=s*(k===0?Math.sqrt(1/n):Math.sqrt(2/n));}}
 function hammingDistance(h1,h2){let d=0;for(let i=0;i<h1.length;i+=2){let x=parseInt(h1.substr(i,2),16)^parseInt(h2.substr(i,2),16);while(x){d+=x&1;x>>=1;}}return d;}
-function compareHash(){
-  const ref=document.getElementById('ref-hash-input').value.trim().toLowerCase();
-  const area=document.getElementById('cmp-result-area');
-  if(!currentHash){area.innerHTML='<div class="cmp-result different">Nenhum hash calculado. Carregue uma imagem primeiro.</div>';return;}
-  if(!/^[0-9a-f]{16}$/.test(ref)){area.innerHTML='<div class="cmp-result different">Hash inválido. Informe 16 caracteres hexadecimais.</div>';return;}
-  const dist=hammingDistance(currentHash,ref);
-  let cls,label;
-  if(dist===0){cls='identical';label=`🟢 Idênticas (distância: ${dist})`;}
-  else if(dist<=10){cls='similar';label=`🟡 Muito similares (distância: ${dist})`;}
-  else if(dist<=20){cls='similar';label=`🟠 Alterações moderadas (distância: ${dist})`;}
-  else{cls='different';label=`🔴 Imagens distintas (distância: ${dist})`;}
-  area.innerHTML=`<div class="cmp-result ${cls}">${label}</div>`;
-}
-function copyHash(){
-  if(!currentHash)return;
-  navigator.clipboard.writeText(currentHash).then(()=>{
-    const btn=document.querySelector('#hash-result .btn');const orig=btn.textContent;
-    btn.textContent='✓ Copiado';setTimeout(()=>{btn.textContent=orig;},1500);
-  });
+function compareHash(){const ref=document.getElementById('ref-hash-input').value.trim().toLowerCase();const area=document.getElementById('cmp-result-area');if(!currentHash){area.innerHTML='<div class="cmp-result different">Nenhum hash calculado.</div>';return;}if(!/^[0-9a-f]{16}$/.test(ref)){area.innerHTML='<div class="cmp-result different">Hash inválido.</div>';return;}const dist=hammingDistance(currentHash,ref);let cls,label;if(dist===0){cls='identical';label=`🟢 Idênticas (${dist} bits)`;}else if(dist<=10){cls='similar';label=`🟡 Muito similares (${dist} bits)`;}else if(dist<=20){cls='similar';label=`🟠 Alterações moderadas (${dist} bits)`;}else{cls='different';label=`🔴 Imagens distintas (${dist} bits)`;}area.innerHTML=`<div class="cmp-result ${cls}">${label}</div>`;}
+function copyHash(){if(!currentHash)return;navigator.clipboard.writeText(currentHash).then(()=>{const btn=document.querySelector('#hash-result .btn');const orig=btn.textContent;btn.textContent='✓ Copiado';setTimeout(()=>{btn.textContent=orig;},1500);});}
+
+// ═══════════════════════════════════
+// EXPORT
+// ═══════════════════════════════════
+function exportReport(){
+  if(!currentAnalysis)return;
+  const{meta,flags,fileInfo}=currentAnalysis;
+  const perito=document.getElementById('perito-nome').value.trim()||'(não informado)';
+  const reg=document.getElementById('perito-reg').value.trim()||'(não informado)';
+  const caso=document.getElementById('caso-num').value.trim()||'—';
+  const obs=document.getElementById('obs-text').value.trim();
+  const score=calcFraudScore(flags);
+
+  const metaRows=Object.entries(meta).filter(([,v])=>v!=null&&v!==undefined&&v!=='')
+    .map(([k,v])=>`<tr><td style="padding:5px 10px;border:1px solid #ccc;font-weight:bold;background:#f5f5f5;width:200px">${escHtml(k)}</td><td style="padding:5px 10px;border:1px solid #ccc;font-family:monospace">${escHtml(String(v))}</td></tr>`).join('');
+
+  const exames=buildExames(meta,flags,fileInfo.ext);
+  const examesRows=exames.map(e=>`<tr><td style="padding:5px 10px;border:1px solid #ccc">${e.icon} ${e.name}</td><td style="padding:5px 10px;border:1px solid #ccc;font-weight:bold;color:${e.status==='ok'?'#155724':e.status==='fail'?'#c00':'#7a5200'}">${statusLabel(e.status)}</td><td style="padding:5px 10px;border:1px solid #ccc">${escHtml(e.result)}</td></tr>`).join('');
+
+  const flagsHtml=flags.length?flags.map(f=>`<div style="margin-bottom:8px;border-left:4px solid ${flagSeverity(f)==='high'?'#c00':flagSeverity(f)==='medium'?'#7a5200':'#004080'};padding:6px 10px;background:#fafafa"><strong>${f}</strong><br><span style="font-size:12px;color:#444">${FLAG_DESCS[f]||''}</span></div>`).join(''):'<p><em>Nenhum indicador de risco detectado.</em></p>';
+
+  const sigsHtml=currentSigs.length?currentSigs.map((sig,i)=>{
+    const c=sig.certInfo;const signer=c.subject.CN||c.subject.O||sig.pdfName||'desconhecido';
+    const intTxt=sig.integrity.hashMismatch?'⚠ HASH NÃO CONFERE — ADULTERADO':sig.integrity.modifiedAfterSig?'⚠ CONTEÚDO APÓS ASSINATURA':sig.integrity.hashVerified===true?'✓ Íntegra':'não verificada';
+    return`<tr><td style="padding:6px;border:1px solid #ccc;font-weight:bold">${i+1}</td><td style="padding:6px;border:1px solid #ccc">${escHtml(signer)}</td><td style="padding:6px;border:1px solid #ccc">${escHtml(c.subject.O||'—')}</td><td style="padding:6px;border:1px solid #ccc">${sig.sigDate||c.signingTime?(sig.sigDate||c.signingTime).toLocaleString('pt-BR'):'—'}</td><td style="padding:6px;border:1px solid #ccc">${escHtml(c.algorithm||'—')}</td><td style="padding:6px;border:1px solid #ccc;color:${sig.integrity.hashMismatch||sig.integrity.modifiedAfterSig?'#c00':'#155724'}">${intTxt}</td></tr>`;
+  }).join(''):'';
+
+  const scoreColor=score>=60?'#c00':score>=30?'#7a5200':'#155724';
+  const scoreBg=score>=60?'#ffe0e0':score>=30?'#fff3cd':'#d4edda';
+
+  const html=`<!DOCTYPE html><html lang="pt-BR"><head><meta charset="UTF-8"><title>Relatório PerDoc — ${escHtml(fileInfo.name)}</title>
+<style>body{font-family:Arial,sans-serif;font-size:13px;color:#1a1a1a;max-width:920px;margin:0 auto;padding:30px 40px;}@media print{body{padding:10px 20px;}}h1{font-size:20px;border-bottom:3px solid #1a1a1a;padding-bottom:6px;margin-bottom:4px;}h2{font-size:13px;text-transform:uppercase;letter-spacing:.6px;color:#555;margin:22px 0 8px;}table{width:100%;border-collapse:collapse;}.info-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px 24px;}.info-item{border-bottom:1px solid #e0e0e0;padding:5px 0;}.lbl{font-size:11px;color:#777;text-transform:uppercase;}.val{font-weight:bold;font-size:13px;}.sha{font-family:monospace;font-size:11px;background:#f0f0f0;padding:8px 12px;border-radius:4px;word-break:break-all;margin:4px 0;}footer{margin-top:40px;border-top:1px solid #ccc;padding-top:12px;font-size:11px;color:#777;}</style></head><body>
+<h1>PerDoc — Relatório de Evidências Documentoscópicas</h1>
+<p style="font-size:12px;color:#777;margin-bottom:20px">Gerado por PerDoc v1.3</p>
+<h2>1. Identificação do Caso</h2>
+<div class="info-grid">
+  <div class="info-item"><div class="lbl">Número do Caso</div><div class="val">${escHtml(caso)}</div></div>
+  <div class="info-item"><div class="lbl">Data/Hora da Análise</div><div class="val">${fileInfo.analysisTime}</div></div>
+  <div class="info-item"><div class="lbl">Perito / Analista</div><div class="val">${escHtml(perito)}</div></div>
+  <div class="info-item"><div class="lbl">Matrícula / Registro</div><div class="val">${escHtml(reg)}</div></div>
+</div>
+<h2>2. Identificação do Documento</h2>
+<div class="info-grid">
+  <div class="info-item"><div class="lbl">Nome</div><div class="val">${escHtml(fileInfo.name)}</div></div>
+  <div class="info-item"><div class="lbl">Tipo</div><div class="val">${fileInfo.ext.toUpperCase()}</div></div>
+  <div class="info-item"><div class="lbl">Tamanho</div><div class="val">${formatBytes(fileInfo.size)}</div></div>
+  <div class="info-item"><div class="lbl">Última Modificação (SO)</div><div class="val">${fileInfo.lastModified.toLocaleString('pt-BR')}</div></div>
+</div>
+<div style="margin-top:10px"><div class="lbl">SHA-256 (cadeia de custódia)</div><div class="sha">${fileInfo.sha256}</div></div>
+<h2>3. Exames Realizados</h2>
+<table><tr style="background:#f5f5f5"><th style="padding:6px 10px;border:1px solid #ccc;text-align:left">Exame</th><th style="padding:6px 10px;border:1px solid #ccc;text-align:left">Resultado</th><th style="padding:6px 10px;border:1px solid #ccc;text-align:left">Detalhe</th></tr>${examesRows}</table>
+<h2>4. Metadados Extraídos</h2>
+<table>${metaRows||'<tr><td colspan="2" style="padding:8px;color:#777">Nenhum metadado encontrado.</td></tr>'}</table>
+<h2>5. FraudScore</h2>
+<div style="display:flex;align-items:center;gap:16px;margin-bottom:10px">
+  <div style="font-size:42px;font-weight:bold;color:${scoreColor}">${score}<span style="font-size:18px">/100</span></div>
+  <div style="flex:1"><div style="background:#e0e0e0;border-radius:5px;height:12px;overflow:hidden"><div style="width:${Math.min(score,100)}%;height:100%;background:${scoreColor};border-radius:5px"></div></div>
+  <div style="margin-top:6px;padding:6px 12px;background:${scoreBg};border-radius:4px;font-weight:bold;color:${scoreColor};font-size:13px">${score>=60?'⚠ Alto risco — múltiplos indicadores de adulteração':score>=30?'⚡ Risco moderado — verificação adicional recomendada':'✓ Baixo risco — nenhum indicador significativo detectado'}</div></div>
+</div>
+<h2>6. Indicadores de Risco (Red Flags)</h2>${flagsHtml}
+${sigsHtml?`<h2>7. Assinaturas Digitais</h2><table style="font-size:12px"><tr style="background:#f5f5f5"><th style="padding:6px;border:1px solid #ccc">Nº</th><th style="padding:6px;border:1px solid #ccc">Signatário</th><th style="padding:6px;border:1px solid #ccc">Organização</th><th style="padding:6px;border:1px solid #ccc">Data/Hora</th><th style="padding:6px;border:1px solid #ccc">Algoritmo</th><th style="padding:6px;border:1px solid #ccc">Integridade</th></tr>${sigsHtml}</table>`:''}
+${obs?`<h2>${sigsHtml?'8':'7'}. Observações do Perito</h2><p style="background:#f9f9f9;border-left:4px solid #333;padding:10px 14px;font-size:13px;line-height:1.6">${escHtml(obs).replace(/\n/g,'<br>')}</p>`:''}
+<footer><p><strong>PerDoc v1.3</strong> — Análise documentoscópica digital. Gerado em ${new Date().toLocaleString('pt-BR')}.</p>
+<p style="margin-top:8px;font-style:italic">As conclusões deste relatório devem ser interpretadas por perito habilitado no contexto do exame documentoscópico.</p></footer>
+</body></html>`;
+
+  const blob=new Blob([html],{type:'text/html;charset=utf-8'});
+  const win=window.open(URL.createObjectURL(blob),'_blank');
+  if(win)setTimeout(()=>win.print(),800);
 }
 
-// ═══════════════════════════════════════════
-// UTILS
-// ═══════════════════════════════════════════
+function exportTxt(){
+  if(!currentAnalysis)return;
+  const{meta,flags,fileInfo}=currentAnalysis;
+  const perito=document.getElementById('perito-nome').value.trim()||'(não informado)';
+  const reg=document.getElementById('perito-reg').value.trim()||'(não informado)';
+  const caso=document.getElementById('caso-num').value.trim()||'—';
+  const obs=document.getElementById('obs-text').value.trim();
+  const score=calcFraudScore(flags);
+  const sep='─'.repeat(60);
+  let txt=`PERDOC v1.3 — RELATÓRIO DE EVIDÊNCIAS DOCUMENTOSCÓPICAS\n${sep}\n`;
+  txt+=`Data/Hora            : ${fileInfo.analysisTime}\nPerito               : ${perito}\nMatrícula            : ${reg}\nNº do Caso           : ${caso}\n\n`;
+  txt+=`DOCUMENTO\n${sep}\nNome    : ${fileInfo.name}\nTipo    : ${fileInfo.ext.toUpperCase()}\nTamanho : ${formatBytes(fileInfo.size)}\nModif SO: ${fileInfo.lastModified.toLocaleString('pt-BR')}\nSHA-256 : ${fileInfo.sha256}\n\n`;
+  const exames=buildExames(meta,flags,fileInfo.ext);
+  txt+=`EXAMES REALIZADOS\n${sep}\n`;
+  exames.forEach(e=>{txt+=`${e.icon} ${e.name.padEnd(30)} [${statusLabel(e.status)}] ${e.result}\n`;});
+  txt+=`\nMETADADOS\n${sep}\n`;
+  Object.entries(meta).filter(([,v])=>v!=null&&v!=='').forEach(([k,v])=>{txt+=`${k.padEnd(30)}: ${v}\n`;});
+  txt+=`\nFRAUDSCORE: ${score}/100\n\nRED FLAGS\n${sep}\n`;
+  if(flags.length)flags.forEach(f=>{txt+=`⚑ ${f}\n  ${FLAG_DESCS[f]||''}\n\n`;});
+  else txt+='Nenhum.\n';
+  if(currentSigs.length){txt+=`\nASSINATURAS DIGITAIS\n${sep}\n`;currentSigs.forEach((sig,i)=>{const c=sig.certInfo;txt+=`\nAssinatura ${i+1}\n  Signatário: ${c.subject.CN||c.subject.O||sig.pdfName||'desconhecido'}\n`;if(c.subject.O)txt+=`  Organização: ${c.subject.O}\n`;const t=sig.sigDate||c.signingTime;if(t)txt+=`  Data/Hora: ${t.toLocaleString('pt-BR')}\n`;txt+=`  Algoritmo: ${c.algorithm||'—'}\n  Emitente: ${(c.issuer&&(c.issuer.CN||c.issuer.O))||'desconhecido'}\n  Integridade: ${sig.integrity.hashMismatch?'FALHOU':sig.integrity.modifiedAfterSig?'MODIFICADO PÓS-ASSINATURA':sig.integrity.hashVerified===true?'OK':'não verificada'}\n`;if(sig.flags.length)txt+=`  Flags: ${sig.flags.join(', ')}\n`;});}
+  if(currentHash)txt+=`\npHASH DCT: ${currentHash}\n`;
+  if(obs)txt+=`\nOBSERVAÇÕES\n${sep}\n${obs}\n`;
+  txt+=`\n${sep}\nGerado por PerDoc v1.3 em ${new Date().toLocaleString('pt-BR')}\n`;
+  const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([txt],{type:'text/plain;charset=utf-8'}));a.download='evidencias_'+fileInfo.name.replace(/\.[^.]+$/,'')+'_'+Date.now()+'.txt';a.click();
+}
+
 const formatBytes=b=>b<1024?b+' B':b<1048576?(b/1024).toFixed(1)+' KB':(b/1048576).toFixed(2)+' MB';
 const escHtml=s=>String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
 </script>
