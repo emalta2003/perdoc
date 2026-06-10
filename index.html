@@ -366,7 +366,7 @@ hr.divider{border:none;border-top:1px solid var(--border);margin:14px 0;}
       <div class="card" id="noise-card" style="display:none">
         <div class="card-title">Análise de Ruído Residual</div>
         <div style="font-size:12px;color:var(--muted);margin-bottom:10px">
-          Subtrai a versão suavizada (blur 3 px) da imagem original e amplifica o resíduo (×8). Inconsistências no padrão de ruído indicam regiões manipuladas ou com origens distintas.
+          Subtrai a versão suavizada (blur 3 px) da imagem original e amplifica o resíduo (×8). Regiões com ruído inconsistente — bordas serrilhadas, halos, pixelização irregular — indicam elementos inseridos digitalmente ou regiões de origens distintas.
         </div>
         <div class="ela-wrap">
           <div class="ela-col">
@@ -374,10 +374,31 @@ hr.divider{border:none;border-top:1px solid var(--border);margin:14px 0;}
             <img id="noise-original" class="ela-img" alt="Original">
           </div>
           <div class="ela-col">
-            <div class="ela-label">Ruído residual (amplificado)</div>
+            <div class="ela-label">Ruído residual (amplificado ×8)</div>
             <canvas id="noise-canvas" class="ela-img"></canvas>
           </div>
         </div>
+        <div id="noise-stats" style="margin-top:12px;font-size:12px;line-height:1.8"></div>
+        <div style="margin-top:10px">
+          <div class="ela-label" style="margin-bottom:4px">Mapa de inconsistências (grade 16×16)</div>
+          <canvas id="noise-map" style="width:100%;max-height:160px;border-radius:6px;border:1px solid var(--border);image-rendering:pixelated"></canvas>
+        </div>
+        <div id="noise-interpretation" style="margin-top:10px;font-size:12px;padding:10px 12px;border-radius:6px;background:var(--bg);border:1px solid var(--border)"></div>
+      </div>
+
+      <!-- Entropia Binária -->
+      <div class="card" id="entropy-card">
+        <div class="card-title">Entropia Binária do Arquivo</div>
+        <div style="font-size:12px;color:var(--muted);margin-bottom:10px">
+          Mede a distribuição de bytes no arquivo (Shannon entropy, 0–8 bits/byte). Documentos nativos têm padrões regulares; documentos reconstruídos ou montados apresentam distribuição anômala. Blocos com entropia uniforme indicam regiões comprimidas ou cifradas.
+        </div>
+        <div id="entropy-stats" style="font-size:13px;margin-bottom:10px"></div>
+        <canvas id="entropy-chart" height="60" style="width:100%;border-radius:4px;border:1px solid var(--border)"></canvas>
+        <div id="entropy-map-wrap" style="margin-top:10px">
+          <div class="ela-label" style="margin-bottom:4px">Mapa de entropia por bloco (256 blocos)</div>
+          <canvas id="entropy-map" height="32" style="width:100%;border-radius:4px;image-rendering:pixelated;border:1px solid var(--border)"></canvas>
+        </div>
+        <div id="entropy-interpretation" style="margin-top:10px;font-size:12px;padding:10px 12px;border-radius:6px;background:var(--bg);border:1px solid var(--border)"></div>
       </div>
 
     </div>
@@ -1460,6 +1481,8 @@ function initForense(buffer,ext,imgEl){
     computeELA(imgEl);
     computeNoiseResidual(imgEl);
   }
+  // Entropy analysis for all file types
+  setTimeout(()=>initEntropy(buffer),50);
 }
 
 function refreshHex(){renderHexDump();}
@@ -1605,39 +1628,165 @@ async function computeELA(imgSrc){
 
 // Noise Residual Analysis
 async function computeNoiseResidual(imgSrc){
-  const AMPLIFY=8;
+  const AMPLIFY=8,GRID=16;
   const img=new Image();
   img.crossOrigin='anonymous';
   await new Promise(res=>{img.onload=res;img.onerror=res;img.src=typeof imgSrc==='string'?imgSrc:imgSrc.src;});
   const W=img.naturalWidth,H=img.naturalHeight;
   if(!W||!H)return;
 
-  // draw original
   const c1=document.createElement('canvas');c1.width=W;c1.height=H;
   c1.getContext('2d').drawImage(img,0,0);
   const orig=c1.getContext('2d').getImageData(0,0,W,H);
 
-  // blurred version via CSS filter on offscreen canvas
   const c2=document.createElement('canvas');c2.width=W;c2.height=H;
   const ctx2=c2.getContext('2d');
-  ctx2.filter='blur(3px)';
-  ctx2.drawImage(img,0,0);
-  ctx2.filter='none';
+  ctx2.filter='blur(3px)';ctx2.drawImage(img,0,0);ctx2.filter='none';
   const blurred=ctx2.getImageData(0,0,W,H);
 
-  // residual = original - blurred, amplified
   const out=ctx2.createImageData(W,H);
+  const residuals=new Float32Array(W*H);
   for(let i=0;i<orig.data.length;i+=4){
+    const pi=i/4;
+    let rsum=0;
     for(let ch=0;ch<3;ch++){
       const diff=orig.data[i+ch]-blurred.data[i+ch];
       out.data[i+ch]=Math.min(255,Math.max(0,128+diff*AMPLIFY));
+      rsum+=Math.abs(diff);
     }
+    residuals[pi]=rsum/3;
     out.data[i+3]=255;
   }
   const nc=document.getElementById('noise-canvas');
   nc.width=W;nc.height=H;
   nc.getContext('2d').putImageData(out,0,0);
+
+  // Stats
+  let sum=0,sum2=0,maxR=0;
+  for(let i=0;i<residuals.length;i++){sum+=residuals[i];sum2+=residuals[i]*residuals[i];if(residuals[i]>maxR)maxR=residuals[i];}
+  const mean=sum/residuals.length;
+  const std=Math.sqrt(sum2/residuals.length-mean*mean);
+  const threshold=mean+2*std;
+
+  // Grid map — each cell = avg residual
+  const cellW=W/GRID,cellH=H/GRID;
+  const gridVals=new Float32Array(GRID*GRID);
+  for(let gy=0;gy<GRID;gy++){
+    for(let gx=0;gx<GRID;gx++){
+      let gs=0,gc=0;
+      const x0=Math.floor(gx*cellW),y0=Math.floor(gy*cellH);
+      const x1=Math.floor((gx+1)*cellW),y1=Math.floor((gy+1)*cellH);
+      for(let y=y0;y<y1;y++)for(let x=x0;x<x1;x++){gs+=residuals[y*W+x];gc++;}
+      gridVals[gy*GRID+gx]=gc?gs/gc:0;
+    }
+  }
+  const gridMax=Math.max(...gridVals)||1;
+  const anomalyCells=gridVals.filter(v=>v>threshold).length;
+
+  // Draw grid map
+  const nm=document.getElementById('noise-map');
+  nm.width=GRID;nm.height=GRID;
+  const nmCtx=nm.getContext('2d');
+  const nmId=nmCtx.createImageData(GRID,GRID);
+  for(let i=0;i<GRID*GRID;i++){
+    const t=gridVals[i]/gridMax;
+    const isAnom=gridVals[i]>threshold;
+    nmId.data[i*4]  =isAnom?255:Math.round(t*60);
+    nmId.data[i*4+1]=isAnom?Math.round((1-t)*80):Math.round(t*120);
+    nmId.data[i*4+2]=isAnom?0:Math.round(t*180);
+    nmId.data[i*4+3]=255;
+  }
+  nmCtx.putImageData(nmId,0,0);
+
+  // Stats text
+  document.getElementById('noise-stats').innerHTML=
+    `<b>Média do resíduo:</b> ${mean.toFixed(2)} &nbsp;|&nbsp; <b>Desvio padrão:</b> ${std.toFixed(2)} &nbsp;|&nbsp; <b>Máximo:</b> ${maxR.toFixed(1)}<br>`+
+    `<b>Células anômalas (>${threshold.toFixed(1)}):</b> ${anomalyCells} de ${GRID*GRID} (${(anomalyCells*100/(GRID*GRID)).toFixed(1)}%)`;
+
+  // Interpretation
+  let interp='',color='var(--text)';
+  if(anomalyCells===0){interp='✅ Padrão de ruído uniforme em toda a imagem. Nenhuma região com inconsistência detectável.';color='#3fb950';}
+  else if(anomalyCells<=3){interp=`⚡ ${anomalyCells} região(ões) com ruído levemente elevado. Pode indicar compressão diferencial ou leve edição. Verificar visualmente as áreas destacadas em vermelho no mapa.`;color='#f0b429';}
+  else{interp=`⚠ ${anomalyCells} célula(s) com ruído anômalo (${(anomalyCells*100/(GRID*GRID)).toFixed(0)}% da imagem). Forte indício de elementos inseridos digitalmente, montagem ou origens distintas. Bordas serrilhadas, halo e pixelização irregular são típicos de assinaturas ou textos colados como imagem.`;color='#f85149';}
+  document.getElementById('noise-interpretation').innerHTML=`<span style="color:${color}">${interp}</span>`;
 }
+
+// Binary Entropy Analysis (all file types)
+function computeEntropy(buffer){
+  const bytes=new Uint8Array(buffer);
+  const BLOCKS=256,blockSize=Math.floor(bytes.length/BLOCKS)||1;
+
+  // Global byte frequency
+  const freq=new Float64Array(256);
+  for(let i=0;i<bytes.length;i++)freq[bytes[i]]++;
+  const n=bytes.length;
+  let entropy=0;
+  for(let i=0;i<256;i++){if(freq[i]>0){const p=freq[i]/n;entropy-=p*Math.log2(p);}}
+
+  // Per-block entropy
+  const blockEntropies=new Float32Array(BLOCKS);
+  for(let b=0;b<BLOCKS;b++){
+    const start=b*blockSize,end=Math.min(start+blockSize,bytes.length);
+    const bf=new Float32Array(256);
+    for(let i=start;i<end;i++)bf[bytes[i]]++;
+    const bn=end-start;let be=0;
+    for(let i=0;i<256;i++){if(bf[i]>0){const p=bf[i]/bn;be-=p*Math.log2(p);}}
+    blockEntropies[b]=be;
+  }
+
+  // Draw histogram of byte values
+  const ec=document.getElementById('entropy-chart');
+  const EW=ec.width=ec.offsetWidth||600,EH=60;
+  ec.height=EH;
+  const ectx=ec.getContext('2d');
+  ectx.fillStyle='var(--bg-card,#1c2128)';ectx.fillRect(0,0,EW,EH);
+  const maxFreq=Math.max(...freq)||1;
+  const barW=EW/256;
+  for(let i=0;i<256;i++){
+    const h=(freq[i]/maxFreq)*(EH-4);
+    const t=i/255;
+    ectx.fillStyle=`hsl(${200+t*60},70%,55%)`;
+    ectx.fillRect(i*barW,EH-h,Math.max(1,barW-0.5),h);
+  }
+  // axis label
+  ectx.fillStyle='rgba(139,148,158,.6)';ectx.font='9px monospace';
+  ectx.fillText('0x00',2,EH-2);ectx.fillText('0x7F',EW/2-8,EH-2);ectx.fillText('0xFF',EW-22,EH-2);
+
+  // Draw block entropy map
+  const em=document.getElementById('entropy-map');
+  em.width=BLOCKS;em.height=1;
+  const emCtx=em.getContext('2d');
+  const emId=emCtx.createImageData(BLOCKS,1);
+  for(let i=0;i<BLOCKS;i++){
+    const t=blockEntropies[i]/8;
+    // green=compressed/high entropy, red=low entropy (possible padding/image)
+    emId.data[i*4]  =Math.round((1-t)*200);
+    emId.data[i*4+1]=Math.round(t*180);
+    emId.data[i*4+2]=Math.round(t*60);
+    emId.data[i*4+3]=255;
+  }
+  emCtx.putImageData(emId,0,0);
+
+  // Stats text
+  const minE=Math.min(...blockEntropies),maxE=Math.max(...blockEntropies);
+  const lowBlocks=Array.from(blockEntropies).filter(e=>e<3).length;
+  const highBlocks=Array.from(blockEntropies).filter(e=>e>7.5).length;
+  document.getElementById('entropy-stats').innerHTML=
+    `<b>Entropia global:</b> ${entropy.toFixed(4)} bits/byte &nbsp;|&nbsp; `+
+    `<b>Mín. bloco:</b> ${minE.toFixed(2)} &nbsp;|&nbsp; <b>Máx. bloco:</b> ${maxE.toFixed(2)}<br>`+
+    `<b>Blocos de baixa entropia (&lt;3):</b> ${lowBlocks} &nbsp;|&nbsp; `+
+    `<b>Blocos de alta entropia (&gt;7.5):</b> ${highBlocks}`;
+
+  // Interpretation
+  let interp='',color='var(--text)';
+  if(entropy>7.5){interp='✅ Entropia alta (>7.5) — arquivo fortemente comprimido ou cifrado. Padrão normal para PDF/JPEG com conteúdo real.';}
+  else if(entropy>5){interp='⚡ Entropia moderada (5–7.5) — mistura de texto, imagens e metadados. Verificar blocos de baixa entropia que podem indicar regiões preenchidas artificialmente.';}
+  else{interp='⚠ Entropia baixa (<5) — documento com pouco conteúdo variado. Pode indicar arquivo vazio, preenchido com padrões repetitivos, ou gerado artificialmente.';}
+  if(lowBlocks>10)interp+=` | ${lowBlocks} blocos de baixa entropia — possíveis regiões em branco, padding ou estruturas artificiais inseridas.`;
+  document.getElementById('entropy-interpretation').innerHTML=`<span style="color:${color}">${interp}</span>`;
+}
+
+function initEntropy(buffer){computeEntropy(buffer);}
 </script>
 </body>
 </html>
