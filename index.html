@@ -1,9 +1,9 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="pt-BR">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>PerDoc â€” Análise Documentoscópica</title>
+<title>PerDoc — Análise Documentoscópica</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"
         integrity="sha512-XMVd28F1oH/O71fzwBnV7HucLxVwtxf26XV8P4wPk26EDxuGZ91N8bsOttmnomcCD3CS5ZMRL50H0GgOHvegtg=="
         crossorigin="anonymous" referrerpolicy="no-referrer"></script>
@@ -39,7 +39,7 @@ header{background:var(--surface);border-bottom:1px solid var(--border);padding:1
 .card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:18px;margin-bottom:14px;}
 .card-title{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.7px;color:var(--muted);margin-bottom:14px;}
 
-/* â”€â”€ Painel de Exames â”€â”€ */
+/* ── Painel de Exames ── */
 .exames-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:10px;}
 .exame-card{background:var(--bg);border:1px solid var(--border);border-radius:var(--radius);padding:12px 14px;display:flex;flex-direction:column;gap:6px;}
 .exame-card.ok   {border-left:3px solid var(--accent);}
@@ -56,17 +56,17 @@ header{background:var(--surface);border-bottom:1px solid var(--border);padding:1
 .exame-status.na  {background:var(--border);color:var(--muted);}
 .exame-result{font-size:11px;color:var(--muted);line-height:1.4;word-break:break-word;}
 
-/* â”€â”€ Image preview â”€â”€ */
+/* ── Image preview ── */
 .doc-preview{max-width:100%;max-height:260px;border-radius:var(--radius);border:1px solid var(--border);object-fit:contain;display:block;background:var(--bg);margin-bottom:14px;}
 
-/* â”€â”€ Meta table â”€â”€ */
+/* ── Meta table ── */
 .meta-table{width:100%;border-collapse:collapse;}
 .meta-table tr{border-bottom:1px solid var(--border);}.meta-table tr:last-child{border-bottom:none;}
 .meta-table td{padding:7px 6px;vertical-align:top;}
 .meta-table td:first-child{color:var(--muted);font-size:12px;font-weight:500;white-space:nowrap;width:190px;padding-right:12px;}
 .meta-table td:last-child{word-break:break-all;font-family:'Cascadia Code',monospace;font-size:12px;}
 
-/* â”€â”€ Flags â”€â”€ */
+/* ── Flags ── */
 .flags-list{display:flex;flex-wrap:wrap;gap:8px;}
 .flag-item{border-radius:var(--radius);overflow:hidden;flex:1;min-width:200px;}
 .flag-bar{display:flex;align-items:center;gap:6px;padding:6px 10px;font-size:12px;font-weight:700;}
@@ -78,7 +78,7 @@ header{background:var(--surface);border-bottom:1px solid var(--border);padding:1
 .flag-item.info .flag-bar{background:rgba(31,111,235,.18);color:#79b8ff;border:1px solid rgba(31,111,235,.3);border-bottom:none;}
 .flag-item.info .flag-desc{background:rgba(31,111,235,.06);border:1px solid rgba(31,111,235,.2);border-top:none;color:#7eb8e8;}
 
-/* â”€â”€ Score â”€â”€ */
+/* ── Score ── */
 .score-row{display:flex;align-items:center;gap:16px;}
 .score-num{font-size:42px;font-weight:700;min-width:60px;}
 .score-num.low{color:var(--accent);}.score-num.medium{color:var(--warn);}.score-num.high{color:var(--danger);}
@@ -91,12 +91,12 @@ header{background:var(--surface);border-bottom:1px solid var(--border);padding:1
 .score-verdict.medium{background:rgba(210,153,34,.12);color:#f0b429;}
 .score-verdict.high{background:rgba(218,54,51,.12);color:#ff6b6b;}
 
-/* â”€â”€ File info â”€â”€ */
+/* ── File info ── */
 .file-info{display:flex;flex-wrap:wrap;gap:20px;}
 .fi-label{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;}
 .fi-value{font-size:14px;font-weight:600;}
 
-/* â”€â”€ Assinaturas â”€â”€ */
+/* ── Assinaturas ── */
 .sig-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);margin-bottom:14px;overflow:hidden;}
 .sig-card-header{padding:14px 18px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;border-bottom:1px solid var(--border);}
 .sig-card-body{padding:14px 18px;}
@@ -123,7 +123,7 @@ header{background:var(--surface);border-bottom:1px solid var(--border);padding:1
 .algo-badge.other{background:var(--border);color:var(--muted);}
 .sig-count{display:inline-flex;align-items:center;justify-content:center;background:var(--accent2);color:#fff;border-radius:20px;font-size:12px;font-weight:700;min-width:22px;height:22px;padding:0 6px;margin-left:6px;}
 
-/* â”€â”€ ByteRange diagram â”€â”€ */
+/* ── ByteRange diagram ── */
 .byterange-wrap{margin:12px 0;}
 .byterange-label{font-size:11px;color:var(--muted);text-transform:uppercase;margin-bottom:6px;}
 .byterange-bar{height:24px;background:var(--bg);border:1px solid var(--border);border-radius:4px;overflow:hidden;display:flex;position:relative;}
@@ -131,7 +131,7 @@ header{background:var(--surface);border-bottom:1px solid var(--border);padding:1
 .br-sig{background:rgba(31,111,235,.35);display:flex;align-items:center;justify-content:center;font-size:9px;color:#79b8ff;font-weight:700;}
 .br-extra{background:rgba(218,54,51,.35);display:flex;align-items:center;justify-content:center;font-size:10px;color:#ff6b6b;font-weight:700;}
 
-/* â”€â”€ Evidências â”€â”€ */
+/* ── Evidências ── */
 .evidence-item{border:1px solid var(--border);border-radius:8px;margin-bottom:14px;overflow:hidden;}
 .evidence-header{display:flex;align-items:center;gap:10px;padding:8px 14px;background:rgba(56,139,253,.08);border-bottom:1px solid var(--border);}
 .evidence-num{font-size:11px;font-weight:700;background:var(--accent);color:#0d1117;padding:2px 8px;border-radius:10px;white-space:nowrap;}
@@ -147,7 +147,7 @@ header{background:var(--surface);border-bottom:1px solid var(--border);padding:1
 .evidence-img-label{font-size:11px;color:var(--muted);text-align:center;margin-top:3px;}
 .evidence-significance{padding:8px 14px;font-size:12px;line-height:1.6;border-top:1px solid var(--border);color:var(--muted);}
 .evidence-significance b{color:var(--text);}
-/* â”€â”€ Forense â”€â”€ */
+/* ── Forense ── */
 .forense-empty{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:60px 20px;color:var(--muted);gap:10px;}
 .hex-controls{display:flex;align-items:center;flex-wrap:wrap;gap:6px;margin-bottom:10px;font-size:13px;color:var(--text);}
 .hex-controls input,.hex-controls select{background:var(--bg);border:1px solid var(--border);border-radius:4px;padding:3px 6px;color:var(--text);font-size:12px;}
@@ -162,7 +162,7 @@ header{background:var(--surface);border-bottom:1px solid var(--border);padding:1
 .ela-col{display:flex;flex-direction:column;gap:6px;}
 .ela-label{font-size:12px;font-weight:600;color:var(--muted);}
 .ela-img{width:100%;max-height:280px;object-fit:contain;border-radius:6px;border:1px solid var(--border);background:var(--bg);}
-/* â”€â”€ pHash â”€â”€ */
+/* ── pHash ── */
 .phash-layout{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
 @media(max-width:600px){.phash-layout{grid-template-columns:1fr;}}
 #phash-canvas{display:none;}
@@ -173,7 +173,7 @@ header{background:var(--surface);border-bottom:1px solid var(--border);padding:1
 .cmp-result.similar{background:rgba(210,153,34,.15);color:#f0b429;border:1px solid rgba(210,153,34,.3);}
 .cmp-result.different{background:rgba(218,54,51,.15);color:#ff6b6b;border:1px solid rgba(218,54,51,.3);}
 
-/* â”€â”€ Buttons â”€â”€ */
+/* ── Buttons ── */
 .btn{display:inline-flex;align-items:center;gap:6px;padding:7px 14px;border-radius:6px;border:1px solid var(--border);background:var(--surface);color:var(--text);cursor:pointer;font-size:13px;font-weight:500;transition:background .15s;}
 .btn:hover{background:var(--border);}
 .btn.primary{background:var(--accent2);border-color:transparent;}.btn.primary:hover{background:#388bfd;}
@@ -219,26 +219,26 @@ hr.divider{border:none;border-top:1px solid var(--border);margin:14px 0;}
 
   <div id="dropzone">
     <input type="file" id="file-input" accept=".jpg,.jpeg,.pdf,.docx,.xlsx,.png">
-    <div class="drop-icon">ðŸ“‚</div>
+    <div class="drop-icon">📂</div>
     <div class="drop-title">Arraste o documento aqui ou clique para selecionar</div>
     <div class="drop-sub">JPEG · PDF · DOCX · XLSX · PNG</div>
   </div>
 
   <div id="sha-row">
     <span class="sha-label">SHA-256 (cadeia de custódia)</span>
-    <span id="sha-value">calculandoâ€¦</span>
+    <span id="sha-value">calculando…</span>
   </div>
 
   <div class="tabs">
-    <button class="tab-btn active" data-tab="meta">ðŸ“‹ Metadados</button>
-    <button class="tab-btn" data-tab="sig">ðŸ” Assinaturas<span class="sig-count" id="sig-count" style="display:none">0</span></button>
-    <button class="tab-btn" data-tab="hash">ðŸ”¢ Hash Perceptual</button>
-    <button class="tab-btn" data-tab="forense">ðŸ”¬ Forense</button>
+    <button class="tab-btn active" data-tab="meta">📋 Metadados</button>
+    <button class="tab-btn" data-tab="sig">🔏 Assinaturas<span class="sig-count" id="sig-count" style="display:none">0</span></button>
+    <button class="tab-btn" data-tab="hash">🔢 Hash Perceptual</button>
+    <button class="tab-btn" data-tab="forense">🔬 Forense</button>
   </div>
 
-  <!-- â•â• METADADOS TAB â•â• -->
+  <!-- ══ METADADOS TAB ══ -->
   <div id="tab-meta" class="tab-panel active">
-    <div id="meta-empty" class="empty-state"><div class="es-icon">ðŸ”</div><div>Carregue um documento para iniciar a análise</div></div>
+    <div id="meta-empty" class="empty-state"><div class="es-icon">🔍</div><div>Carregue um documento para iniciar a análise</div></div>
     <div id="meta-results" style="display:none">
 
       <!-- Arquivo -->
@@ -253,7 +253,7 @@ hr.divider{border:none;border-top:1px solid var(--border);margin:14px 0;}
         <img id="doc-img-preview" class="doc-preview" alt="Preview do documento">
       </div>
 
-      <!-- â˜… EXAMES REALIZADOS â˜… -->
+      <!-- ★ EXAMES REALIZADOS ★ -->
       <div class="card">
         <div class="card-title">Exames Realizados</div>
         <div class="exames-grid" id="exames-grid"></div>
@@ -261,7 +261,7 @@ hr.divider{border:none;border-top:1px solid var(--border);margin:14px 0;}
 
       <!-- FraudScore -->
       <div class="card">
-        <div class="card-title">Índice de Risco â€” FraudScore</div>
+        <div class="card-title">Índice de Risco — FraudScore</div>
         <div class="score-row">
           <div class="score-num" id="score-num">0</div>
           <div class="score-bar-wrap">
@@ -280,7 +280,7 @@ hr.divider{border:none;border-top:1px solid var(--border);margin:14px 0;}
 
       <!-- Evidências Documentadas -->
       <div class="card" id="evidences-card" style="display:none">
-        <div class="card-title">ðŸ“Ž Evidências Documentadas</div>
+        <div class="card-title">📎 Evidências Documentadas</div>
         <div style="font-size:12px;color:var(--muted);margin-bottom:12px">Cada achado técnico é registrado como evidência numerada com base documental para o laudo pericial.</div>
         <div id="evidences-list"></div>
       </div>
@@ -294,25 +294,25 @@ hr.divider{border:none;border-top:1px solid var(--border);margin:14px 0;}
       <!-- Observações -->
       <div class="card">
         <div class="card-title">Observações do Perito</div>
-        <textarea class="obs" id="obs-text" placeholder="Anotações para o laudoâ€¦"></textarea>
+        <textarea class="obs" id="obs-text" placeholder="Anotações para o laudo…"></textarea>
       </div>
 
       <div class="action-row">
-        <button class="btn success" onclick="exportReport()">ðŸ“„ Gerar Relatório de Evidências</button>
-        <button class="btn" onclick="exportTxt()">â¬‡ Baixar .txt</button>
+        <button class="btn success" onclick="exportReport()">📄 Gerar Relatório de Evidências</button>
+        <button class="btn" onclick="exportTxt()">⬇ Baixar .txt</button>
       </div>
     </div>
   </div>
 
-  <!-- â•â• ASSINATURAS TAB â•â• -->
+  <!-- ══ ASSINATURAS TAB ══ -->
   <div id="tab-sig" class="tab-panel">
-    <div id="sig-empty" class="empty-state"><div class="es-icon">ðŸ”</div><div>Carregue um PDF para analisar assinaturas digitais</div></div>
+    <div id="sig-empty" class="empty-state"><div class="es-icon">🔏</div><div>Carregue um PDF para analisar assinaturas digitais</div></div>
     <div id="sig-not-pdf" style="display:none" class="no-sig">Assinaturas digitais disponíveis apenas em PDF.</div>
     <div id="sig-none" style="display:none" class="no-sig">Nenhuma assinatura digital encontrada neste PDF.</div>
     <div id="sig-results" style="display:none"></div>
   </div>
 
-  <!-- â•â• HASH TAB â•â• -->
+  <!-- ══ HASH TAB ══ -->
   <div id="tab-hash" class="tab-panel">
     <div class="phash-layout">
       <div class="card">
@@ -322,7 +322,7 @@ hr.divider{border:none;border-top:1px solid var(--border);margin:14px 0;}
           <img id="hash-img-preview" class="img-preview" alt="Preview">
           <div class="hash-display" id="hash-value"></div>
           <div style="margin-top:8px;font-size:12px;color:var(--muted)">64 bits · hexadecimal (big-endian)</div>
-          <button class="btn" style="margin-top:10px" onclick="copyHash()">ðŸ“‹ Copiar hash</button>
+          <button class="btn" style="margin-top:10px" onclick="copyHash()">📋 Copiar hash</button>
         </div>
         <canvas id="phash-canvas" width="32" height="32"></canvas>
       </div>
@@ -335,16 +335,16 @@ hr.divider{border:none;border-top:1px solid var(--border);margin:14px 0;}
         <hr class="divider">
         <div style="font-size:12px;color:var(--muted);line-height:1.8">
           <b style="color:var(--text)">Distância Hamming:</b><br>
-          0 â†’ Idênticas &nbsp;|&nbsp; 1â€“10 â†’ Muito similares<br>
-          11â€“20 â†’ Alterações moderadas &nbsp;|&nbsp; &gt;20 â†’ Distintas
+          0 → Idênticas &nbsp;|&nbsp; 1–10 → Muito similares<br>
+          11–20 → Alterações moderadas &nbsp;|&nbsp; &gt;20 → Distintas
         </div>
       </div>
     </div>
   </div>
 
-  <!-- â•â• FORENSE TAB â•â• -->
+  <!-- ══ FORENSE TAB ══ -->
   <div id="tab-forense" class="tab-panel">
-    <div class="forense-empty" id="forense-empty"><div class="es-icon">ðŸ”¬</div><div>Carregue um documento para análise forense</div></div>
+    <div class="forense-empty" id="forense-empty"><div class="es-icon">🔬</div><div>Carregue um documento para análise forense</div></div>
     <div id="forense-results" style="display:none">
 
       <!-- Hex Viewer -->
@@ -368,7 +368,7 @@ hr.divider{border:none;border-top:1px solid var(--border);margin:14px 0;}
 
       <!-- ELA -->
       <div class="card" id="ela-card" style="display:none">
-        <div class="card-title">ELA â€” Error Level Analysis</div>
+        <div class="card-title">ELA — Error Level Analysis</div>
         <div style="font-size:12px;color:var(--muted);margin-bottom:10px">
           Recomprime a imagem em JPEG qualidade 95 e amplifica as diferenças pixel a pixel (×15). Regiões editadas, coladas ou reprocessadas aparecem com brilho maior que o fundo.
         </div>
@@ -389,7 +389,7 @@ hr.divider{border:none;border-top:1px solid var(--border);margin:14px 0;}
       <div class="card" id="noise-card" style="display:none">
         <div class="card-title">Análise de Ruído Residual</div>
         <div style="font-size:12px;color:var(--muted);margin-bottom:10px">
-          Subtrai a versão suavizada (blur 3 px) da imagem original e amplifica o resíduo (×8). Regiões com ruído inconsistente â€” bordas serrilhadas, halos, pixelização irregular â€” indicam elementos inseridos digitalmente ou regiões de origens distintas.
+          Subtrai a versão suavizada (blur 3 px) da imagem original e amplifica o resíduo (×8). Regiões com ruído inconsistente — bordas serrilhadas, halos, pixelização irregular — indicam elementos inseridos digitalmente ou regiões de origens distintas.
         </div>
         <div class="ela-wrap">
           <div class="ela-col">
@@ -413,7 +413,7 @@ hr.divider{border:none;border-top:1px solid var(--border);margin:14px 0;}
       <div class="card" id="entropy-card">
         <div class="card-title">Entropia Binária do Arquivo</div>
         <div style="font-size:12px;color:var(--muted);margin-bottom:10px">
-          Mede a distribuição de bytes no arquivo (Shannon entropy, 0â€“8 bits/byte). Documentos nativos têm padrões regulares; documentos reconstruídos ou montados apresentam distribuição anômala. Blocos com entropia uniforme indicam regiões comprimidas ou cifradas.
+          Mede a distribuição de bytes no arquivo (Shannon entropy, 0–8 bits/byte). Documentos nativos têm padrões regulares; documentos reconstruídos ou montados apresentam distribuição anômala. Blocos com entropia uniforme indicam regiões comprimidas ou cifradas.
         </div>
         <div id="entropy-stats" style="font-size:13px;margin-bottom:10px"></div>
         <canvas id="entropy-chart" height="60" style="width:100%;border-radius:4px;border:1px solid var(--border)"></canvas>
@@ -430,15 +430,15 @@ hr.divider{border:none;border-top:1px solid var(--border);margin:14px 0;}
 </div>
 
 <script>
-// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+// ═══════════════════════════════════
 // STATE
-// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+// ═══════════════════════════════════
 let currentHash=null,currentAnalysis=null,currentSigs=[];
 let currentEvidences=[];
 
-// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+// ═══════════════════════════════════
 // EVIDENCE SYSTEM
-// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+// ═══════════════════════════════════
 function resetEvidences(){currentEvidences=[];document.getElementById('evidences-card').style.display='none';document.getElementById('evidences-list').innerHTML='';}
 
 function addEvidence({title,status='ok',data=null,imgs=[],significance=''}){
@@ -493,14 +493,14 @@ function buildEvidences(meta,flags,ext,fileInfo){
     const tipoDoc=meta['Tipo de Documento']||'';
     const isImg=tipoDoc.includes('imagem');
     addEvidence({
-      title:'Tipo de Documento â€” Nato-Digital ou Baseado em Imagem',
+      title:'Tipo de Documento — Nato-Digital ou Baseado em Imagem',
       status:isImg?'fail':'ok',
       data:[
         `Tipo         : ${tipoDoc}`,
-        `Versão PDF   : ${meta['Versão PDF']||'â€”'}`,
-        `Tagged       : ${meta['Tagged']||'â€”'}`,
-        `Criptografado: ${meta['Criptografado']||'â€”'}`,
-        `Linearizado  : ${meta['Linearizado (Otimizado)']||'â€”'}`,
+        `Versão PDF   : ${meta['Versão PDF']||'—'}`,
+        `Tagged       : ${meta['Tagged']||'—'}`,
+        `Criptografado: ${meta['Criptografado']||'—'}`,
+        `Linearizado  : ${meta['Linearizado (Otimizado)']||'—'}`,
         meta['Tamanho da Página']&&`Página       : ${meta['Tamanho da Página']}`,
       ].filter(Boolean).join('\n'),
       significance:isImg
@@ -512,11 +512,11 @@ function buildEvidences(meta,flags,ext,fileInfo){
     const fontEmb=meta['Fontes Incorporadas']||'';
     const noFont=fontEmb.includes('Nenhuma');
     addEvidence({
-      title:'Fontes Tipográficas â€” Incorporadas vs Referenciadas',
+      title:'Fontes Tipográficas — Incorporadas vs Referenciadas',
       status:noFont?'fail':'ok',
       data:`Referenciadas: ${meta['Fontes Referenciadas']||'Nenhuma'}\nIncorporadas : ${fontEmb}`,
       significance:noFont
-        ?'A ausência de fontes incorporadas confirma que o PDF não contém texto real â€” é composto exclusivamente por imagens rasterizadas. Documentos nativos de sistemas bancários sempre incorporam fontes. Esta característica é típica de documentos escaneados, reconstruídos por OCR ou montados a partir de imagens.'
+        ?'A ausência de fontes incorporadas confirma que o PDF não contém texto real — é composto exclusivamente por imagens rasterizadas. Documentos nativos de sistemas bancários sempre incorporam fontes. Esta característica é típica de documentos escaneados, reconstruídos por OCR ou montados a partir de imagens.'
         :'Fontes incorporadas presentes. Documento contém texto real renderizável, compatível com PDF nativo.'
     });
 
@@ -525,11 +525,11 @@ function buildEvidences(meta,flags,ext,fileInfo){
     const fragFlag=flags.includes('rf-pdf-fragmentado');
     if(xobj&&xobj!=='Nenhum bloco de imagem XObject'){
       addEvidence({
-        title:'Fragmentação em Blocos â€” XObjects de Imagem',
+        title:'Fragmentação em Blocos — XObjects de Imagem',
         status:fragFlag?'fail':'warn',
-        data:`Imagens XObject: ${xobj}\nLimiar de alerta: â‰¥ 3 imagens/página`,
+        data:`Imagens XObject: ${xobj}\nLimiar de alerta: ≥ 3 imagens/página`,
         significance:fragFlag
-          ?'Múltiplos blocos de imagem independentes por página indicam uso de pipeline de OCR, reconstrução digital ou montagem. Documentos nativos emitidos por sistemas bancários não apresentam esta fragmentação â€” são gerados como fluxo único de texto e vetores.'
+          ?'Múltiplos blocos de imagem independentes por página indicam uso de pipeline de OCR, reconstrução digital ou montagem. Documentos nativos emitidos por sistemas bancários não apresentam esta fragmentação — são gerados como fluxo único de texto e vetores.'
           :'Imagens XObject presentes em quantidade moderada. Pode indicar documento misto (texto + imagens de cabeçalho/logo).'
       });
     }
@@ -537,7 +537,7 @@ function buildEvidences(meta,flags,ext,fileInfo){
     // 5. JpegDump
     const jpeg=meta['JpegDump (JPEG interno)']||'';
     addEvidence({
-      title:'JpegDump â€” Estruturas JPEG Internas',
+      title:'JpegDump — Estruturas JPEG Internas',
       status:flags.includes('rf-sem-jpegdump')?'warn':'ok',
       data:`Resultado: ${jpeg}`,
       significance:flags.includes('rf-sem-jpegdump')
@@ -547,17 +547,17 @@ function buildEvidences(meta,flags,ext,fileInfo){
 
     // 6. Autenticação eletrônica
     const auth=meta['Autenticação Eletrônica']||'';
-    const authDup=meta['âš  Hashes Duplicados'];
+    const authDup=meta['⚠ Hashes Duplicados'];
     if(authDup){
       addEvidence({
-        title:'Autenticação Eletrônica â€” Hashes Duplicados (CRÍTICO)',
+        title:'Autenticação Eletrônica — Hashes Duplicados (CRÍTICO)',
         status:'fail',
         data:`${auth}\n${authDup}`,
         significance:'A presença do mesmo hash de autenticação em múltiplas páginas ou documentos é tecnicamente impossível em sistemas bancários legítimos. Cada documento, cada operação e cada momento geram hash único e irrepetível. Hashes duplicados indicam que: (1) o hash não representa o conteúdo real; (2) os documentos foram clonados, copiados ou montados; (3) a autenticação eletrônica foi aplicada artificialmente após a criação do documento.'
       });
     } else {
       addEvidence({
-        title:'Autenticação Eletrônica â€” Hashes no Documento',
+        title:'Autenticação Eletrônica — Hashes no Documento',
         status:auth.includes('Nenhum')?'warn':'ok',
         data:`Resultado: ${auth}`,
         significance:auth.includes('Nenhum')
@@ -574,7 +574,7 @@ function buildEvidences(meta,flags,ext,fileInfo){
       status:flags.includes('rf-assinatura-imagem')?'fail':flags.includes('rf-sem-assinatura-campo')?'warn':'ok',
       data:`Campo   : ${campoSig}\nTipo    : ${tipoSig}`,
       significance:flags.includes('rf-assinatura-imagem')
-        ?'A assinatura identificada é uma imagem rasterizada inserida no documento â€” não é um elemento independente e verificável. Análise hexadecimal confirma presença de /Subtype /Image na área de assinatura. Esta característica evidencia que a assinatura foi colada digitalmente e não produzida no documento. Incompatível com documentos nativos de sistemas bancários.'
+        ?'A assinatura identificada é uma imagem rasterizada inserida no documento — não é um elemento independente e verificável. Análise hexadecimal confirma presença de /Subtype /Image na área de assinatura. Esta característica evidencia que a assinatura foi colada digitalmente e não produzida no documento. Incompatível com documentos nativos de sistemas bancários.'
         :flags.includes('rf-sem-assinatura-campo')
           ?'Ausência de campo de assinatura digital ICP-Brasil (AcroForm /Sig). O documento não possui assinatura criptográfica verificável. Qualquer imagem de assinatura presente é apenas visual, sem vínculo criptográfico entre a pessoa e o conteúdo do arquivo.'
           :'Campo de assinatura digital presente. Análise detalhada disponível na aba Assinaturas.'
@@ -584,7 +584,7 @@ function buildEvidences(meta,flags,ext,fileInfo){
     const cpfs=meta['CPF(s) encontrado(s)'];
     if(cpfs){
       addEvidence({
-        title:'Dados Cadastrais â€” CPF(s) Identificado(s)',
+        title:'Dados Cadastrais — CPF(s) Identificado(s)',
         status:flags.includes('rf-dados-conflitantes')?'fail':'ok',
         data:`CPF(s) encontrado(s): ${cpfs}`,
         significance:flags.includes('rf-dados-conflitantes')
@@ -599,8 +599,8 @@ function buildEvidences(meta,flags,ext,fileInfo){
       addEvidence({
         title:'Software de Reprocessamento Identificado',
         status:'fail',
-        data:`Creator : ${meta['Creator']||'â€”'}\nProducer: ${meta['Producer']||'â€”'}`,
-        significance:'O software identificado nos metadados (GhostScript, Inkscape, LibreOffice) é utilizado para reprocessamento, conversão ou edição de PDFs â€” não para geração nativa de documentos bancários. A presença deste software indica que o arquivo foi gerado ou modificado fora do sistema emissor original.'
+        data:`Creator : ${meta['Creator']||'—'}\nProducer: ${meta['Producer']||'—'}`,
+        significance:'O software identificado nos metadados (GhostScript, Inkscape, LibreOffice) é utilizado para reprocessamento, conversão ou edição de PDFs — não para geração nativa de documentos bancários. A presença deste software indica que o arquivo foi gerado ou modificado fora do sistema emissor original.'
       });
     }
 
@@ -609,21 +609,21 @@ function buildEvidences(meta,flags,ext,fileInfo){
       addEvidence({
         title:'Inconsistência nas Datas dos Metadados',
         status:'fail',
-        data:`CreationDate: ${meta['CreationDate']||'â€”'}\nModDate     : ${meta['ModDate']||'â€”'}`,
+        data:`CreationDate: ${meta['CreationDate']||'—'}\nModDate     : ${meta['ModDate']||'—'}`,
         significance:flags.includes('rf-datas-incompat')
-          ?'Data de modificação anterior à data de criação â€” logicamente impossível. Indica adulteração dos metadados temporais do documento.'
-          :'Data de criação idêntica à data de modificação â€” padrão incomum que pode indicar que o documento foi criado e finalizado em um único ato automatizado, sem edição posterior, ou que os metadados foram resetados.'
+          ?'Data de modificação anterior à data de criação — logicamente impossível. Indica adulteração dos metadados temporais do documento.'
+          :'Data de criação idêntica à data de modificação — padrão incomum que pode indicar que o documento foi criado e finalizado em um único ato automatizado, sem edição posterior, ou que os metadados foram resetados.'
       });
     }
   }
 
   // JPEG/PNG evidences
   if(ext==='jpg'||ext==='jpeg'){
-    const cam=`${meta['Make (câmera)']||'â€”'} ${meta['Model (câmera)']||''}`.trim();
+    const cam=`${meta['Make (câmera)']||'—'} ${meta['Model (câmera)']||''}`.trim();
     const dt=meta['DateTimeOriginal']||meta['DateTime'];
     const soft2=meta['Software'];
     addEvidence({
-      title:'Metadados EXIF â€” Câmera, Data e Software',
+      title:'Metadados EXIF — Câmera, Data e Software',
       status:flags.includes('rf-software-edicao')?'warn':'ok',
       data:[
         `Câmera    : ${cam||'Não identificada'}`,
@@ -638,7 +638,7 @@ function buildEvidences(meta,flags,ext,fileInfo){
     });
   }
 
-  // All formats â€” metadata summary
+  // All formats — metadata summary
   const entries=Object.entries(meta).filter(([,v])=>v!=null&&v!=='');
   if(entries.length>0){
     addEvidence({
@@ -669,13 +669,13 @@ dropzone.addEventListener('dragleave',()=>dropzone.classList.remove('drag-over')
 dropzone.addEventListener('drop',e=>{e.preventDefault();dropzone.classList.remove('drag-over');const f=e.dataTransfer.files[0];if(f)handleFile(f);});
 fileInput.addEventListener('change',()=>{if(fileInput.files[0])handleFile(fileInput.files[0]);});
 
-// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+// ═══════════════════════════════════
 // FILE DISPATCH
-// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+// ═══════════════════════════════════
 async function handleFile(file){
   const buf=await file.arrayBuffer();
   document.getElementById('sha-row').style.display='block';
-  document.getElementById('sha-value').textContent='calculandoâ€¦';
+  document.getElementById('sha-value').textContent='calculando…';
   const sha256=await calcSHA256(buf);
   document.getElementById('sha-value').textContent=sha256;
 
@@ -731,7 +731,7 @@ function showError(msg){
   document.getElementById('exames-grid').innerHTML='<div style="color:var(--muted);font-size:13px">Análise não concluída.</div>';
   document.getElementById('flags-container').innerHTML='';
   document.getElementById('file-info-row').innerHTML='';
-  document.getElementById('score-num').textContent='â€”';
+  document.getElementById('score-num').textContent='—';
   document.getElementById('score-fill').style.width='0%';
   document.getElementById('score-verdict').textContent='';
   document.getElementById('score-lbl').textContent='';
@@ -742,9 +742,9 @@ async function calcSHA256(buf){
   return Array.from(new Uint8Array(h)).map(b=>b.toString(16).padStart(2,'0')).join('');
 }
 
-// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+// ═══════════════════════════════════
 // RENDER RESULTS
-// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+// ═══════════════════════════════════
 function renderResults({meta,flags},file,ext,sha256,analysisTime){
   // File info
   document.getElementById('file-info-row').innerHTML=`
@@ -784,32 +784,32 @@ function renderResults({meta,flags},file,ext,sha256,analysisTime){
   document.getElementById('meta-results').style.display='block';
 }
 
-// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+// ═══════════════════════════════════
 // PAINEL DE EXAMES
-// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+// ═══════════════════════════════════
 const FLAG_DESCS={
-  'rf-ghostscript':'Producer/Creator indica GhostScript â€” software de reprocessamento de PDF. Documentos originais raramente usam este software.',
-  'rf-datas-incompat':'Data de modificação anterior à criação â€” impossível em condições normais. Forte indício de adulteração dos metadados.',
-  'rf-datas-iguais':'CreationDate idêntica à ModDate em PDF â€” padrão incomum, pode indicar geração automática ou adulteração.',
+  'rf-ghostscript':'Producer/Creator indica GhostScript — software de reprocessamento de PDF. Documentos originais raramente usam este software.',
+  'rf-datas-incompat':'Data de modificação anterior à criação — impossível em condições normais. Forte indício de adulteração dos metadados.',
+  'rf-datas-iguais':'CreationDate idêntica à ModDate em PDF — padrão incomum, pode indicar geração automática ou adulteração.',
   'rf-software-suspeito':'Software identificado (LibreOffice, PDFCreator etc.) difere do declarado ou esperado para o tipo de documento.',
-  'rf-inkscape':'Inkscape detectado â€” editor de imagens vetoriais usado para criar/editar documentos, não para geração legítima de PDFs oficiais.',
-  'rf-sem-datas':'Ausência total de datas no documento â€” metadados de data removidos ou documento gerado sem registro temporal.',
-  'rf-gps-presente':'Coordenadas GPS embutidas na imagem â€” revela localização onde a foto foi tirada. Relevante para verificar consistência com o alegado.',
-  'rf-software-edicao':'Software de edição de imagem (Photoshop, GIMP, Lightroom) identificado nos metadados â€” imagem foi processada após a captura.',
-  'rf-revisoes-zero':'Número de revisões igual a zero ou um â€” documento pode ter sido criado e nunca editado, ou metadados de revisão foram resetados.',
-  'rf-sha1-obsoleto':'Algoritmo SHA-1 utilizado na assinatura digital â€” considerado criptograficamente inseguro desde 2017. Assinaturas SHA-1 não oferecem garantia adequada.',
-  'rf-modificado-pos-assinatura':'ByteRange não cobre o arquivo inteiro â€” conteúdo foi adicionado após a assinatura. A assinatura não cobre o documento completo.',
-  'rf-assinatura-invalida':'Hash calculado do documento não confere com o hash da assinatura â€” documento foi alterado após assinatura ou assinatura está corrompida.',
-  'rf-cert-expirado':'Certificado digital estava expirado na data de assinatura â€” assinatura sem validade jurídica conforme ICP-Brasil.',
-  'rf-cert-autoassinado':'Certificado autoassinado (emitente = titular) â€” não emitido por Autoridade Certificadora reconhecida. Qualquer pessoa pode criar este tipo de certificado.',
+  'rf-inkscape':'Inkscape detectado — editor de imagens vetoriais usado para criar/editar documentos, não para geração legítima de PDFs oficiais.',
+  'rf-sem-datas':'Ausência total de datas no documento — metadados de data removidos ou documento gerado sem registro temporal.',
+  'rf-gps-presente':'Coordenadas GPS embutidas na imagem — revela localização onde a foto foi tirada. Relevante para verificar consistência com o alegado.',
+  'rf-software-edicao':'Software de edição de imagem (Photoshop, GIMP, Lightroom) identificado nos metadados — imagem foi processada após a captura.',
+  'rf-revisoes-zero':'Número de revisões igual a zero ou um — documento pode ter sido criado e nunca editado, ou metadados de revisão foram resetados.',
+  'rf-sha1-obsoleto':'Algoritmo SHA-1 utilizado na assinatura digital — considerado criptograficamente inseguro desde 2017. Assinaturas SHA-1 não oferecem garantia adequada.',
+  'rf-modificado-pos-assinatura':'ByteRange não cobre o arquivo inteiro — conteúdo foi adicionado após a assinatura. A assinatura não cobre o documento completo.',
+  'rf-assinatura-invalida':'Hash calculado do documento não confere com o hash da assinatura — documento foi alterado após assinatura ou assinatura está corrompida.',
+  'rf-cert-expirado':'Certificado digital estava expirado na data de assinatura — assinatura sem validade jurídica conforme ICP-Brasil.',
+  'rf-cert-autoassinado':'Certificado autoassinado (emitente = titular) — não emitido por Autoridade Certificadora reconhecida. Qualquer pessoa pode criar este tipo de certificado.',
   'rf-sem-horario-assinatura':'Horário de assinatura não encontrado nem no campo /M nem no atributo signingTime do CMS.',
-  'rf-pdf-imagem':'Nenhuma fonte incorporada â€” PDF baseado exclusivamente em imagens rasterizadas. Não é um documento nato-digital. Típico de scans, reconstruções ou montagens. Impede verificação de integridade e análise grafotécnica.',
-  'rf-pdf-fragmentado':'Páginas divididas em múltiplos blocos independentes de imagem (XObjects). Indício de uso de OCR, pipeline automatizado, reconstrução ou montagem â€” não compatível com PDF nativo.',
-  'rf-hash-duplicado':'Mesmo hash de autenticação eletrônica encontrado em múltiplas páginas ou documentos. Tecnicamente impossível em sistema bancário legítimo â€” cada documento/operação gera hash único. Forte indício de adulteração ou hash aplicado artificialmente.',
+  'rf-pdf-imagem':'Nenhuma fonte incorporada — PDF baseado exclusivamente em imagens rasterizadas. Não é um documento nato-digital. Típico de scans, reconstruções ou montagens. Impede verificação de integridade e análise grafotécnica.',
+  'rf-pdf-fragmentado':'Páginas divididas em múltiplos blocos independentes de imagem (XObjects). Indício de uso de OCR, pipeline automatizado, reconstrução ou montagem — não compatível com PDF nativo.',
+  'rf-hash-duplicado':'Mesmo hash de autenticação eletrônica encontrado em múltiplas páginas ou documentos. Tecnicamente impossível em sistema bancário legítimo — cada documento/operação gera hash único. Forte indício de adulteração ou hash aplicado artificialmente.',
   'rf-sem-assinatura-campo':'Nenhum campo de assinatura digital (AcroForm /Sig) encontrado. Documento não possui assinatura digital ICP-Brasil verificável.',
-  'rf-assinatura-imagem':'Campo de assinatura contém imagem rasterizada, não elemento vetorial independente. A assinatura foi inserida como figura colada â€” não foi produzida no documento. Incompatível com sistema bancário real.',
+  'rf-assinatura-imagem':'Campo de assinatura contém imagem rasterizada, não elemento vetorial independente. A assinatura foi inserida como figura colada — não foi produzida no documento. Incompatível com sistema bancário real.',
   'rf-sem-jpegdump':'Ausência de estruturas JPEG internas (DCTDecode / FF D8 FF). Confirma que o PDF não contém imagens fotográficas reais, sendo composto por imagens rasterizadas de outro tipo ou reconstruídas.',
-  'rf-dados-conflitantes':'Múltiplos CPFs ou dados cadastrais inconsistentes detectados no documento â€” possível montagem ou preenchimento incorreto.',
+  'rf-dados-conflitantes':'Múltiplos CPFs ou dados cadastrais inconsistentes detectados no documento — possível montagem ou preenchimento incorreto.',
 };
 
 function renderExames(meta,flags,ext){
@@ -839,100 +839,100 @@ function buildExames(meta,flags,ext){
   const val=k=>meta[k]||meta[Object.keys(meta).find(m=>m.toLowerCase()===k.toLowerCase())];
 
   // SHA-256
-  exames.push({icon:'ðŸ”',name:'Hash SHA-256',status:'ok',result:'Calculado â€” identifica univocamente este arquivo (cadeia de custódia)'});
+  exames.push({icon:'🔐',name:'Hash SHA-256',status:'ok',result:'Calculado — identifica univocamente este arquivo (cadeia de custódia)'});
 
   // Metadados gerais
   const nMeta=Object.keys(meta).filter(k=>meta[k]).length;
-  exames.push({icon:'ðŸ“‹',name:'Metadados',status:nMeta>0?'ok':'warn',result:nMeta>0?`${nMeta} campo(s) extraído(s)`:'Nenhum metadado encontrado'});
+  exames.push({icon:'📋',name:'Metadados',status:nMeta>0?'ok':'warn',result:nMeta>0?`${nMeta} campo(s) extraído(s)`:'Nenhum metadado encontrado'});
 
   if(ext==='jpg'||ext==='jpeg'){
     const cam=meta['Make (câmera)']||meta['Model (câmera)'];
-    exames.push({icon:'ðŸ“·',name:'Câmera (EXIF)',status:cam?'ok':'warn',result:cam?`${meta['Make (câmera)']||''} ${meta['Model (câmera)']||''}`.trim():'Dados de câmera não encontrados'});
+    exames.push({icon:'📷',name:'Câmera (EXIF)',status:cam?'ok':'warn',result:cam?`${meta['Make (câmera)']||''} ${meta['Model (câmera)']||''}`.trim():'Dados de câmera não encontrados'});
     const dt=meta['DateTimeOriginal']||meta['DateTime'];
-    exames.push({icon:'ðŸ“…',name:'Data/Hora EXIF',status:dt?'ok':'warn',result:dt||'Não encontrado'});
+    exames.push({icon:'📅',name:'Data/Hora EXIF',status:dt?'ok':'warn',result:dt||'Não encontrado'});
     const soft=meta['Software'];
-    exames.push({icon:'ðŸ–¥',name:'Software de Edição',status:hasFlag('rf-software-edicao')?'fail':'ok',result:soft?`Detectado: ${soft}`:'Sem software de edição identificado'});
+    exames.push({icon:'🖥',name:'Software de Edição',status:hasFlag('rf-software-edicao')?'fail':'ok',result:soft?`Detectado: ${soft}`:'Sem software de edição identificado'});
     const gps=meta['GPS Latitude'];
-    exames.push({icon:'ðŸ“',name:'Coordenadas GPS',status:gps?'warn':'ok',result:gps?`Lat: ${meta['GPS Latitude']} | Lon: ${meta['GPS Longitude']}`:'Sem GPS'});
-    exames.push({icon:'ðŸ”¢',name:'Hash Perceptual (pHash)',status:'ok',result:'Calculado na aba Hash Perceptual'});
+    exames.push({icon:'📍',name:'Coordenadas GPS',status:gps?'warn':'ok',result:gps?`Lat: ${meta['GPS Latitude']} | Lon: ${meta['GPS Longitude']}`:'Sem GPS'});
+    exames.push({icon:'🔢',name:'Hash Perceptual (pHash)',status:'ok',result:'Calculado na aba Hash Perceptual'});
   }
 
   if(ext==='pdf'){
     // Tipo do documento
     const tipoDoc=meta['Tipo de Documento']||'';
     const isImg=tipoDoc.includes('imagem');
-    exames.push({icon:'ðŸ“„',name:'Tipo de Documento',status:isImg?'fail':'ok',result:tipoDoc||'Não determinado'});
+    exames.push({icon:'📄',name:'Tipo de Documento',status:isImg?'fail':'ok',result:tipoDoc||'Não determinado'});
 
     // Software / Creator / Producer
     const creator=meta['Creator'],producer=meta['Producer'];
     const softStatus=hasFlag('rf-ghostscript')||hasFlag('rf-inkscape')||hasFlag('rf-software-suspeito')?'fail':'ok';
-    exames.push({icon:'ðŸ–¨',name:'Software de Origem',status:softStatus,result:[creator&&`Creator: ${creator}`,producer&&`Producer: ${producer}`].filter(Boolean).join(' | ')||'Não identificado'});
+    exames.push({icon:'🖨',name:'Software de Origem',status:softStatus,result:[creator&&`Creator: ${creator}`,producer&&`Producer: ${producer}`].filter(Boolean).join(' | ')||'Não identificado'});
 
     // Versão, Tagged, Encrypted, Linearizado, Tamanho página
     const versao=meta['Versão PDF'],tagged=meta['Tagged'],crypt=meta['Criptografado'],linear=meta['Linearizado (Otimizado)'],pageSize=meta['Tamanho da Página'];
-    exames.push({icon:'ðŸ—‚',name:'Propriedades PDF',status:'ok',result:[versao&&`Versão: ${versao}`,tagged&&`Tagged: ${tagged}`,crypt&&`Criptografado: ${crypt}`,linear&&`Linearizado: ${linear}`,pageSize&&`Página: ${pageSize}`].filter(Boolean).join(' | ')||'â€”'});
+    exames.push({icon:'🗂',name:'Propriedades PDF',status:'ok',result:[versao&&`Versão: ${versao}`,tagged&&`Tagged: ${tagged}`,crypt&&`Criptografado: ${crypt}`,linear&&`Linearizado: ${linear}`,pageSize&&`Página: ${pageSize}`].filter(Boolean).join(' | ')||'—'});
 
     // Páginas
     const pages=meta['Número de Páginas'];
-    exames.push({icon:'ðŸ“‘',name:'Número de Páginas',status:pages&&pages!=='(não determinado)'?'ok':'warn',result:pages?`${pages} página(s)`:'Não determinado'});
+    exames.push({icon:'📑',name:'Número de Páginas',status:pages&&pages!=='(não determinado)'?'ok':'warn',result:pages?`${pages} página(s)`:'Não determinado'});
 
     // Datas
     const cd=meta['CreationDate'],md=meta['ModDate'];
     const dateStatus=hasFlag('rf-datas-incompat')?'fail':hasFlag('rf-datas-iguais')?'warn':cd||md?'ok':'warn';
-    exames.push({icon:'ðŸ“…',name:'Análise de Datas',status:dateStatus,result:cd&&md?`Criação: ${cd.replace(' (criação)','')} | Modif: ${md.replace(' (modificação)','')}`:cd||md||'Datas não encontradas'});
+    exames.push({icon:'📅',name:'Análise de Datas',status:dateStatus,result:cd&&md?`Criação: ${cd.replace(' (criação)','')} | Modif: ${md.replace(' (modificação)','')}`:cd||md||'Datas não encontradas'});
 
     // Fontes
     const fontes=meta['Fontes Referenciadas'],fontEmb=meta['Fontes Incorporadas'];
-    exames.push({icon:'ðŸ”¤',name:'Fontes',status:hasFlag('rf-pdf-imagem')?'fail':'ok',result:`Referenciadas: ${fontes||'Nenhuma'} | Incorporadas: ${fontEmb||'Nenhuma'}`});
+    exames.push({icon:'🔤',name:'Fontes',status:hasFlag('rf-pdf-imagem')?'fail':'ok',result:`Referenciadas: ${fontes||'Nenhuma'} | Incorporadas: ${fontEmb||'Nenhuma'}`});
 
     // Fragmentação
     const xobj=meta['Imagens XObject'];
-    exames.push({icon:'ðŸ§©',name:'Fragmentação em Blocos',status:hasFlag('rf-pdf-fragmentado')?'fail':xobj&&xobj!=='Nenhum bloco de imagem XObject'?'warn':'ok',result:xobj||'Não detectada'});
+    exames.push({icon:'🧩',name:'Fragmentação em Blocos',status:hasFlag('rf-pdf-fragmentado')?'fail':xobj&&xobj!=='Nenhum bloco de imagem XObject'?'warn':'ok',result:xobj||'Não detectada'});
 
     // JpegDump
     const jpeg=meta['JpegDump (JPEG interno)'];
-    exames.push({icon:'ðŸ“¸',name:'JpegDump (JPEG interno)',status:hasFlag('rf-sem-jpegdump')?'warn':'ok',result:jpeg||'Não analisado'});
+    exames.push({icon:'📸',name:'JpegDump (JPEG interno)',status:hasFlag('rf-sem-jpegdump')?'warn':'ok',result:jpeg||'Não analisado'});
 
     // Autenticação eletrônica
     const auth=meta['Autenticação Eletrônica'];
-    const authDup=meta['âš  Hashes Duplicados'];
-    exames.push({icon:'ðŸ”‘',name:'Autenticação Eletrônica',status:hasFlag('rf-hash-duplicado')?'fail':auth&&!auth.includes('Nenhum')?'ok':'warn',result:authDup?`${auth} â€” âš  ${authDup}`:auth||'Não analisado'});
+    const authDup=meta['⚠ Hashes Duplicados'];
+    exames.push({icon:'🔑',name:'Autenticação Eletrônica',status:hasFlag('rf-hash-duplicado')?'fail':auth&&!auth.includes('Nenhum')?'ok':'warn',result:authDup?`${auth} — ⚠ ${authDup}`:auth||'Não analisado'});
 
     // Campo de assinatura
     const campoSig=meta['Campo de Assinatura'];
     const tipoSig=meta['Tipo de Assinatura'];
-    exames.push({icon:'âœ',name:'Campo de Assinatura',status:hasFlag('rf-assinatura-imagem')?'fail':hasFlag('rf-sem-assinatura-campo')?'warn':'ok',result:[campoSig,tipoSig].filter(Boolean).join(' | ')||'Não analisado'});
+    exames.push({icon:'✍',name:'Campo de Assinatura',status:hasFlag('rf-assinatura-imagem')?'fail':hasFlag('rf-sem-assinatura-campo')?'warn':'ok',result:[campoSig,tipoSig].filter(Boolean).join(' | ')||'Não analisado'});
 
     // Dados cadastrais
     const cpfs=meta['CPF(s) encontrado(s)'];
-    exames.push({icon:'ðŸªª',name:'Dados Cadastrais',status:hasFlag('rf-dados-conflitantes')?'fail':cpfs?'ok':'warn',result:cpfs?`CPF(s): ${cpfs}`:'Nenhum CPF detectado no texto'});
+    exames.push({icon:'🪪',name:'Dados Cadastrais',status:hasFlag('rf-dados-conflitantes')?'fail':cpfs?'ok':'warn',result:cpfs?`CPF(s): ${cpfs}`:'Nenhum CPF detectado no texto'});
 
     // Assinaturas digitais ICP-Brasil (placeholder, atualizado depois)
-    exames.push({icon:'ðŸ”',name:'Assinaturas Digitais ICP-Brasil',status:'ok',result:'Analisandoâ€¦',id:'exame-sig'});
+    exames.push({icon:'🔏',name:'Assinaturas Digitais ICP-Brasil',status:'ok',result:'Analisando…',id:'exame-sig'});
   }
 
   if(ext==='docx'||ext==='xlsx'){
     const author=meta['Autor'];
-    exames.push({icon:'ðŸ‘¤',name:'Autor',status:author?'ok':'warn',result:author||'Não encontrado'});
+    exames.push({icon:'👤',name:'Autor',status:author?'ok':'warn',result:author||'Não encontrado'});
     const lastMod=meta['Última Modificação por'];
-    exames.push({icon:'âœï¸',name:'Último Editor',status:lastMod?'ok':'warn',result:lastMod||'Não encontrado'});
+    exames.push({icon:'✏️',name:'Último Editor',status:lastMod?'ok':'warn',result:lastMod||'Não encontrado'});
     const rev=meta['Número de Revisões'];
-    exames.push({icon:'ðŸ”„',name:'Revisões',status:hasFlag('rf-revisoes-zero')?'warn':'ok',result:rev?`${rev} revisão(ões)`:'Não encontrado'});
+    exames.push({icon:'🔄',name:'Revisões',status:hasFlag('rf-revisoes-zero')?'warn':'ok',result:rev?`${rev} revisão(ões)`:'Não encontrado'});
     const cd=meta['Data de Criação'],md=meta['Data de Modificação'];
     const dateStatus=hasFlag('rf-datas-incompat')?'fail':hasFlag('rf-datas-iguais')?'warn':cd||md?'ok':'warn';
-    exames.push({icon:'ðŸ“…',name:'Análise de Datas',status:dateStatus,result:cd&&md?`Criação: ${cd} | Modif: ${md}`:cd||md||'Não encontrado'});
+    exames.push({icon:'📅',name:'Análise de Datas',status:dateStatus,result:cd&&md?`Criação: ${cd} | Modif: ${md}`:cd||md||'Não encontrado'});
     const app=meta['Aplicativo'];
-    exames.push({icon:'ðŸ–¥',name:'Aplicativo',status:'ok',result:app||'Não identificado'});
+    exames.push({icon:'🖥',name:'Aplicativo',status:'ok',result:app||'Não identificado'});
   }
 
   if(ext==='png'){
     const w=meta['Largura'],h=meta['Altura'];
-    exames.push({icon:'ðŸ“',name:'Dimensões',status:w?'ok':'warn',result:w&&h?`${w} × ${h}`:'Não encontrado'});
+    exames.push({icon:'📐',name:'Dimensões',status:w?'ok':'warn',result:w&&h?`${w} × ${h}`:'Não encontrado'});
     const res=meta['Resolução X'];
-    exames.push({icon:'ðŸ”¬',name:'Resolução',status:res?'ok':'warn',result:res||'Não encontrado'});
+    exames.push({icon:'🔬',name:'Resolução',status:res?'ok':'warn',result:res||'Não encontrado'});
     const soft=Object.entries(meta).find(([k])=>k.includes('Software')||k.includes('software'));
-    exames.push({icon:'ðŸ–¥',name:'Software (chunks)',status:hasFlag('rf-software-edicao')?'fail':soft?'warn':'ok',result:soft?soft[1]:'Não identificado em chunks tEXt/iTXt'});
-    exames.push({icon:'ðŸ”¢',name:'Hash Perceptual (pHash)',status:'ok',result:'Calculado na aba Hash Perceptual'});
+    exames.push({icon:'🖥',name:'Software (chunks)',status:hasFlag('rf-software-edicao')?'fail':soft?'warn':'ok',result:soft?soft[1]:'Não identificado em chunks tEXt/iTXt'});
+    exames.push({icon:'🔢',name:'Hash Perceptual (pHash)',status:'ok',result:'Calculado na aba Hash Perceptual'});
   }
 
   return exames;
@@ -946,19 +946,19 @@ function updateExameSig(sigs){
   const hasFail=sigs.some(s=>s.flags.includes('rf-assinatura-invalida')||s.flags.includes('rf-modificado-pos-assinatura'));
   const hasWarn=sigs.some(s=>s.flags.length>0);
   const status=sigs.length===0?'warn':hasFail?'fail':hasWarn?'warn':'ok';
-  const result=sigs.length===0?'Nenhuma assinatura encontrada':`${sigs.length} assinatura(s) â€” ${hasFail?'FALHOU':hasWarn?'atenção necessária':'todas íntegras'}`;
+  const result=sigs.length===0?'Nenhuma assinatura encontrada':`${sigs.length} assinatura(s) — ${hasFail?'FALHOU':hasWarn?'atenção necessária':'todas íntegras'}`;
   el.className='exame-card '+status;
   el.querySelector('.exame-status').className='exame-status '+status;
   el.querySelector('.exame-status').textContent=statusLabel(status);
   el.querySelector('.exame-result').textContent=result;
 }
 
-function statusLabel(s){return{ok:'Concluído âœ“',warn:'Atenção âš¡',fail:'Falhou âš ',na:'N/A'}[s]||s;}
+function statusLabel(s){return{ok:'Concluído ✓',warn:'Atenção ⚡',fail:'Falhou ⚠',na:'N/A'}[s]||s;}
 
 
-// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+// ═══════════════════════════════════
 // SCORE & FLAGS
-// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+// ═══════════════════════════════════
 const FLAG_WEIGHTS={
   'rf-ghostscript':35,'rf-datas-incompat':40,'rf-datas-iguais':20,
   'rf-software-suspeito':20,'rf-inkscape':30,'rf-sem-datas':10,
@@ -982,9 +982,9 @@ function renderScore(flags){
   document.getElementById('score-lbl').textContent=`${flags.length} indicador(es) detectado(s)`;
   const vEl=document.getElementById('score-verdict');
   vEl.className='score-verdict '+cls;
-  vEl.textContent=score>=60?'âš  Alto risco â€” o documento apresenta múltiplos indicadores de adulteração. Recomenda-se análise pericial aprofundada.':
-    score>=30?'âš¡ Risco moderado â€” foram detectados indicadores que requerem atenção. Verificação adicional recomendada.':
-    'âœ“ Baixo risco â€” nenhum indicador significativo de adulteração foi detectado nesta análise automática.';
+  vEl.textContent=score>=60?'⚠ Alto risco — o documento apresenta múltiplos indicadores de adulteração. Recomenda-se análise pericial aprofundada.':
+    score>=30?'⚡ Risco moderado — foram detectados indicadores que requerem atenção. Verificação adicional recomendada.':
+    '✓ Baixo risco — nenhum indicador significativo de adulteração foi detectado nesta análise automática.';
 }
 
 function renderFlags(flags){
@@ -1001,15 +1001,15 @@ function renderFlags(flags){
     const desc=FLAG_DESCS[f]||'Indicador de risco detectado.';
     const item=document.createElement('div');
     item.className='flag-item '+sev;
-    item.innerHTML=`<div class="flag-bar">âš‘ ${f}</div><div class="flag-desc">${desc}</div>`;
+    item.innerHTML=`<div class="flag-bar">⚑ ${f}</div><div class="flag-desc">${desc}</div>`;
     wrap.appendChild(item);
   });
   fc.appendChild(wrap);
 }
 
-// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+// ═══════════════════════════════════
 // ASSINATURAS
-// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+// ═══════════════════════════════════
 function resetSigTab(){
   ['sig-empty','sig-not-pdf','sig-none'].forEach(id=>document.getElementById(id).style.display='none');
   const r=document.getElementById('sig-results');r.style.display='none';r.innerHTML='';
@@ -1077,27 +1077,27 @@ function renderSignatures(sigs,buf){
     const hasFail=sig.flags.includes('rf-assinatura-invalida')||sig.flags.includes('rf-modificado-pos-assinatura');
     const hasWarn=sig.flags.length>0;
     const statusCls=hasFail?'fail':hasWarn?'warn':'ok';
-    const statusTxt=hasFail?'âš  Integridade comprometida':hasWarn?'âš¡ Atenção':'âœ“ Assinatura íntegra';
+    const statusTxt=hasFail?'⚠ Integridade comprometida':hasWarn?'⚡ Atenção':'✓ Assinatura íntegra';
     const signer=cert.subject.CN||cert.subject.O||sig.pdfName||'(desconhecido)';
     const org=cert.subject.O&&cert.subject.CN?cert.subject.O:'';
     const algKey=cert.algorithm?cert.algorithm.toLowerCase():'';
     const algoCls=algKey.includes('sha256')||algKey.includes('sha384')||algKey.includes('sha512')?'sha256':algKey.includes('sha1')?'sha1':'other';
     const algoBadge=cert.algorithm?`<span class="algo-badge ${algoCls}">${cert.algorithm.toUpperCase()}</span>`:'';
     const sigTimeStr=(sig.sigDate||cert.signingTime)?(sig.sigDate||cert.signingTime).toLocaleString('pt-BR'):'não informado';
-    const validFrom=cert.notBefore?cert.notBefore.toLocaleString('pt-BR'):'â€”';
-    const validTo=cert.notAfter?cert.notAfter.toLocaleString('pt-BR'):'â€”';
-    const certExp=cert.expired?'<span style="color:var(--danger);font-size:11px"> âš  expirado</span>':'';
+    const validFrom=cert.notBefore?cert.notBefore.toLocaleString('pt-BR'):'—';
+    const validTo=cert.notAfter?cert.notAfter.toLocaleString('pt-BR'):'—';
+    const certExp=cert.expired?'<span style="color:var(--danger);font-size:11px"> ⚠ expirado</span>':'';
     const issuerStr=[cert.issuer&&cert.issuer.CN,cert.issuer&&cert.issuer.O].filter(Boolean).join(' / ')||'(desconhecido)';
     const selfNote=cert.selfSigned?'<span style="color:var(--warn);font-size:11px"> (autoassinado)</span>':'';
     const byteRangeViz=buildByteRangeDiagram(sig.br,sig.fileSize);
     const chainHtml=buildChainHtml(cert);
-    const flagsHtml=sig.flags.length?sig.flags.map(f=>`<div class="flag-item ${flagSeverity(f)}" style="min-width:140px"><div class="flag-bar" style="font-size:11px;padding:4px 8px">âš‘ ${f}</div><div class="flag-desc">${FLAG_DESCS[f]||''}</div></div>`).join(''):'<span style="color:var(--muted);font-size:12px">Nenhum</span>';
+    const flagsHtml=sig.flags.length?sig.flags.map(f=>`<div class="flag-item ${flagSeverity(f)}" style="min-width:140px"><div class="flag-bar" style="font-size:11px;padding:4px 8px">⚑ ${f}</div><div class="flag-desc">${FLAG_DESCS[f]||''}</div></div>`).join(''):'<span style="color:var(--muted);font-size:12px">Nenhum</span>';
 
     container.innerHTML+=`
     <div class="sig-card">
       <div class="sig-card-header">
         <div>
-          <div class="sig-signer">ðŸ” Assinatura ${idx+1} â€” ${escHtml(signer)}</div>
+          <div class="sig-signer">🔏 Assinatura ${idx+1} — ${escHtml(signer)}</div>
           ${org?`<div class="sig-org">${escHtml(org)}</div>`:''}
         </div>
         <div style="display:flex;align-items:center;gap:8px">${algoBadge}<span class="sig-status ${statusCls}">${statusTxt}</span></div>
@@ -1105,11 +1105,11 @@ function renderSignatures(sigs,buf){
       <div class="sig-card-body">
         <div class="sig-grid">
           <div class="sig-field"><div class="sf-label">Horário de assinatura</div><div class="sf-value">${escHtml(sigTimeStr)}</div></div>
-          <div class="sig-field"><div class="sf-label">Razão / Motivo</div><div class="sf-value">${escHtml(sig.reason||'â€”')}</div></div>
-          <div class="sig-field"><div class="sf-label">Localização</div><div class="sf-value">${escHtml(sig.location||'â€”')}</div></div>
-          <div class="sig-field"><div class="sf-label">Padrão (SubFilter)</div><div class="sf-value">${escHtml(sig.subfilter||sig.filter||'â€”')}</div></div>
+          <div class="sig-field"><div class="sf-label">Razão / Motivo</div><div class="sf-value">${escHtml(sig.reason||'—')}</div></div>
+          <div class="sig-field"><div class="sf-label">Localização</div><div class="sf-value">${escHtml(sig.location||'—')}</div></div>
+          <div class="sig-field"><div class="sf-label">Padrão (SubFilter)</div><div class="sf-value">${escHtml(sig.subfilter||sig.filter||'—')}</div></div>
           <div class="sig-field"><div class="sf-label">Emitente do certificado</div><div class="sf-value">${escHtml(issuerStr)}${selfNote}</div></div>
-          <div class="sig-field"><div class="sf-label">Validade do certificado</div><div class="sf-value">${validFrom} â†’ ${validTo}${certExp}</div></div>
+          <div class="sig-field"><div class="sf-label">Validade do certificado</div><div class="sf-value">${validFrom} → ${validTo}${certExp}</div></div>
           ${cert.serialNumber?`<div class="sig-field"><div class="sf-label">Nº de série</div><div class="sf-value">${escHtml(cert.serialNumber)}</div></div>`:''}
           ${cert.subject&&cert.subject.E?`<div class="sig-field"><div class="sf-label">E-mail</div><div class="sf-value">${escHtml(cert.subject.E)}</div></div>`:''}
         </div>
@@ -1119,12 +1119,12 @@ function renderSignatures(sigs,buf){
           <div style="display:flex;gap:12px;margin-top:5px;flex-wrap:wrap">
             <span style="font-size:11px;color:var(--muted)"><span style="display:inline-block;width:10px;height:10px;background:rgba(35,134,54,.4);border-radius:2px;margin-right:3px"></span>Assinado</span>
             <span style="font-size:11px;color:var(--muted)"><span style="display:inline-block;width:10px;height:10px;background:rgba(31,111,235,.35);border-radius:2px;margin-right:3px"></span>Blob da assinatura</span>
-            ${!integ.coversFullFile?'<span style="font-size:11px;color:var(--danger)"><span style="display:inline-block;width:10px;height:10px;background:rgba(218,54,51,.4);border-radius:2px;margin-right:3px"></span>Fora da cobertura âš </span>':''}
+            ${!integ.coversFullFile?'<span style="font-size:11px;color:var(--danger)"><span style="display:inline-block;width:10px;height:10px;background:rgba(218,54,51,.4);border-radius:2px;margin-right:3px"></span>Fora da cobertura ⚠</span>':''}
           </div>
         </div>
         <div style="margin-bottom:10px;display:flex;gap:16px;flex-wrap:wrap">
           <div><span style="font-size:11px;color:var(--muted);text-transform:uppercase">Verificação de hash:</span><br>
-            ${integ.hashVerified===true?'<span style="color:var(--accent);font-size:12px;font-weight:600">âœ“ Hash verificado â€” documento íntegro</span>':integ.hashVerified===false?'<span style="color:var(--danger);font-size:12px;font-weight:600">âš  Hash não confere â€” documento adulterado</span>':'<span style="color:var(--muted);font-size:12px">não verificado</span>'}</div>
+            ${integ.hashVerified===true?'<span style="color:var(--accent);font-size:12px;font-weight:600">✓ Hash verificado — documento íntegro</span>':integ.hashVerified===false?'<span style="color:var(--danger);font-size:12px;font-weight:600">⚠ Hash não confere — documento adulterado</span>':'<span style="color:var(--muted);font-size:12px">não verificado</span>'}</div>
         </div>
         ${chainHtml?`<div class="cert-chain"><div style="font-size:11px;color:var(--muted);text-transform:uppercase;margin-bottom:6px">Cadeia de Certificados</div>${chainHtml}</div><hr class="divider">`:''}
         <div><div style="font-size:11px;color:var(--muted);text-transform:uppercase;margin-bottom:8px">Indicadores de Risco desta Assinatura</div><div class="flags-list">${flagsHtml}</div></div>
@@ -1140,13 +1140,13 @@ function buildByteRangeDiagram(br,fileSize){
   const pct=v=>Math.max(1,Math.round(v/total*100));
   const extra=total-(o1+l1);
   let html=`<div class="byterange-bar">`;
-  html+=`<div class="br-signed" style="width:${pct(l0)}%" title="Bytes ${o0}â€“${o0+l0}">`;
+  html+=`<div class="br-signed" style="width:${pct(l0)}%" title="Bytes ${o0}–${o0+l0}">`;
   if(pct(l0)>8) html+=`${l0}B`;
   html+=`</div>`;
   html+=`<div class="br-sig" style="width:${pct(o1-o0-l0)}%" title="Assinatura PKCS#7">`;
   if(pct(o1-o0-l0)>5) html+=`sig`;
   html+=`</div>`;
-  html+=`<div class="br-signed" style="width:${pct(l1)}%" title="Bytes ${o1}â€“${o1+l1}">`;
+  html+=`<div class="br-signed" style="width:${pct(l1)}%" title="Bytes ${o1}–${o1+l1}">`;
   if(pct(l1)>8) html+=`${l1}B`;
   html+=`</div>`;
   if(extra>0) html+=`<div class="br-extra" style="width:${pct(extra)}%" title="Fora da assinatura: ${extra} bytes">+${extra}B</div>`;
@@ -1159,18 +1159,18 @@ function buildChainHtml(cert){
   return cert.chain.map((c,i)=>`
     ${i>0?'<div class="chain-line"></div>':''}
     <div class="cert-level">
-      <div class="cert-icon">${i===0?'ðŸ‘¤':i===cert.chain.length-1?'ðŸ›':'ðŸ”—'}</div>
+      <div class="cert-icon">${i===0?'👤':i===cert.chain.length-1?'🏛':'🔗'}</div>
       <div class="cert-info">
         <strong>${escHtml(c.CN||c.O||'desconhecido')}</strong>
-        ${c.O&&c.CN?`<span> â€” ${escHtml(c.O)}</span>`:''}
+        ${c.O&&c.CN?`<span> — ${escHtml(c.O)}</span>`:''}
         ${c.C?`<span> [${escHtml(c.C)}]</span>`:''}
       </div>
     </div>`).join('');
 }
 
-// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+// ═══════════════════════════════════
 // PKCS#7 / ASN.1 / X.509
-// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+// ═══════════════════════════════════
 function parsePKCS7(bytes){
   const result={subject:{},issuer:{},chain:[],algorithm:'',signingTime:null,notBefore:null,notAfter:null,serialNumber:null,selfSigned:false,expired:false};
   try{
@@ -1283,9 +1283,9 @@ const OID_ATTR={'2.5.4.3':'CN','2.5.4.6':'C','2.5.4.7':'L','2.5.4.8':'ST','2.5.4
 const OID_ALG={'1.2.840.113549.1.1.5':'sha1WithRSA','1.2.840.113549.1.1.11':'sha256WithRSA','1.2.840.113549.1.1.12':'sha384WithRSA','1.2.840.113549.1.1.13':'sha512WithRSA','1.2.840.10045.4.3.2':'sha256WithECDSA','1.2.840.10045.4.3.3':'sha384WithECDSA','1.3.14.3.2.26':'sha1','2.16.840.1.101.3.4.2.1':'sha256','2.16.840.1.101.3.4.2.2':'sha384','2.16.840.1.101.3.4.2.3':'sha512'};
 const oidName=oid=>OID_ALG[oid]||OID_ATTR[oid]||oid;
 
-// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+// ═══════════════════════════════════
 // JPEG / EXIF
-// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+// ═══════════════════════════════════
 function parseJPEG(buffer,file){
   const view=new DataView(buffer),meta={},flags=[];
   if(view.getUint16(0)!==0xFFD8)return{meta:{Erro:'Não é um JPEG válido'},flags};
@@ -1359,9 +1359,9 @@ const fmtExifDate=s=>{if(!s)return s;const m=s.match(/^(\d{4}):(\d{2}):(\d{2}) (
 const orientLabel=v=>({1:'Normal',2:'Flip H',3:'Rotação 180°',4:'Flip V',6:'Rotação 90° CW',8:'Rotação 90° CCW'}[v]||String(v));
 function readStr(view,off,len){let s='';for(let i=0;i<len;i++){const c=view.getUint8(off+i);if(!c)break;s+=String.fromCharCode(c);}return s;}
 
-// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+// ═══════════════════════════════════
 // PDF METADATA
-// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+// ═══════════════════════════════════
 function parsePDF(buffer,file){
   const bytes=new Uint8Array(buffer);
   let text='';
@@ -1370,10 +1370,10 @@ function parsePDF(buffer,file){
   const meta={},flags=[];
   if(!text.startsWith('%PDF'))return{meta:{Erro:'Não é um PDF válido'},flags};
 
-  // â”€â”€ 1. Versão PDF â”€â”€
+  // ── 1. Versão PDF ──
   meta['Versão PDF']=text.substring(1,8).trim();
 
-  // â”€â”€ 2. Campos Info â”€â”€
+  // ── 2. Campos Info ──
   ['Creator','Producer','Author','Title','Subject','Keywords','CreationDate','ModDate'].forEach(f=>{
     const m1=new RegExp('/'+f+'\\s*\\(([\\s\\S]*?)(?<!\\\\)\\)').exec(text);
     if(m1){meta[f]=unescPDF(m1[1]);return;}
@@ -1381,45 +1381,45 @@ function parsePDF(buffer,file){
     if(m2)meta[f]=hexPDF(m2[1].replace(/\s/g,''));
   });
 
-  // â”€â”€ 3. Contagem de páginas â”€â”€
+  // ── 3. Contagem de páginas ──
   const pm=text.match(/\/Type\s*\/Page(?!s)/g);
   const pageCount=pm?pm.length:1;
   meta['Número de Páginas']=pm?pageCount:'(não determinado)';
 
-  // â”€â”€ 4. Linearizado / Otimizado â”€â”€
+  // ── 4. Linearizado / Otimizado ──
   const first1k=text.substring(0,1024);
   meta['Linearizado (Otimizado)']=(/\/Linearized\s+[\d.]+/.test(first1k))?'Sim':'Não';
 
-  // â”€â”€ 5. Tagged â”€â”€
+  // ── 5. Tagged ──
   meta['Tagged']=(/\/Marked\s+true|\/Marked\s+1/.test(text))?'Sim':'Não';
 
-  // â”€â”€ 6. Criptografado â”€â”€
-  meta['Criptografado']=(/\/Encrypt\s+\d+\s+\d+\s+R/.test(text))?'Sim â€” conteúdo protegido':'Não';
+  // ── 6. Criptografado ──
+  meta['Criptografado']=(/\/Encrypt\s+\d+\s+\d+\s+R/.test(text))?'Sim — conteúdo protegido':'Não';
 
-  // â”€â”€ 7. Tamanho da página (MediaBox) â”€â”€
+  // ── 7. Tamanho da página (MediaBox) ──
   const mbm=text.match(/\/MediaBox\s*\[\s*([\d.]+)\s+([\d.]+)\s+([\d.]+)\s+([\d.]+)\s*\]/);
   if(mbm){
     const pw=parseFloat(mbm[3])-parseFloat(mbm[1]);
     const ph=parseFloat(mbm[4])-parseFloat(mbm[2]);
     const mm=(v)=>(v*0.352778).toFixed(0);
-    meta['Tamanho da Página']=`${pw.toFixed(0)} × ${ph.toFixed(0)} pt  (â‰ˆ ${mm(pw)} × ${mm(ph)} mm)`;
+    meta['Tamanho da Página']=`${pw.toFixed(0)} × ${ph.toFixed(0)} pt  (≈ ${mm(pw)} × ${mm(ph)} mm)`;
   }
 
-  // â”€â”€ 8. Fontes â”€â”€
+  // ── 8. Fontes ──
   const fontBaseNames=(text.match(/\/BaseFont\s*\/(\S+)/g)||[]).map(s=>s.replace(/\/BaseFont\s*\//,'').replace(/[+]/,' '));
   const fontUniq=[...new Set(fontBaseNames)];
   const fontEmbedded=(text.match(/\/FontFile[23]?\b/g)||[]).length;
   meta['Fontes Referenciadas']=fontUniq.length>0?fontUniq.slice(0,8).join(', '):'Nenhuma';
-  meta['Fontes Incorporadas']=fontEmbedded>0?`${fontEmbedded} fonte(s) incorporada(s)`:'Nenhuma â€” PDF baseado em imagem';
+  meta['Fontes Incorporadas']=fontEmbedded>0?`${fontEmbedded} fonte(s) incorporada(s)`:'Nenhuma — PDF baseado em imagem';
   if(fontUniq.length===0&&fontEmbedded===0)flags.push('rf-pdf-imagem');
 
-  // â”€â”€ 9. Fragmentação em blocos (XObjects imagem) â”€â”€
+  // ── 9. Fragmentação em blocos (XObjects imagem) ──
   const imgXobj=(text.match(/\/Subtype\s*\/Image/g)||[]).length;
   const avgImg=(imgXobj/Math.max(1,pageCount)).toFixed(1);
-  meta['Imagens XObject']=imgXobj>0?`${imgXobj} bloco(s) de imagem no documento (â‰ˆ${avgImg}/página)`:'Nenhum bloco de imagem XObject';
+  meta['Imagens XObject']=imgXobj>0?`${imgXobj} bloco(s) de imagem no documento (≈${avgImg}/página)`:'Nenhum bloco de imagem XObject';
   if(imgXobj>0&&(imgXobj/Math.max(1,pageCount))>=3)flags.push('rf-pdf-fragmentado');
 
-  // â”€â”€ 10. JpegDump â€” estruturas JPEG internas â”€â”€
+  // ── 10. JpegDump — estruturas JPEG internas ──
   const jpegStreams=(text.match(/\/Filter\s*\/DCTDecode/g)||[]).length;
   let jpegBin=0;
   const binLimit=Math.min(bytes.length,2000000);
@@ -1427,58 +1427,58 @@ function parsePDF(buffer,file){
   if(jpegStreams>0||jpegBin>0){
     meta['JpegDump (JPEG interno)']=`${jpegStreams} stream(s) DCTDecode + ${jpegBin} marcador(es) FF D8 FF`;
   }else{
-    meta['JpegDump (JPEG interno)']='Ausente â€” nenhuma estrutura JPEG interna detectada';
+    meta['JpegDump (JPEG interno)']='Ausente — nenhuma estrutura JPEG interna detectada';
     flags.push('rf-sem-jpegdump');
   }
 
-  // â”€â”€ 11. Autenticação eletrônica (hashes no texto) â”€â”€
+  // ── 11. Autenticação eletrônica (hashes no texto) ──
   const hashRe=/\b([0-9a-fA-F]{64}|[0-9a-fA-F]{40}|[0-9a-fA-F]{32})\b/g;
   const allHashes=[];let hm;
   while((hm=hashRe.exec(text))!==null)allHashes.push(hm[1].toLowerCase());
   const uniqHashes=[...new Set(allHashes)];
   const dupHashes=[...new Set(allHashes.filter((h,i)=>allHashes.indexOf(h)!==i))];
   if(uniqHashes.length>0){
-    meta['Autenticação Eletrônica']=`${uniqHashes.length} hash(es) no texto: ${uniqHashes.slice(0,3).map(h=>h.substring(0,16)+'â€¦').join(', ')}`;
+    meta['Autenticação Eletrônica']=`${uniqHashes.length} hash(es) no texto: ${uniqHashes.slice(0,3).map(h=>h.substring(0,16)+'…').join(', ')}`;
     if(dupHashes.length>0){
-      meta['âš  Hashes Duplicados']=`${dupHashes.length} hash(es) REPETIDO(S) em múltiplas partes â€” impossível em sistema legítimo`;
+      meta['⚠ Hashes Duplicados']=`${dupHashes.length} hash(es) REPETIDO(S) em múltiplas partes — impossível em sistema legítimo`;
       flags.push('rf-hash-duplicado');
     }
   }else{
     meta['Autenticação Eletrônica']='Nenhum hash de autenticação eletrônica encontrado no texto';
   }
 
-  // â”€â”€ 12. Campo de assinatura digital â”€â”€
+  // ── 12. Campo de assinatura digital ──
   const hasSigField=/\/FT\s*\/Sig/.test(text);
   const hasPKCS7=/\/Contents\s*<[0-9A-Fa-f]{20}/.test(text);
   const hasAcroForm=/\/AcroForm/.test(text);
   if(hasSigField||hasPKCS7){
-    meta['Campo de Assinatura']='Campo /Sig presente (AcroForm) â€” assinatura digital ICP-Brasil potencial';
+    meta['Campo de Assinatura']='Campo /Sig presente (AcroForm) — assinatura digital ICP-Brasil potencial';
   }else if(hasAcroForm){
-    meta['Campo de Assinatura']='AcroForm presente, mas sem campo /Sig â€” sem assinatura digital verificável';
+    meta['Campo de Assinatura']='AcroForm presente, mas sem campo /Sig — sem assinatura digital verificável';
     flags.push('rf-sem-assinatura-campo');
   }else{
     meta['Campo de Assinatura']='Nenhum campo de assinatura digital (AcroForm ausente)';
     flags.push('rf-sem-assinatura-campo');
   }
 
-  // â”€â”€ 13. Assinatura é imagem? â”€â”€
+  // ── 13. Assinatura é imagem? ──
   const sigImgPattern=/\/Subtype\s*\/Image[\s\S]{0,300}\/BitsPerComponent\s+8/;
   if(sigImgPattern.test(text)&&!hasSigField){
-    meta['Tipo de Assinatura']='Assinatura provável é imagem rasterizada inserida â€” não é elemento independente verificável';
+    meta['Tipo de Assinatura']='Assinatura provável é imagem rasterizada inserida — não é elemento independente verificável';
     flags.push('rf-assinatura-imagem');
   }else if(hasSigField||hasPKCS7){
     meta['Tipo de Assinatura']='Assinatura digital criptográfica (campo /Sig)';
   }else{
-    meta['Tipo de Assinatura']='Sem assinatura verificável â€” apenas eventual imagem de assinatura manuscrita';
+    meta['Tipo de Assinatura']='Sem assinatura verificável — apenas eventual imagem de assinatura manuscrita';
   }
 
-  // â”€â”€ 14. Tipo do documento (nato-digital vs imagem) â”€â”€
+  // ── 14. Tipo do documento (nato-digital vs imagem) ──
   const isNative=fontUniq.length>0||fontEmbedded>0;
   meta['Tipo de Documento']=isNative
-    ?'Nato-digital â€” contém texto real e fontes incorporadas'
-    :'Baseado em imagem â€” escaneado, reconstruído ou montado (sem fontes)';
+    ?'Nato-digital — contém texto real e fontes incorporadas'
+    :'Baseado em imagem — escaneado, reconstruído ou montado (sem fontes)';
 
-  // â”€â”€ 15. Dados cadastrais â”€â”€
+  // ── 15. Dados cadastrais ──
   const cpfRe=/\b\d{3}[.\s]\d{3}[.\s]\d{3}[-\s]\d{2}\b/g;
   const cpfs=[...new Set((text.match(cpfRe)||[]).map(s=>s.trim()))];
   if(cpfs.length>0){
@@ -1486,13 +1486,13 @@ function parsePDF(buffer,file){
     if(cpfs.length>1)flags.push('rf-dados-conflitantes');
   }
 
-  // â”€â”€ 16. Software flags â”€â”€
+  // ── 16. Software flags ──
   const soft=((meta['Producer']||'')+(meta['Creator']||'')).toLowerCase();
   if(soft.includes('ghostscript'))flags.push('rf-ghostscript');
   else if(soft.includes('inkscape'))flags.push('rf-inkscape');
   else if(soft.includes('pdfcreator')||soft.includes('libreoffice')||soft.includes('openoffice'))flags.push('rf-software-suspeito');
 
-  // â”€â”€ 17. Análise de datas â”€â”€
+  // ── 17. Análise de datas ──
   const cd=meta['CreationDate'],md=meta['ModDate'];
   if(cd&&md){
     const cdO=parsePDFDate(cd),mdO=parsePDFDate(md);
@@ -1510,9 +1510,9 @@ const parsePDFDate=s=>{if(!s)return null;const m=s.match(/D:(\d{4})(\d{2})(\d{2}
 const unescPDF=s=>s.replace(/\\n/g,'\n').replace(/\\r/g,'\r').replace(/\\t/g,'\t').replace(/\\\\/g,'\\').replace(/\\\(/g,'(').replace(/\\\)/g,')').replace(/\\(\d{3})/g,(_,o)=>String.fromCharCode(parseInt(o,8)));
 const hexPDF=h=>{let s='';for(let i=0;i<h.length-1;i+=2)s+=String.fromCharCode(parseInt(h.substr(i,2),16));return s;};
 
-// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+// ═══════════════════════════════════
 // DOCX / XLSX
-// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+// ═══════════════════════════════════
 async function parseDOCX(buffer,file){
   const meta={},flags=[];
   let zip;try{zip=await JSZip.loadAsync(buffer);}catch(e){return{meta:{Erro:'Não foi possível descompactar: '+e.message},flags};}
@@ -1544,9 +1544,9 @@ async function parseDOCX(buffer,file){
   return{meta,flags};
 }
 
-// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+// ═══════════════════════════════════
 // PNG
-// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+// ═══════════════════════════════════
 function parsePNG(buffer,file){
   const view=new DataView(buffer),bytes=new Uint8Array(buffer),meta={},flags=[];
   const sig=[137,80,78,71,13,10,26,10];
@@ -1566,9 +1566,9 @@ function parsePNG(buffer,file){
 }
 const dc=(bytes,start,len)=>{let s='';for(let i=0;i<len;i++)s+=String.fromCharCode(bytes[start+i]);return s;};
 
-// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+// ═══════════════════════════════════
 // pHASH
-// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+// ═══════════════════════════════════
 function scheduleImageHash(buffer,file,ext){
   const url=URL.createObjectURL(new Blob([buffer],{type:ext==='png'?'image/png':'image/jpeg'}));
   const img=new Image();
@@ -1599,18 +1599,18 @@ function dct2D(sig,n){const temp=new Float64Array(n*n),res=new Float64Array(n*n)
 function dct1D(src,dst,sO,dO,n){for(let k=0;k<n;k++){let s=0;for(let i=0;i<n;i++)s+=src[sO+i]*Math.cos(Math.PI/n*(i+.5)*k);dst[dO+k]=s*(k===0?Math.sqrt(1/n):Math.sqrt(2/n));}}
 function dct1DArr(src,dst,n){for(let k=0;k<n;k++){let s=0;for(let i=0;i<n;i++)s+=src[i]*Math.cos(Math.PI/n*(i+.5)*k);dst[k]=s*(k===0?Math.sqrt(1/n):Math.sqrt(2/n));}}
 function hammingDistance(h1,h2){let d=0;for(let i=0;i<h1.length;i+=2){let x=parseInt(h1.substr(i,2),16)^parseInt(h2.substr(i,2),16);while(x){d+=x&1;x>>=1;}}return d;}
-function compareHash(){const ref=document.getElementById('ref-hash-input').value.trim().toLowerCase();const area=document.getElementById('cmp-result-area');if(!currentHash){area.innerHTML='<div class="cmp-result different">Nenhum hash calculado.</div>';return;}if(!/^[0-9a-f]{16}$/.test(ref)){area.innerHTML='<div class="cmp-result different">Hash inválido.</div>';return;}const dist=hammingDistance(currentHash,ref);let cls,label;if(dist===0){cls='identical';label=`ðŸŸ¢ Idênticas (${dist} bits)`;}else if(dist<=10){cls='similar';label=`ðŸŸ¡ Muito similares (${dist} bits)`;}else if(dist<=20){cls='similar';label=`ðŸŸ  Alterações moderadas (${dist} bits)`;}else{cls='different';label=`ðŸ”´ Imagens distintas (${dist} bits)`;}area.innerHTML=`<div class="cmp-result ${cls}">${label}</div>`;}
-function copyHash(){if(!currentHash)return;navigator.clipboard.writeText(currentHash).then(()=>{const btn=document.querySelector('#hash-result .btn');const orig=btn.textContent;btn.textContent='âœ“ Copiado';setTimeout(()=>{btn.textContent=orig;},1500);});}
+function compareHash(){const ref=document.getElementById('ref-hash-input').value.trim().toLowerCase();const area=document.getElementById('cmp-result-area');if(!currentHash){area.innerHTML='<div class="cmp-result different">Nenhum hash calculado.</div>';return;}if(!/^[0-9a-f]{16}$/.test(ref)){area.innerHTML='<div class="cmp-result different">Hash inválido.</div>';return;}const dist=hammingDistance(currentHash,ref);let cls,label;if(dist===0){cls='identical';label=`🟢 Idênticas (${dist} bits)`;}else if(dist<=10){cls='similar';label=`🟡 Muito similares (${dist} bits)`;}else if(dist<=20){cls='similar';label=`🟠 Alterações moderadas (${dist} bits)`;}else{cls='different';label=`🔴 Imagens distintas (${dist} bits)`;}area.innerHTML=`<div class="cmp-result ${cls}">${label}</div>`;}
+function copyHash(){if(!currentHash)return;navigator.clipboard.writeText(currentHash).then(()=>{const btn=document.querySelector('#hash-result .btn');const orig=btn.textContent;btn.textContent='✓ Copiado';setTimeout(()=>{btn.textContent=orig;},1500);});}
 
-// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+// ═══════════════════════════════════
 // EXPORT
-// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+// ═══════════════════════════════════
 function exportReport(){
   if(!currentAnalysis)return;
   const{meta,flags,fileInfo}=currentAnalysis;
   const perito=document.getElementById('perito-nome').value.trim()||'(não informado)';
   const reg=document.getElementById('perito-reg').value.trim()||'(não informado)';
-  const caso=document.getElementById('caso-num').value.trim()||'â€”';
+  const caso=document.getElementById('caso-num').value.trim()||'—';
   const obs=document.getElementById('obs-text').value.trim();
   const score=calcFraudScore(flags);
 
@@ -1624,16 +1624,16 @@ function exportReport(){
 
   const sigsHtml=currentSigs.length?currentSigs.map((sig,i)=>{
     const c=sig.certInfo;const signer=c.subject.CN||c.subject.O||sig.pdfName||'desconhecido';
-    const intTxt=sig.integrity.hashMismatch?'âš  HASH NÃO CONFERE â€” ADULTERADO':sig.integrity.modifiedAfterSig?'âš  CONTEÚDO APÓS ASSINATURA':sig.integrity.hashVerified===true?'âœ“ Íntegra':'não verificada';
-    return`<tr><td style="padding:6px;border:1px solid #ccc;font-weight:bold">${i+1}</td><td style="padding:6px;border:1px solid #ccc">${escHtml(signer)}</td><td style="padding:6px;border:1px solid #ccc">${escHtml(c.subject.O||'â€”')}</td><td style="padding:6px;border:1px solid #ccc">${sig.sigDate||c.signingTime?(sig.sigDate||c.signingTime).toLocaleString('pt-BR'):'â€”'}</td><td style="padding:6px;border:1px solid #ccc">${escHtml(c.algorithm||'â€”')}</td><td style="padding:6px;border:1px solid #ccc;color:${sig.integrity.hashMismatch||sig.integrity.modifiedAfterSig?'#c00':'#155724'}">${intTxt}</td></tr>`;
+    const intTxt=sig.integrity.hashMismatch?'⚠ HASH NÃO CONFERE — ADULTERADO':sig.integrity.modifiedAfterSig?'⚠ CONTEÚDO APÓS ASSINATURA':sig.integrity.hashVerified===true?'✓ Íntegra':'não verificada';
+    return`<tr><td style="padding:6px;border:1px solid #ccc;font-weight:bold">${i+1}</td><td style="padding:6px;border:1px solid #ccc">${escHtml(signer)}</td><td style="padding:6px;border:1px solid #ccc">${escHtml(c.subject.O||'—')}</td><td style="padding:6px;border:1px solid #ccc">${sig.sigDate||c.signingTime?(sig.sigDate||c.signingTime).toLocaleString('pt-BR'):'—'}</td><td style="padding:6px;border:1px solid #ccc">${escHtml(c.algorithm||'—')}</td><td style="padding:6px;border:1px solid #ccc;color:${sig.integrity.hashMismatch||sig.integrity.modifiedAfterSig?'#c00':'#155724'}">${intTxt}</td></tr>`;
   }).join(''):'';
 
   const scoreColor=score>=60?'#c00':score>=30?'#7a5200':'#155724';
   const scoreBg=score>=60?'#ffe0e0':score>=30?'#fff3cd':'#d4edda';
 
-  const html=`<!DOCTYPE html><html lang="pt-BR"><head><meta charset="UTF-8"><title>Relatório PerDoc â€” ${escHtml(fileInfo.name)}</title>
+  const html=`<!DOCTYPE html><html lang="pt-BR"><head><meta charset="UTF-8"><title>Relatório PerDoc — ${escHtml(fileInfo.name)}</title>
 <style>body{font-family:Arial,sans-serif;font-size:13px;color:#1a1a1a;max-width:920px;margin:0 auto;padding:30px 40px;}@media print{body{padding:10px 20px;}}h1{font-size:20px;border-bottom:3px solid #1a1a1a;padding-bottom:6px;margin-bottom:4px;}h2{font-size:13px;text-transform:uppercase;letter-spacing:.6px;color:#555;margin:22px 0 8px;}table{width:100%;border-collapse:collapse;}.info-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px 24px;}.info-item{border-bottom:1px solid #e0e0e0;padding:5px 0;}.lbl{font-size:11px;color:#777;text-transform:uppercase;}.val{font-weight:bold;font-size:13px;}.sha{font-family:monospace;font-size:11px;background:#f0f0f0;padding:8px 12px;border-radius:4px;word-break:break-all;margin:4px 0;}footer{margin-top:40px;border-top:1px solid #ccc;padding-top:12px;font-size:11px;color:#777;}</style></head><body>
-<h1>PerDoc â€” Relatório de Evidências Documentoscópicas</h1>
+<h1>PerDoc — Relatório de Evidências Documentoscópicas</h1>
 <p style="font-size:12px;color:#777;margin-bottom:20px">Gerado por PerDoc v1.4</p>
 <h2>1. Identificação do Caso</h2>
 <div class="info-grid">
@@ -1658,7 +1658,7 @@ function exportReport(){
 <div style="display:flex;align-items:center;gap:16px;margin-bottom:10px">
   <div style="font-size:42px;font-weight:bold;color:${scoreColor}">${score}<span style="font-size:18px">/100</span></div>
   <div style="flex:1"><div style="background:#e0e0e0;border-radius:5px;height:12px;overflow:hidden"><div style="width:${Math.min(score,100)}%;height:100%;background:${scoreColor};border-radius:5px"></div></div>
-  <div style="margin-top:6px;padding:6px 12px;background:${scoreBg};border-radius:4px;font-weight:bold;color:${scoreColor};font-size:13px">${score>=60?'âš  Alto risco â€” múltiplos indicadores de adulteração':score>=30?'âš¡ Risco moderado â€” verificação adicional recomendada':'âœ“ Baixo risco â€” nenhum indicador significativo detectado'}</div></div>
+  <div style="margin-top:6px;padding:6px 12px;background:${scoreBg};border-radius:4px;font-weight:bold;color:${scoreColor};font-size:13px">${score>=60?'⚠ Alto risco — múltiplos indicadores de adulteração':score>=30?'⚡ Risco moderado — verificação adicional recomendada':'✓ Baixo risco — nenhum indicador significativo detectado'}</div></div>
 </div>
 <h2>6. Indicadores de Risco (Red Flags)</h2>${flagsHtml}
 ${sigsHtml?`<h2>7. Assinaturas Digitais</h2><table style="font-size:12px"><tr style="background:#f5f5f5"><th style="padding:6px;border:1px solid #ccc">Nº</th><th style="padding:6px;border:1px solid #ccc">Signatário</th><th style="padding:6px;border:1px solid #ccc">Organização</th><th style="padding:6px;border:1px solid #ccc">Data/Hora</th><th style="padding:6px;border:1px solid #ccc">Algoritmo</th><th style="padding:6px;border:1px solid #ccc">Integridade</th></tr>${sigsHtml}</table>`:''}
@@ -1679,7 +1679,7 @@ ${currentEvidences.map(ev=>{
   <div style="padding:8px 14px;font-size:12px;color:#444;line-height:1.6;background:#fff"><b>Significância pericial:</b> ${ev.significance}</div>
 </div>`;}).join('')}`:''}
 ${obs?`<h2>${sigsHtml?(currentEvidences.length?'9':'8'):(currentEvidences.length?'8':'7')}. Observações do Perito</h2><p style="background:#f9f9f9;border-left:4px solid #333;padding:10px 14px;font-size:13px;line-height:1.6">${escHtml(obs).replace(/\n/g,'<br>')}</p>`:''}
-<footer><p><strong>PerDoc v1.4</strong> â€” Análise documentoscópica digital com evidências documentadas. Gerado em ${new Date().toLocaleString('pt-BR')}.</p>
+<footer><p><strong>PerDoc v1.4</strong> — Análise documentoscópica digital com evidências documentadas. Gerado em ${new Date().toLocaleString('pt-BR')}.</p>
 <p style="margin-top:8px;font-style:italic">As conclusões deste relatório devem ser interpretadas por perito habilitado no contexto do exame documentoscópico.</p></footer>
 </body></html>`;
 
@@ -1693,11 +1693,11 @@ function exportTxt(){
   const{meta,flags,fileInfo}=currentAnalysis;
   const perito=document.getElementById('perito-nome').value.trim()||'(não informado)';
   const reg=document.getElementById('perito-reg').value.trim()||'(não informado)';
-  const caso=document.getElementById('caso-num').value.trim()||'â€”';
+  const caso=document.getElementById('caso-num').value.trim()||'—';
   const obs=document.getElementById('obs-text').value.trim();
   const score=calcFraudScore(flags);
-  const sep='â”€'.repeat(60);
-  let txt=`PERDOC v1.4 â€” RELATÓRIO DE EVIDÊNCIAS DOCUMENTOSCÓPICAS\n${sep}\n`;
+  const sep='─'.repeat(60);
+  let txt=`PERDOC v1.4 — RELATÓRIO DE EVIDÊNCIAS DOCUMENTOSCÓPICAS\n${sep}\n`;
   txt+=`Data/Hora            : ${fileInfo.analysisTime}\nPerito               : ${perito}\nMatrícula            : ${reg}\nNº do Caso           : ${caso}\n\n`;
   txt+=`DOCUMENTO\n${sep}\nNome    : ${fileInfo.name}\nTipo    : ${fileInfo.ext.toUpperCase()}\nTamanho : ${formatBytes(fileInfo.size)}\nModif SO: ${fileInfo.lastModified.toLocaleString('pt-BR')}\nSHA-256 : ${fileInfo.sha256}\n\n`;
   const exames=buildExames(meta,flags,fileInfo.ext);
@@ -1706,9 +1706,9 @@ function exportTxt(){
   txt+=`\nMETADADOS\n${sep}\n`;
   Object.entries(meta).filter(([,v])=>v!=null&&v!=='').forEach(([k,v])=>{txt+=`${k.padEnd(30)}: ${v}\n`;});
   txt+=`\nFRAUDSCORE: ${score}/100\n\nRED FLAGS\n${sep}\n`;
-  if(flags.length)flags.forEach(f=>{txt+=`âš‘ ${f}\n  ${FLAG_DESCS[f]||''}\n\n`;});
+  if(flags.length)flags.forEach(f=>{txt+=`⚑ ${f}\n  ${FLAG_DESCS[f]||''}\n\n`;});
   else txt+='Nenhum.\n';
-  if(currentSigs.length){txt+=`\nASSINATURAS DIGITAIS\n${sep}\n`;currentSigs.forEach((sig,i)=>{const c=sig.certInfo;txt+=`\nAssinatura ${i+1}\n  Signatário: ${c.subject.CN||c.subject.O||sig.pdfName||'desconhecido'}\n`;if(c.subject.O)txt+=`  Organização: ${c.subject.O}\n`;const t=sig.sigDate||c.signingTime;if(t)txt+=`  Data/Hora: ${t.toLocaleString('pt-BR')}\n`;txt+=`  Algoritmo: ${c.algorithm||'â€”'}\n  Emitente: ${(c.issuer&&(c.issuer.CN||c.issuer.O))||'desconhecido'}\n  Integridade: ${sig.integrity.hashMismatch?'FALHOU':sig.integrity.modifiedAfterSig?'MODIFICADO PÓS-ASSINATURA':sig.integrity.hashVerified===true?'OK':'não verificada'}\n`;if(sig.flags.length)txt+=`  Flags: ${sig.flags.join(', ')}\n`;});}
+  if(currentSigs.length){txt+=`\nASSINATURAS DIGITAIS\n${sep}\n`;currentSigs.forEach((sig,i)=>{const c=sig.certInfo;txt+=`\nAssinatura ${i+1}\n  Signatário: ${c.subject.CN||c.subject.O||sig.pdfName||'desconhecido'}\n`;if(c.subject.O)txt+=`  Organização: ${c.subject.O}\n`;const t=sig.sigDate||c.signingTime;if(t)txt+=`  Data/Hora: ${t.toLocaleString('pt-BR')}\n`;txt+=`  Algoritmo: ${c.algorithm||'—'}\n  Emitente: ${(c.issuer&&(c.issuer.CN||c.issuer.O))||'desconhecido'}\n  Integridade: ${sig.integrity.hashMismatch?'FALHOU':sig.integrity.modifiedAfterSig?'MODIFICADO PÓS-ASSINATURA':sig.integrity.hashVerified===true?'OK':'não verificada'}\n`;if(sig.flags.length)txt+=`  Flags: ${sig.flags.join(', ')}\n`;});}
   if(currentHash)txt+=`\npHASH DCT: ${currentHash}\n`;
   if(obs)txt+=`\nOBSERVAÇÕES\n${sep}\n${obs}\n`;
   txt+=`\n${sep}\nGerado por PerDoc v1.4 em ${new Date().toLocaleString('pt-BR')}\n`;
@@ -1718,9 +1718,9 @@ function exportTxt(){
 const formatBytes=b=>b<1024?b+' B':b<1048576?(b/1024).toFixed(1)+' KB':(b/1048576).toFixed(2)+' MB';
 const escHtml=s=>String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
 
-// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+// ═══════════════════════════════════
 // FORENSE TAB
-// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+// ═══════════════════════════════════
 let _forenseBuffer=null,_forenseExt=null,_forenseImg=null;
 
 function initForense(buffer,ext,imgEl){
@@ -1844,7 +1844,7 @@ function jpegMarkerName(b){
   return m[b]||('FF'+b.toString(16).toUpperCase().padStart(2,'0'));
 }
 
-// ELA â€” Error Level Analysis
+// ELA — Error Level Analysis
 async function computeELA(imgSrc){
   const QUALITY=0.95,AMPLIFY=15;
   const img=new Image();
@@ -1883,14 +1883,14 @@ async function computeELA(imgSrc){
   elaCanvas.getContext('2d').putImageData(out,0,0);
   document.getElementById('ela-note').textContent=`Diferença máxima: ${maxDiff} níveis · fator de amplificação: ×${AMPLIFY} · imagem: ${W}×${H} px`;
   // Evidence capture
-  const elaOrig=captureCanvasEvidence('ela-canvas','ELA â€” diferença amplificada ×15');
+  const elaOrig=captureCanvasEvidence('ela-canvas','ELA — diferença amplificada ×15');
   if(elaOrig) addEvidence({
-    title:'ELA â€” Error Level Analysis (Análise de Nível de Erro)',
+    title:'ELA — Error Level Analysis (Análise de Nível de Erro)',
     status:maxDiff>30?'fail':maxDiff>15?'warn':'ok',
     data:`Diferença máxima: ${maxDiff} níveis\nFator: ×${AMPLIFY}\nDimensões: ${W}×${H} px`,
     imgs:[elaOrig],
     significance:maxDiff>30
-      ?'ELA revela diferenças significativas entre a imagem original e a recomprimida. Regiões mais claras indicam áreas de maior diferença â€” típico de elementos inseridos, colados ou reprocessados em momento distinto do restante da imagem. Forte indício de manipulação.'
+      ?'ELA revela diferenças significativas entre a imagem original e a recomprimida. Regiões mais claras indicam áreas de maior diferença — típico de elementos inseridos, colados ou reprocessados em momento distinto do restante da imagem. Forte indício de manipulação.'
       :maxDiff>15
         ?'ELA apresenta variações moderadas. Pode indicar diferentes origens de compressão em partes da imagem. Verificar visualmente as regiões mais claras.'
         :'ELA uniforme. Nenhuma região com diferença de nível de erro acima do esperado para imagem não manipulada.'
@@ -1939,7 +1939,7 @@ async function computeNoiseResidual(imgSrc){
   const std=Math.sqrt(sum2/residuals.length-mean*mean);
   const threshold=mean+2*std;
 
-  // Grid map â€” each cell = avg residual
+  // Grid map — each cell = avg residual
   const cellW=W/GRID,cellH=H/GRID;
   const gridVals=new Float32Array(GRID*GRID);
   for(let gy=0;gy<GRID;gy++){
@@ -1976,9 +1976,9 @@ async function computeNoiseResidual(imgSrc){
 
   // Interpretation
   let interp='',color='var(--text)';
-  if(anomalyCells===0){interp='âœ… Padrão de ruído uniforme em toda a imagem. Nenhuma região com inconsistência detectável.';color='#3fb950';}
-  else if(anomalyCells<=3){interp=`âš¡ ${anomalyCells} região(ões) com ruído levemente elevado. Pode indicar compressão diferencial ou leve edição. Verificar visualmente as áreas destacadas em vermelho no mapa.`;color='#f0b429';}
-  else{interp=`âš  ${anomalyCells} célula(s) com ruído anômalo (${(anomalyCells*100/(GRID*GRID)).toFixed(0)}% da imagem). Forte indício de elementos inseridos digitalmente, montagem ou origens distintas. Bordas serrilhadas, halo e pixelização irregular são típicos de assinaturas ou textos colados como imagem.`;color='#f85149';}
+  if(anomalyCells===0){interp='✅ Padrão de ruído uniforme em toda a imagem. Nenhuma região com inconsistência detectável.';color='#3fb950';}
+  else if(anomalyCells<=3){interp=`⚡ ${anomalyCells} região(ões) com ruído levemente elevado. Pode indicar compressão diferencial ou leve edição. Verificar visualmente as áreas destacadas em vermelho no mapa.`;color='#f0b429';}
+  else{interp=`⚠ ${anomalyCells} célula(s) com ruído anômalo (${(anomalyCells*100/(GRID*GRID)).toFixed(0)}% da imagem). Forte indício de elementos inseridos digitalmente, montagem ou origens distintas. Bordas serrilhadas, halo e pixelização irregular são típicos de assinaturas ou textos colados como imagem.`;color='#f85149';}
   document.getElementById('noise-interpretation').innerHTML=`<span style="color:${color}">${interp}</span>`;
   // Evidence capture
   const noiseImgs=[
@@ -1991,7 +1991,7 @@ async function computeNoiseResidual(imgSrc){
     data:`Média do resíduo : ${mean.toFixed(2)}\nDesvio padrão    : ${std.toFixed(2)}\nMáximo           : ${maxR.toFixed(1)}\nLimiar de anomalia: ${threshold.toFixed(1)}\nCélulas anômalas : ${anomalyCells} de ${GRID*GRID} (${(anomalyCells*100/(GRID*GRID)).toFixed(1)}%)\nDimensões        : ${W}×${H} px`,
     imgs:noiseImgs,
     significance:anomalyCells>3
-      ?`${anomalyCells} células com ruído anômalo. Bordas serrilhadas, halo e pixelização irregular indicam elementos inseridos digitalmente. No mapa, células vermelhas representam regiões com desvio de ruído acima de 2 desvios-padrão da média â€” padrão consistente com assinatura ou texto colado como imagem.`
+      ?`${anomalyCells} células com ruído anômalo. Bordas serrilhadas, halo e pixelização irregular indicam elementos inseridos digitalmente. No mapa, células vermelhas representam regiões com desvio de ruído acima de 2 desvios-padrão da média — padrão consistente com assinatura ou texto colado como imagem.`
       :anomalyCells>0
         ?`${anomalyCells} região(ões) com ruído levemente elevado. Verificar visualmente as áreas destacadas no mapa.`
         :'Padrão de ruído uniforme. Nenhuma região com inconsistência detectável por análise residual.'
@@ -2066,14 +2066,14 @@ function computeEntropy(buffer){
 
   // Interpretation
   let interp='',color='var(--text)';
-  if(entropy>7.5){interp='âœ… Entropia alta (>7.5) â€” arquivo fortemente comprimido ou cifrado. Padrão normal para PDF/JPEG com conteúdo real.';}
-  else if(entropy>5){interp='âš¡ Entropia moderada (5â€“7.5) â€” mistura de texto, imagens e metadados. Verificar blocos de baixa entropia que podem indicar regiões preenchidas artificialmente.';}
-  else{interp='âš  Entropia baixa (<5) â€” documento com pouco conteúdo variado. Pode indicar arquivo vazio, preenchido com padrões repetitivos, ou gerado artificialmente.';}
-  if(lowBlocks>10)interp+=` | ${lowBlocks} blocos de baixa entropia â€” possíveis regiões em branco, padding ou estruturas artificiais inseridas.`;
+  if(entropy>7.5){interp='✅ Entropia alta (>7.5) — arquivo fortemente comprimido ou cifrado. Padrão normal para PDF/JPEG com conteúdo real.';}
+  else if(entropy>5){interp='⚡ Entropia moderada (5–7.5) — mistura de texto, imagens e metadados. Verificar blocos de baixa entropia que podem indicar regiões preenchidas artificialmente.';}
+  else{interp='⚠ Entropia baixa (<5) — documento com pouco conteúdo variado. Pode indicar arquivo vazio, preenchido com padrões repetitivos, ou gerado artificialmente.';}
+  if(lowBlocks>10)interp+=` | ${lowBlocks} blocos de baixa entropia — possíveis regiões em branco, padding ou estruturas artificiais inseridas.`;
   document.getElementById('entropy-interpretation').innerHTML=`<span style="color:${color}">${interp}</span>`;
   // Evidence capture
   const entropyImgs=[
-    captureCanvasEvidence('entropy-chart','Histograma de frequência de bytes (0x00â€“0xFF)'),
+    captureCanvasEvidence('entropy-chart','Histograma de frequência de bytes (0x00–0xFF)'),
     captureCanvasEvidence('entropy-map','Mapa de entropia por bloco (verde=alta, vermelho=baixa)'),
   ].filter(Boolean);
   addEvidence({
@@ -2082,10 +2082,10 @@ function computeEntropy(buffer){
     data:`Entropia global      : ${entropy.toFixed(4)} bits/byte\nBlocos analisados    : ${BLOCKS}\nBlocos baixa entropia: ${lowBlocks} (< 3 bits/byte)\nBlocos alta entropia : ${highBlocks} (> 7.5 bits/byte)\nEntropia mín. bloco  : ${minE.toFixed(2)}\nEntropia máx. bloco  : ${maxE.toFixed(2)}`,
     imgs:entropyImgs,
     significance:entropy>7.5
-      ?'Entropia alta â€” arquivo fortemente comprimido. Padrão normal para PDF com conteúdo real e imagens. O histograma de bytes e o mapa de blocos confirmam distribuição consistente com documento legítimo.'
+      ?'Entropia alta — arquivo fortemente comprimido. Padrão normal para PDF com conteúdo real e imagens. O histograma de bytes e o mapa de blocos confirmam distribuição consistente com documento legítimo.'
       :entropy>5
         ?`Entropia moderada. Mistura de regiões comprimidas e não comprimidas. ${lowBlocks>5?`${lowBlocks} blocos de baixa entropia podem indicar regiões com dados artificialmente inseridos ou áreas em branco.`:''}`
-        :`Entropia baixa (${entropy.toFixed(2)} bits/byte). Distribuição de bytes com pouca variação â€” atípico para documentos reais. Pode indicar arquivo gerado artificialmente, preenchido com padrões repetitivos ou com estrutura binária anômala.`
+        :`Entropia baixa (${entropy.toFixed(2)} bits/byte). Distribuição de bytes com pouca variação — atípico para documentos reais. Pode indicar arquivo gerado artificialmente, preenchido com padrões repetitivos ou com estrutura binária anômala.`
   });
 }
 
