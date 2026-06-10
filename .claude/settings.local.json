@@ -1,0 +1,7 @@
+{
+  "permissions": {
+    "allow": [
+      "PowerShell(Get-Command \"GitHub Desktop\" -ErrorAction SilentlyContinue; Test-Path \"$env:LOCALAPPDATA\\\\GitHubDesktop\\\\GitHubDesktop.exe\"; Test-Path \"$env:APPDATA\\\\GitHub Desktop\\\\GitHubDesktop.exe\")"
+    ]
+  }
+}
