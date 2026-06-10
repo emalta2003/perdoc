@@ -131,6 +131,21 @@ header{background:var(--surface);border-bottom:1px solid var(--border);padding:1
 .br-sig{background:rgba(31,111,235,.35);display:flex;align-items:center;justify-content:center;font-size:9px;color:#79b8ff;font-weight:700;}
 .br-extra{background:rgba(218,54,51,.35);display:flex;align-items:center;justify-content:center;font-size:10px;color:#ff6b6b;font-weight:700;}
 
+/* ── Forense ── */
+.forense-empty{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:60px 20px;color:var(--muted);gap:10px;}
+.hex-controls{display:flex;align-items:center;flex-wrap:wrap;gap:6px;margin-bottom:10px;font-size:13px;color:var(--text);}
+.hex-controls input,.hex-controls select{background:var(--bg);border:1px solid var(--border);border-radius:4px;padding:3px 6px;color:var(--text);font-size:12px;}
+.hex-sections{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:10px;}
+.hex-section-badge{font-size:11px;padding:2px 8px;border-radius:10px;font-weight:600;cursor:pointer;}
+.hex-viewer{font-family:'Cascadia Code',Consolas,monospace;font-size:11.5px;line-height:1.7;background:var(--bg);border:1px solid var(--border);border-radius:6px;padding:12px;overflow-x:auto;white-space:pre;color:var(--text);max-height:380px;overflow-y:auto;}
+.hex-hl-marker{background:rgba(210,153,34,.35);border-radius:2px;}
+.hex-hl-sig{background:rgba(35,134,54,.3);border-radius:2px;}
+.hex-hl-eof{background:rgba(248,81,73,.3);border-radius:2px;}
+.ela-wrap{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+@media(max-width:600px){.ela-wrap{grid-template-columns:1fr;}}
+.ela-col{display:flex;flex-direction:column;gap:6px;}
+.ela-label{font-size:12px;font-weight:600;color:var(--muted);}
+.ela-img{width:100%;max-height:280px;object-fit:contain;border-radius:6px;border:1px solid var(--border);background:var(--bg);}
 /* ── pHash ── */
 .phash-layout{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
 @media(max-width:600px){.phash-layout{grid-template-columns:1fr;}}
@@ -202,6 +217,7 @@ hr.divider{border:none;border-top:1px solid var(--border);margin:14px 0;}
     <button class="tab-btn active" data-tab="meta">📋 Metadados</button>
     <button class="tab-btn" data-tab="sig">🔏 Assinaturas<span class="sig-count" id="sig-count" style="display:none">0</span></button>
     <button class="tab-btn" data-tab="hash">🔢 Hash Perceptual</button>
+    <button class="tab-btn" data-tab="forense">🔬 Forense</button>
   </div>
 
   <!-- ══ METADADOS TAB ══ -->
@@ -303,6 +319,70 @@ hr.divider{border:none;border-top:1px solid var(--border);margin:14px 0;}
     </div>
   </div>
 
+  <!-- ══ FORENSE TAB ══ -->
+  <div id="tab-forense" class="tab-panel">
+    <div class="forense-empty" id="forense-empty"><div class="es-icon">🔬</div><div>Carregue um documento para análise forense</div></div>
+    <div id="forense-results" style="display:none">
+
+      <!-- Hex Viewer -->
+      <div class="card">
+        <div class="card-title">Dump Hexadecimal</div>
+        <div class="hex-controls">
+          <label>Offset inicial: <input type="number" id="hex-offset" value="0" min="0" style="width:80px"></label>
+          <label style="margin-left:12px">Bytes: <select id="hex-length">
+            <option value="256">256</option>
+            <option value="512" selected>512</option>
+            <option value="1024">1 KB</option>
+            <option value="4096">4 KB</option>
+            <option value="8192">8 KB</option>
+          </select></label>
+          <button class="btn" style="margin-left:12px;padding:3px 10px" onclick="refreshHex()">Atualizar</button>
+          <span id="hex-file-size" style="margin-left:16px;color:var(--muted);font-size:12px"></span>
+        </div>
+        <div class="hex-sections" id="hex-sections"></div>
+        <pre class="hex-viewer" id="hex-viewer"></pre>
+      </div>
+
+      <!-- ELA -->
+      <div class="card" id="ela-card" style="display:none">
+        <div class="card-title">ELA — Error Level Analysis</div>
+        <div style="font-size:12px;color:var(--muted);margin-bottom:10px">
+          Recomprime a imagem em JPEG qualidade 95 e amplifica as diferenças pixel a pixel (×15). Regiões editadas, coladas ou reprocessadas aparecem com brilho maior que o fundo.
+        </div>
+        <div class="ela-wrap">
+          <div class="ela-col">
+            <div class="ela-label">Original</div>
+            <img id="ela-original" class="ela-img" alt="Original">
+          </div>
+          <div class="ela-col">
+            <div class="ela-label">ELA (diferença amplificada)</div>
+            <canvas id="ela-canvas" class="ela-img"></canvas>
+          </div>
+        </div>
+        <div id="ela-note" style="font-size:12px;color:var(--muted);margin-top:8px"></div>
+      </div>
+
+      <!-- Noise Residual -->
+      <div class="card" id="noise-card" style="display:none">
+        <div class="card-title">Análise de Ruído Residual</div>
+        <div style="font-size:12px;color:var(--muted);margin-bottom:10px">
+          Subtrai a versão suavizada (blur 3 px) da imagem original e amplifica o resíduo (×8). Inconsistências no padrão de ruído indicam regiões manipuladas ou com origens distintas.
+        </div>
+        <div class="ela-wrap">
+          <div class="ela-col">
+            <div class="ela-label">Original</div>
+            <img id="noise-original" class="ela-img" alt="Original">
+          </div>
+          <div class="ela-col">
+            <div class="ela-label">Ruído residual (amplificado)</div>
+            <canvas id="noise-canvas" class="ela-img"></canvas>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
 </div>
 
 <script>
@@ -351,6 +431,9 @@ async function handleFile(file){
   const analysisTime=new Date().toLocaleString('pt-BR',{dateStyle:'short',timeStyle:'medium'});
   currentAnalysis={...result,fileInfo:{name:file.name,size:file.size,lastModified:new Date(file.lastModified),ext,sha256,analysisTime}};
   renderResults(result,file,ext,sha256,analysisTime);
+  // Forense tab (hex dump; ELA/noise added later when image loads)
+  const isImg=ext==='jpg'||ext==='jpeg'||ext==='png';
+  if(!isImg) initForense(buf,ext,null);
 
   // Assinaturas
   resetSigTab();
@@ -1052,6 +1135,7 @@ function scheduleImageHash(buffer,file,ext){
     document.getElementById('hash-value').textContent=h;
     document.getElementById('cmp-result-area').innerHTML='';
     if(currentAnalysis)currentAnalysis.pHash=h;
+    initForense(buffer,ext,img);
   };
   img.src=url;
 }
@@ -1172,6 +1256,206 @@ function exportTxt(){
 
 const formatBytes=b=>b<1024?b+' B':b<1048576?(b/1024).toFixed(1)+' KB':(b/1048576).toFixed(2)+' MB';
 const escHtml=s=>String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+
+// ═══════════════════════════════════
+// FORENSE TAB
+// ═══════════════════════════════════
+let _forenseBuffer=null,_forenseExt=null,_forenseImg=null;
+
+function initForense(buffer,ext,imgEl){
+  _forenseBuffer=buffer;_forenseExt=ext;_forenseImg=imgEl||null;
+  document.getElementById('forense-empty').style.display='none';
+  document.getElementById('forense-results').style.display='';
+  document.getElementById('hex-file-size').textContent='Tamanho: '+formatBytes(buffer.byteLength);
+  document.getElementById('hex-offset').value=0;
+  renderHexDump();
+  const isImg=ext==='jpg'||ext==='jpeg'||ext==='png';
+  document.getElementById('ela-card').style.display=isImg?'':'none';
+  document.getElementById('noise-card').style.display=isImg?'':'none';
+  if(isImg&&imgEl){
+    document.getElementById('ela-original').src=imgEl.src||imgEl;
+    document.getElementById('noise-original').src=imgEl.src||imgEl;
+    computeELA(imgEl);
+    computeNoiseResidual(imgEl);
+  }
+}
+
+function refreshHex(){renderHexDump();}
+
+function renderHexDump(){
+  if(!_forenseBuffer)return;
+  const buf=_forenseBuffer,dv=new DataView(buf);
+  const off=Math.max(0,parseInt(document.getElementById('hex-offset').value)||0);
+  const len=Math.min(parseInt(document.getElementById('hex-length').value)||512,buf.byteLength-off);
+  const bytes=new Uint8Array(buf,off,len);
+
+  // detect important sections for current file type
+  const sections=detectSections(_forenseBuffer,_forenseExt,off,off+len);
+  renderSectionBadges(sections);
+
+  let html='';
+  const COLS=16;
+  for(let r=0;r<bytes.length;r+=COLS){
+    const addr=(off+r).toString(16).padStart(8,'0').toUpperCase();
+    let hexPart='',ascPart='';
+    for(let c=0;c<COLS;c++){
+      if(r+c<bytes.length){
+        const b=bytes[r+c];
+        const globalOff=off+r+c;
+        const cls=getSectionClass(sections,globalOff);
+        const hex=b.toString(16).padStart(2,'0').toUpperCase();
+        const asc=(b>=32&&b<127)?escHtml(String.fromCharCode(b)):'.';
+        if(cls){hexPart+=`<span class="${cls}">${hex}</span> `;ascPart+=`<span class="${cls}">${asc}</span>`;}
+        else{hexPart+=hex+' ';ascPart+=asc;}
+      }else{hexPart+='   ';ascPart+=' ';}
+      if(c===7){hexPart+=' ';ascPart+=' ';}
+    }
+    html+=`<span style="color:var(--muted)">${addr}</span>  ${hexPart} <span style="color:var(--muted)">|</span>${ascPart}<span style="color:var(--muted)">|</span>\n`;
+  }
+  document.getElementById('hex-viewer').innerHTML=html;
+}
+
+function detectSections(buf,ext,visStart,visEnd){
+  const sections=[];
+  const b=new Uint8Array(buf);
+  if(ext==='jpg'||ext==='jpeg'){
+    // mark JPEG markers (FF xx)
+    for(let i=0;i<b.length-1;i++){
+      if(b[i]===0xFF&&b[i+1]!==0x00&&b[i+1]!==0xFF){
+        const name=jpegMarkerName(b[i+1]);
+        sections.push({start:i,end:i+2,cls:'hex-hl-marker',label:name});
+        i++;
+      }
+    }
+  } else if(ext==='pdf'){
+    // mark %PDF header, xref, %%EOF, startxref
+    const text=new TextDecoder('latin1').decode(buf);
+    const patterns=[
+      {re:/%PDF-[\d.]+/g,cls:'hex-hl-marker',label:'Header PDF'},
+      {re:/%%EOF/g,cls:'hex-hl-eof',label:'%%EOF'},
+      {re:/startxref/g,cls:'hex-hl-sig',label:'startxref'},
+      {re:/\/ByteRange/g,cls:'hex-hl-sig',label:'ByteRange'},
+      {re:/obj\b/g,cls:'hex-hl-marker',label:'obj'},
+    ];
+    patterns.forEach(({re,cls,label})=>{
+      let m;re.lastIndex=0;
+      while((m=re.exec(text))!==null){
+        sections.push({start:m.index,end:m.index+m[0].length,cls,label});
+      }
+    });
+  } else if(ext==='png'){
+    // PNG chunks: signature + chunk headers
+    if(b.length>=8){
+      sections.push({start:0,end:8,cls:'hex-hl-marker',label:'PNG Sig'});
+    }
+    let pos=8;
+    while(pos+12<=b.length){
+      const len=(b[pos]<<24|b[pos+1]<<16|b[pos+2]<<8|b[pos+3])>>>0;
+      const type=String.fromCharCode(b[pos+4],b[pos+5],b[pos+6],b[pos+7]);
+      sections.push({start:pos,end:pos+8,cls:'hex-hl-marker',label:type});
+      pos+=12+len;
+    }
+  }
+  return sections;
+}
+
+function getSectionClass(sections,off){
+  for(const s of sections){if(off>=s.start&&off<s.end)return s.cls;}
+  return null;
+}
+
+function renderSectionBadges(sections){
+  const seen=new Set(),badges=[];
+  sections.forEach(s=>{
+    const k=s.label+'|'+s.cls;
+    if(!seen.has(k)){seen.add(k);badges.push(s);}
+  });
+  const colors={'hex-hl-marker':'rgba(210,153,34,.6)','hex-hl-sig':'rgba(35,134,54,.6)','hex-hl-eof':'rgba(248,81,73,.6)'};
+  document.getElementById('hex-sections').innerHTML=badges.slice(0,20).map(s=>
+    `<span class="hex-section-badge" style="background:${colors[s.cls]||'rgba(100,100,100,.4)'};color:var(--text)">${escHtml(s.label)}</span>`
+  ).join('');
+}
+
+function jpegMarkerName(b){
+  const m={0xD8:'SOI',0xE0:'APP0',0xE1:'APP1/EXIF',0xE2:'APP2',0xDB:'DQT',0xC0:'SOF0',0xC2:'SOF2',0xC4:'DHT',0xDA:'SOS',0xD9:'EOI',0xFE:'COM',0xDD:'DRI'};
+  return m[b]||('FF'+b.toString(16).toUpperCase().padStart(2,'0'));
+}
+
+// ELA — Error Level Analysis
+async function computeELA(imgSrc){
+  const QUALITY=0.95,AMPLIFY=15;
+  const img=new Image();
+  img.crossOrigin='anonymous';
+  await new Promise(res=>{img.onload=res;img.onerror=res;img.src=typeof imgSrc==='string'?imgSrc:imgSrc.src;});
+  const W=img.naturalWidth,H=img.naturalHeight;
+  if(!W||!H){document.getElementById('ela-note').textContent='Não foi possível processar a imagem.';return;}
+
+  // draw original
+  const c1=document.createElement('canvas');c1.width=W;c1.height=H;
+  const ctx1=c1.getContext('2d');ctx1.drawImage(img,0,0);
+  const orig=ctx1.getImageData(0,0,W,H);
+
+  // recompress
+  const dataURL=c1.toDataURL('image/jpeg',QUALITY);
+  const img2=new Image();
+  await new Promise(res=>{img2.onload=res;img2.src=dataURL;});
+  const c2=document.createElement('canvas');c2.width=W;c2.height=H;
+  const ctx2=c2.getContext('2d');ctx2.drawImage(img2,0,0);
+  const comp=ctx2.getImageData(0,0,W,H);
+
+  // diff amplified
+  const out=ctx2.createImageData(W,H);
+  let maxDiff=0;
+  for(let i=0;i<orig.data.length;i+=4){
+    const dr=Math.abs(orig.data[i]-comp.data[i]);
+    const dg=Math.abs(orig.data[i+1]-comp.data[i+1]);
+    const db=Math.abs(orig.data[i+2]-comp.data[i+2]);
+    const v=Math.round((dr+dg+db)/3);
+    if(v>maxDiff)maxDiff=v;
+    const a=Math.min(255,v*AMPLIFY);
+    out.data[i]=a;out.data[i+1]=a;out.data[i+2]=a;out.data[i+3]=255;
+  }
+  const elaCanvas=document.getElementById('ela-canvas');
+  elaCanvas.width=W;elaCanvas.height=H;
+  elaCanvas.getContext('2d').putImageData(out,0,0);
+  document.getElementById('ela-note').textContent=`Diferença máxima: ${maxDiff} níveis · fator de amplificação: ×${AMPLIFY} · imagem: ${W}×${H} px`;
+}
+
+// Noise Residual Analysis
+async function computeNoiseResidual(imgSrc){
+  const AMPLIFY=8;
+  const img=new Image();
+  img.crossOrigin='anonymous';
+  await new Promise(res=>{img.onload=res;img.onerror=res;img.src=typeof imgSrc==='string'?imgSrc:imgSrc.src;});
+  const W=img.naturalWidth,H=img.naturalHeight;
+  if(!W||!H)return;
+
+  // draw original
+  const c1=document.createElement('canvas');c1.width=W;c1.height=H;
+  c1.getContext('2d').drawImage(img,0,0);
+  const orig=c1.getContext('2d').getImageData(0,0,W,H);
+
+  // blurred version via CSS filter on offscreen canvas
+  const c2=document.createElement('canvas');c2.width=W;c2.height=H;
+  const ctx2=c2.getContext('2d');
+  ctx2.filter='blur(3px)';
+  ctx2.drawImage(img,0,0);
+  ctx2.filter='none';
+  const blurred=ctx2.getImageData(0,0,W,H);
+
+  // residual = original - blurred, amplified
+  const out=ctx2.createImageData(W,H);
+  for(let i=0;i<orig.data.length;i+=4){
+    for(let ch=0;ch<3;ch++){
+      const diff=orig.data[i+ch]-blurred.data[i+ch];
+      out.data[i+ch]=Math.min(255,Math.max(0,128+diff*AMPLIFY));
+    }
+    out.data[i+3]=255;
+  }
+  const nc=document.getElementById('noise-canvas');
+  nc.width=W;nc.height=H;
+  nc.getContext('2d').putImageData(out,0,0);
+}
 </script>
 </body>
 </html>
