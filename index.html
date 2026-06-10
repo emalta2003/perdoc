@@ -540,6 +540,13 @@ const FLAG_DESCS={
   'rf-cert-expirado':'Certificado digital estava expirado na data de assinatura — assinatura sem validade jurídica conforme ICP-Brasil.',
   'rf-cert-autoassinado':'Certificado autoassinado (emitente = titular) — não emitido por Autoridade Certificadora reconhecida. Qualquer pessoa pode criar este tipo de certificado.',
   'rf-sem-horario-assinatura':'Horário de assinatura não encontrado nem no campo /M nem no atributo signingTime do CMS.',
+  'rf-pdf-imagem':'Nenhuma fonte incorporada — PDF baseado exclusivamente em imagens rasterizadas. Não é um documento nato-digital. Típico de scans, reconstruções ou montagens. Impede verificação de integridade e análise grafotécnica.',
+  'rf-pdf-fragmentado':'Páginas divididas em múltiplos blocos independentes de imagem (XObjects). Indício de uso de OCR, pipeline automatizado, reconstrução ou montagem — não compatível com PDF nativo.',
+  'rf-hash-duplicado':'Mesmo hash de autenticação eletrônica encontrado em múltiplas páginas ou documentos. Tecnicamente impossível em sistema bancário legítimo — cada documento/operação gera hash único. Forte indício de adulteração ou hash aplicado artificialmente.',
+  'rf-sem-assinatura-campo':'Nenhum campo de assinatura digital (AcroForm /Sig) encontrado. Documento não possui assinatura digital ICP-Brasil verificável.',
+  'rf-assinatura-imagem':'Campo de assinatura contém imagem rasterizada, não elemento vetorial independente. A assinatura foi inserida como figura colada — não foi produzida no documento. Incompatível com sistema bancário real.',
+  'rf-sem-jpegdump':'Ausência de estruturas JPEG internas (DCTDecode / FF D8 FF). Confirma que o PDF não contém imagens fotográficas reais, sendo composto por imagens rasterizadas de outro tipo ou reconstruídas.',
+  'rf-dados-conflitantes':'Múltiplos CPFs ou dados cadastrais inconsistentes detectados no documento — possível montagem ou preenchimento incorreto.',
 };
 
 function renderExames(meta,flags,ext){
@@ -588,15 +595,57 @@ function buildExames(meta,flags,ext){
   }
 
   if(ext==='pdf'){
+    // Tipo do documento
+    const tipoDoc=meta['Tipo de Documento']||'';
+    const isImg=tipoDoc.includes('imagem');
+    exames.push({icon:'📄',name:'Tipo de Documento',status:isImg?'fail':'ok',result:tipoDoc||'Não determinado'});
+
+    // Software / Creator / Producer
     const creator=meta['Creator'],producer=meta['Producer'];
-    exames.push({icon:'🖨',name:'Software de Origem',status:hasFlag('rf-ghostscript')||hasFlag('rf-inkscape')||hasFlag('rf-software-suspeito')?'fail':'ok',result:[creator&&`Creator: ${creator}`,producer&&`Producer: ${producer}`].filter(Boolean).join(' | ')||'Não identificado'});
+    const softStatus=hasFlag('rf-ghostscript')||hasFlag('rf-inkscape')||hasFlag('rf-software-suspeito')?'fail':'ok';
+    exames.push({icon:'🖨',name:'Software de Origem',status:softStatus,result:[creator&&`Creator: ${creator}`,producer&&`Producer: ${producer}`].filter(Boolean).join(' | ')||'Não identificado'});
+
+    // Versão, Tagged, Encrypted, Linearizado, Tamanho página
+    const versao=meta['Versão PDF'],tagged=meta['Tagged'],crypt=meta['Criptografado'],linear=meta['Linearizado (Otimizado)'],pageSize=meta['Tamanho da Página'];
+    exames.push({icon:'🗂',name:'Propriedades PDF',status:'ok',result:[versao&&`Versão: ${versao}`,tagged&&`Tagged: ${tagged}`,crypt&&`Criptografado: ${crypt}`,linear&&`Linearizado: ${linear}`,pageSize&&`Página: ${pageSize}`].filter(Boolean).join(' | ')||'—'});
+
+    // Páginas
     const pages=meta['Número de Páginas'];
-    exames.push({icon:'📄',name:'Número de Páginas',status:pages&&pages!=='(não determinado)'?'ok':'warn',result:pages?`${pages} página(s)`:'Não determinado'});
+    exames.push({icon:'📑',name:'Número de Páginas',status:pages&&pages!=='(não determinado)'?'ok':'warn',result:pages?`${pages} página(s)`:'Não determinado'});
+
+    // Datas
     const cd=meta['CreationDate'],md=meta['ModDate'];
     const dateStatus=hasFlag('rf-datas-incompat')?'fail':hasFlag('rf-datas-iguais')?'warn':cd||md?'ok':'warn';
     exames.push({icon:'📅',name:'Análise de Datas',status:dateStatus,result:cd&&md?`Criação: ${cd.replace(' (criação)','')} | Modif: ${md.replace(' (modificação)','')}`:cd||md||'Datas não encontradas'});
-    // Sig placeholder (atualizado depois)
-    exames.push({icon:'🔏',name:'Assinaturas Digitais',status:'ok',result:'Analisando…',id:'exame-sig'});
+
+    // Fontes
+    const fontes=meta['Fontes Referenciadas'],fontEmb=meta['Fontes Incorporadas'];
+    exames.push({icon:'🔤',name:'Fontes',status:hasFlag('rf-pdf-imagem')?'fail':'ok',result:`Referenciadas: ${fontes||'Nenhuma'} | Incorporadas: ${fontEmb||'Nenhuma'}`});
+
+    // Fragmentação
+    const xobj=meta['Imagens XObject'];
+    exames.push({icon:'🧩',name:'Fragmentação em Blocos',status:hasFlag('rf-pdf-fragmentado')?'fail':xobj&&xobj!=='Nenhum bloco de imagem XObject'?'warn':'ok',result:xobj||'Não detectada'});
+
+    // JpegDump
+    const jpeg=meta['JpegDump (JPEG interno)'];
+    exames.push({icon:'📸',name:'JpegDump (JPEG interno)',status:hasFlag('rf-sem-jpegdump')?'warn':'ok',result:jpeg||'Não analisado'});
+
+    // Autenticação eletrônica
+    const auth=meta['Autenticação Eletrônica'];
+    const authDup=meta['⚠ Hashes Duplicados'];
+    exames.push({icon:'🔑',name:'Autenticação Eletrônica',status:hasFlag('rf-hash-duplicado')?'fail':auth&&!auth.includes('Nenhum')?'ok':'warn',result:authDup?`${auth} — ⚠ ${authDup}`:auth||'Não analisado'});
+
+    // Campo de assinatura
+    const campoSig=meta['Campo de Assinatura'];
+    const tipoSig=meta['Tipo de Assinatura'];
+    exames.push({icon:'✍',name:'Campo de Assinatura',status:hasFlag('rf-assinatura-imagem')?'fail':hasFlag('rf-sem-assinatura-campo')?'warn':'ok',result:[campoSig,tipoSig].filter(Boolean).join(' | ')||'Não analisado'});
+
+    // Dados cadastrais
+    const cpfs=meta['CPF(s) encontrado(s)'];
+    exames.push({icon:'🪪',name:'Dados Cadastrais',status:hasFlag('rf-dados-conflitantes')?'fail':cpfs?'ok':'warn',result:cpfs?`CPF(s): ${cpfs}`:'Nenhum CPF detectado no texto'});
+
+    // Assinaturas digitais ICP-Brasil (placeholder, atualizado depois)
+    exames.push({icon:'🔏',name:'Assinaturas Digitais ICP-Brasil',status:'ok',result:'Analisando…',id:'exame-sig'});
   }
 
   if(ext==='docx'||ext==='xlsx'){
@@ -653,6 +702,9 @@ const FLAG_WEIGHTS={
   'rf-gps-presente':5,'rf-software-edicao':15,'rf-revisoes-zero':8,
   'rf-sha1-obsoleto':25,'rf-modificado-pos-assinatura':50,'rf-assinatura-invalida':60,
   'rf-cert-expirado':30,'rf-cert-autoassinado':20,'rf-sem-horario-assinatura':10,
+  'rf-pdf-imagem':45,'rf-pdf-fragmentado':40,'rf-hash-duplicado':65,
+  'rf-sem-assinatura-campo':30,'rf-assinatura-imagem':50,'rf-sem-jpegdump':15,
+  'rf-dados-conflitantes':35,
 };
 const calcFraudScore=flags=>Math.min(flags.reduce((s,f)=>s+(FLAG_WEIGHTS[f]||10),0),100);
 const flagSeverity=f=>{const w=FLAG_WEIGHTS[f]||10;return w>=30?'high':w>=15?'medium':'info';};
@@ -1049,22 +1101,135 @@ function readStr(view,off,len){let s='';for(let i=0;i<len;i++){const c=view.getU
 // ═══════════════════════════════════
 function parsePDF(buffer,file){
   const bytes=new Uint8Array(buffer);
-  let text='';for(let i=0;i<Math.min(bytes.length,500000);i++)text+=String.fromCharCode(bytes[i]);
+  let text='';
+  const limit=Math.min(bytes.length,600000);
+  for(let i=0;i<limit;i++)text+=String.fromCharCode(bytes[i]);
   const meta={},flags=[];
   if(!text.startsWith('%PDF'))return{meta:{Erro:'Não é um PDF válido'},flags};
+
+  // ── 1. Versão PDF ──
   meta['Versão PDF']=text.substring(1,8).trim();
+
+  // ── 2. Campos Info ──
   ['Creator','Producer','Author','Title','Subject','Keywords','CreationDate','ModDate'].forEach(f=>{
     const m1=new RegExp('/'+f+'\\s*\\(([\\s\\S]*?)(?<!\\\\)\\)').exec(text);
     if(m1){meta[f]=unescPDF(m1[1]);return;}
     const m2=new RegExp('/'+f+'\\s*<([0-9A-Fa-f\\s]*)>').exec(text);
     if(m2)meta[f]=hexPDF(m2[1].replace(/\s/g,''));
   });
+
+  // ── 3. Contagem de páginas ──
   const pm=text.match(/\/Type\s*\/Page(?!s)/g);
-  meta['Número de Páginas']=pm?pm.length:'(não determinado)';
+  const pageCount=pm?pm.length:1;
+  meta['Número de Páginas']=pm?pageCount:'(não determinado)';
+
+  // ── 4. Linearizado / Otimizado ──
+  const first1k=text.substring(0,1024);
+  meta['Linearizado (Otimizado)']=(/\/Linearized\s+[\d.]+/.test(first1k))?'Sim':'Não';
+
+  // ── 5. Tagged ──
+  meta['Tagged']=(/\/Marked\s+true|\/Marked\s+1/.test(text))?'Sim':'Não';
+
+  // ── 6. Criptografado ──
+  meta['Criptografado']=(/\/Encrypt\s+\d+\s+\d+\s+R/.test(text))?'Sim — conteúdo protegido':'Não';
+
+  // ── 7. Tamanho da página (MediaBox) ──
+  const mbm=text.match(/\/MediaBox\s*\[\s*([\d.]+)\s+([\d.]+)\s+([\d.]+)\s+([\d.]+)\s*\]/);
+  if(mbm){
+    const pw=parseFloat(mbm[3])-parseFloat(mbm[1]);
+    const ph=parseFloat(mbm[4])-parseFloat(mbm[2]);
+    const mm=(v)=>(v*0.352778).toFixed(0);
+    meta['Tamanho da Página']=`${pw.toFixed(0)} × ${ph.toFixed(0)} pt  (≈ ${mm(pw)} × ${mm(ph)} mm)`;
+  }
+
+  // ── 8. Fontes ──
+  const fontBaseNames=(text.match(/\/BaseFont\s*\/(\S+)/g)||[]).map(s=>s.replace(/\/BaseFont\s*\//,'').replace(/[+]/,' '));
+  const fontUniq=[...new Set(fontBaseNames)];
+  const fontEmbedded=(text.match(/\/FontFile[23]?\b/g)||[]).length;
+  meta['Fontes Referenciadas']=fontUniq.length>0?fontUniq.slice(0,8).join(', '):'Nenhuma';
+  meta['Fontes Incorporadas']=fontEmbedded>0?`${fontEmbedded} fonte(s) incorporada(s)`:'Nenhuma — PDF baseado em imagem';
+  if(fontUniq.length===0&&fontEmbedded===0)flags.push('rf-pdf-imagem');
+
+  // ── 9. Fragmentação em blocos (XObjects imagem) ──
+  const imgXobj=(text.match(/\/Subtype\s*\/Image/g)||[]).length;
+  const avgImg=(imgXobj/Math.max(1,pageCount)).toFixed(1);
+  meta['Imagens XObject']=imgXobj>0?`${imgXobj} bloco(s) de imagem no documento (≈${avgImg}/página)`:'Nenhum bloco de imagem XObject';
+  if(imgXobj>0&&(imgXobj/Math.max(1,pageCount))>=3)flags.push('rf-pdf-fragmentado');
+
+  // ── 10. JpegDump — estruturas JPEG internas ──
+  const jpegStreams=(text.match(/\/Filter\s*\/DCTDecode/g)||[]).length;
+  let jpegBin=0;
+  const binLimit=Math.min(bytes.length,2000000);
+  for(let i=0;i<binLimit-2;i++){if(bytes[i]===0xFF&&bytes[i+1]===0xD8&&bytes[i+2]===0xFF)jpegBin++;}
+  if(jpegStreams>0||jpegBin>0){
+    meta['JpegDump (JPEG interno)']=`${jpegStreams} stream(s) DCTDecode + ${jpegBin} marcador(es) FF D8 FF`;
+  }else{
+    meta['JpegDump (JPEG interno)']='Ausente — nenhuma estrutura JPEG interna detectada';
+    flags.push('rf-sem-jpegdump');
+  }
+
+  // ── 11. Autenticação eletrônica (hashes no texto) ──
+  const hashRe=/\b([0-9a-fA-F]{64}|[0-9a-fA-F]{40}|[0-9a-fA-F]{32})\b/g;
+  const allHashes=[];let hm;
+  while((hm=hashRe.exec(text))!==null)allHashes.push(hm[1].toLowerCase());
+  const uniqHashes=[...new Set(allHashes)];
+  const dupHashes=[...new Set(allHashes.filter((h,i)=>allHashes.indexOf(h)!==i))];
+  if(uniqHashes.length>0){
+    meta['Autenticação Eletrônica']=`${uniqHashes.length} hash(es) no texto: ${uniqHashes.slice(0,3).map(h=>h.substring(0,16)+'…').join(', ')}`;
+    if(dupHashes.length>0){
+      meta['⚠ Hashes Duplicados']=`${dupHashes.length} hash(es) REPETIDO(S) em múltiplas partes — impossível em sistema legítimo`;
+      flags.push('rf-hash-duplicado');
+    }
+  }else{
+    meta['Autenticação Eletrônica']='Nenhum hash de autenticação eletrônica encontrado no texto';
+  }
+
+  // ── 12. Campo de assinatura digital ──
+  const hasSigField=/\/FT\s*\/Sig/.test(text);
+  const hasPKCS7=/\/Contents\s*<[0-9A-Fa-f]{20}/.test(text);
+  const hasAcroForm=/\/AcroForm/.test(text);
+  if(hasSigField||hasPKCS7){
+    meta['Campo de Assinatura']='Campo /Sig presente (AcroForm) — assinatura digital ICP-Brasil potencial';
+  }else if(hasAcroForm){
+    meta['Campo de Assinatura']='AcroForm presente, mas sem campo /Sig — sem assinatura digital verificável';
+    flags.push('rf-sem-assinatura-campo');
+  }else{
+    meta['Campo de Assinatura']='Nenhum campo de assinatura digital (AcroForm ausente)';
+    flags.push('rf-sem-assinatura-campo');
+  }
+
+  // ── 13. Assinatura é imagem? ──
+  const sigImgPattern=/\/Subtype\s*\/Image[\s\S]{0,300}\/BitsPerComponent\s+8/;
+  if(sigImgPattern.test(text)&&!hasSigField){
+    meta['Tipo de Assinatura']='Assinatura provável é imagem rasterizada inserida — não é elemento independente verificável';
+    flags.push('rf-assinatura-imagem');
+  }else if(hasSigField||hasPKCS7){
+    meta['Tipo de Assinatura']='Assinatura digital criptográfica (campo /Sig)';
+  }else{
+    meta['Tipo de Assinatura']='Sem assinatura verificável — apenas eventual imagem de assinatura manuscrita';
+  }
+
+  // ── 14. Tipo do documento (nato-digital vs imagem) ──
+  const isNative=fontUniq.length>0||fontEmbedded>0;
+  meta['Tipo de Documento']=isNative
+    ?'Nato-digital — contém texto real e fontes incorporadas'
+    :'Baseado em imagem — escaneado, reconstruído ou montado (sem fontes)';
+
+  // ── 15. Dados cadastrais ──
+  const cpfRe=/\b\d{3}[.\s]\d{3}[.\s]\d{3}[-\s]\d{2}\b/g;
+  const cpfs=[...new Set((text.match(cpfRe)||[]).map(s=>s.trim()))];
+  if(cpfs.length>0){
+    meta['CPF(s) encontrado(s)']=cpfs.join(' | ');
+    if(cpfs.length>1)flags.push('rf-dados-conflitantes');
+  }
+
+  // ── 16. Software flags ──
   const soft=((meta['Producer']||'')+(meta['Creator']||'')).toLowerCase();
   if(soft.includes('ghostscript'))flags.push('rf-ghostscript');
   else if(soft.includes('inkscape'))flags.push('rf-inkscape');
   else if(soft.includes('pdfcreator')||soft.includes('libreoffice')||soft.includes('openoffice'))flags.push('rf-software-suspeito');
+
+  // ── 17. Análise de datas ──
   const cd=meta['CreationDate'],md=meta['ModDate'];
   if(cd&&md){
     const cdO=parsePDFDate(cd),mdO=parsePDFDate(md);
@@ -1075,6 +1240,7 @@ function parsePDF(buffer,file){
       meta['ModDate']=mdO.toLocaleString('pt-BR')+' (modificação)';
     }
   }else if(!cd&&!md)flags.push('rf-sem-datas');
+
   return{meta,flags};
 }
 const parsePDFDate=s=>{if(!s)return null;const m=s.match(/D:(\d{4})(\d{2})(\d{2})(\d{2})(\d{2})(\d{2})/);if(m)return new Date(+m[1],+m[2]-1,+m[3],+m[4],+m[5],+m[6]);const d=new Date(s);return isNaN(d)?null:d;};
