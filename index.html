@@ -982,8 +982,8 @@ function renderScore(flags){
   document.getElementById('score-lbl').textContent=`${flags.length} indicador(es) detectado(s)`;
   const vEl=document.getElementById('score-verdict');
   vEl.className='score-verdict '+cls;
-  vEl.textContent=score>=60?'⚠ Alto risco — o documento apresenta múltiplos indicadores de adulteração. Recomenda-se análise pericial aprofundada.':
-    score>=30?'⚡ Risco moderado — foram detectados indicadores que requerem atenção. Verificação adicional recomendada.':
+  vEl.textContent=score>=60?'⚠ Alto risco — o documento apresenta múltiplos indicadores de adulteração.':
+    score>=30?'⚡ Risco moderado — foram detectados indicadores que requerem atenção.':
     '✓ Baixo risco — nenhum indicador significativo de adulteração foi detectado nesta análise automática.';
 }
 
