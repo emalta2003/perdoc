@@ -422,15 +422,25 @@ async function handleFile(file){
 
   const ext=file.name.split('.').pop().toLowerCase();
   let result;
-  if(ext==='jpg'||ext==='jpeg') result=parseJPEG(buf,file);
-  else if(ext==='pdf')          result=parsePDF(buf,file);
-  else if(ext==='docx'||ext==='xlsx') result=await parseDOCX(buf,file);
-  else if(ext==='png')          result=parsePNG(buf,file);
-  else{alert('Formato não suportado: '+ext);return;}
+  try{
+    if(ext==='jpg'||ext==='jpeg') result=parseJPEG(buf,file);
+    else if(ext==='pdf')          result=parsePDF(buf,file);
+    else if(ext==='docx'||ext==='xlsx') result=await parseDOCX(buf,file);
+    else if(ext==='png')          result=parsePNG(buf,file);
+    else{alert('Formato não suportado: '+ext);return;}
+  }catch(e){
+    showError('Erro ao analisar o arquivo: '+e.message+'\n\nVerifique se o PDF não está protegido por senha.');
+    return;
+  }
 
   const analysisTime=new Date().toLocaleString('pt-BR',{dateStyle:'short',timeStyle:'medium'});
   currentAnalysis={...result,fileInfo:{name:file.name,size:file.size,lastModified:new Date(file.lastModified),ext,sha256,analysisTime}};
-  renderResults(result,file,ext,sha256,analysisTime);
+  try{
+    renderResults(result,file,ext,sha256,analysisTime);
+  }catch(e){
+    showError('Erro ao exibir resultados: '+e.message);
+    return;
+  }
   // Forense tab (hex dump; ELA/noise added later when image loads)
   const isImg=ext==='jpg'||ext==='jpeg'||ext==='png';
   if(!isImg) initForense(buf,ext,null);
@@ -438,15 +448,30 @@ async function handleFile(file){
   // Assinaturas
   resetSigTab();
   if(ext==='pdf'){
-    const sigs=await parsePDFSignatures(buf);
-    currentSigs=sigs;
-    renderSignatures(sigs,buf);
-    // atualiza exame de assinaturas
-    updateExameSig(sigs);
+    try{
+      const sigs=await parsePDFSignatures(buf);
+      currentSigs=sigs;
+      renderSignatures(sigs,buf);
+      updateExameSig(sigs);
+    }catch(e){console.warn('Erro assinaturas:',e);}
   } else {
     document.getElementById('sig-empty').style.display='none';
     document.getElementById('sig-not-pdf').style.display='block';
   }
+}
+
+function showError(msg){
+  document.getElementById('meta-empty').style.display='none';
+  document.getElementById('meta-results').style.display='block';
+  const tb=document.getElementById('meta-table-body');
+  tb.innerHTML=`<tr><td colspan="2" style="color:#f85149;padding:12px;white-space:pre-wrap">${escHtml(msg)}</td></tr>`;
+  document.getElementById('exames-grid').innerHTML='<div style="color:var(--muted);font-size:13px">Análise não concluída.</div>';
+  document.getElementById('flags-container').innerHTML='';
+  document.getElementById('file-info-row').innerHTML='';
+  document.getElementById('score-num').textContent='—';
+  document.getElementById('score-fill').style.width='0%';
+  document.getElementById('score-verdict').textContent='';
+  document.getElementById('score-lbl').textContent='';
 }
 
 async function calcSHA256(buf){
