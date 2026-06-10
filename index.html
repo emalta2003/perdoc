@@ -778,7 +778,43 @@ function renderResults({meta,flags},file,ext,sha256,analysisTime){
   tb.innerHTML='';
   const entries=Object.entries(meta).filter(([,v])=>v!=null&&v!==undefined&&v!=='');
   if(!entries.length) tb.innerHTML='<tr><td colspan="2" style="color:var(--muted);padding:8px">Nenhum metadado encontrado.</td></tr>';
-  else entries.forEach(([k,v])=>{const tr=document.createElement('tr');tr.innerHTML=`<td>${escHtml(k)}</td><td>${escHtml(String(v))}</td>`;tb.appendChild(tr);});
+  const PRODUCER_SUSPEITO={
+    'ghostscript':'GhostScript — software de reprocessamento/conversão de PDF, comumente utilizado em adulterações.',
+    'inkscape':'Inkscape — editor de gráficos vetoriais, não utilizado em geração legítima de documentos oficiais.',
+    'libreoffice':'LibreOffice — suíte de escritório open-source, pode indicar reprocessamento do documento original.',
+    'openoffice':'OpenOffice — suíte de escritório open-source, pode indicar reprocessamento do documento original.',
+    'pdfcreator':'PDFCreator — impressora PDF de terceiros, indica conversão/reprocessamento do documento.',
+    'pdfescape':'PDFEscape — editor online de PDF, frequentemente utilizado para modificação de documentos.',
+    'pdfedit':'PDFEdit — editor de PDF open-source, utilizado para modificação de documentos.',
+    'ilovepdf':'iLovePDF — serviço online de edição de PDF, pode indicar manipulação do arquivo.',
+    'smallpdf':'Smallpdf — serviço online de edição de PDF, pode indicar manipulação do arquivo.',
+    'sejda':'Sejda — editor online de PDF, pode indicar manipulação do arquivo.',
+    'pdf-xchange':'PDF-XChange Editor — editor de PDF com recursos avançados de modificação.',
+    'nitro':'Nitro PDF — editor de PDF que permite modificação de conteúdo.',
+    'foxit':'Foxit PhantomPDF/Editor — editor de PDF que permite modificação de conteúdo.',
+    'pdfsharp':'PDFsharp — biblioteca de geração/modificação de PDF via código.',
+    'itextsharp':'iTextSharp — biblioteca de manipulação de PDF via código, comum em adulterações automatizadas.',
+    'itext':'iText — biblioteca de manipulação de PDF via código, comum em adulterações automatizadas.',
+    'fpdf':'FPDF — biblioteca de geração de PDF via código, incomum em documentos oficiais.',
+    'reportlab':'ReportLab — biblioteca Python de geração de PDF, incomum em documentos oficiais.',
+    'cairo':'Cairo — biblioteca gráfica de baixo nível, pode indicar conversão não oficial.',
+    'scribus':'Scribus — software de diagramação, não utilizado em geração de documentos oficiais.',
+  };
+  else entries.forEach(([k,v])=>{
+    const tr=document.createElement('tr');
+    let cellVal=escHtml(String(v));
+    if(k==='Producer'||k==='Creator'){
+      const vl=String(v).toLowerCase();
+      for(const [kw,desc] of Object.entries(PRODUCER_SUSPEITO)){
+        if(vl.includes(kw)){
+          cellVal+=`<br><span style="color:#f85149;font-size:11px;font-weight:600">⚠ ${escHtml(desc)}</span>`;
+          break;
+        }
+      }
+    }
+    tr.innerHTML=`<td>${escHtml(k)}</td><td>${cellVal}</td>`;
+    tb.appendChild(tr);
+  });
 
   document.getElementById('meta-empty').style.display='none';
   document.getElementById('meta-results').style.display='block';
