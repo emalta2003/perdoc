@@ -291,6 +291,24 @@ hr.divider{border:none;border-top:1px solid var(--border);margin:14px 0;}
         <table class="meta-table" id="meta-table-body"></table>
       </div>
 
+      <!-- Metodologia -->
+      <div class="card">
+        <div class="card-title">Metodologia e Sistema de Pesos</div>
+        <div style="font-size:12px;line-height:1.7;color:var(--fg)">
+          <p style="margin:0 0 10px"><strong>FraudScore</strong> — índice de risco calculado pela soma ponderada dos indicadores detectados (red flags), limitado a 100. Cada indicador possui peso proporcional à sua relevância pericial: flags críticas (hash duplicado, inconsistência de resolução, assinatura como imagem) recebem peso 45–65; flags de atenção (software suspeito, datas incompatíveis, PDF fragmentado) recebem peso 20–45; flags informativas recebem peso 10–15.</p>
+          <table class="meta-table" style="margin-bottom:12px">
+            <tr><td style="font-weight:600;width:220px">Análise de Metadados PDF</td><td>Extração dos campos Info (/Creator, /Producer, /Author, /CreationDate, /ModDate), versão, estrutura de fontes, XObjects, JpegDump (FF D8 FF / DCTDecode), hashes de autenticação eletrônica e campos de assinatura AcroForm. Base: ISO 32000 (especificação PDF).</td></tr>
+            <tr><td style="font-weight:600">ELA — Error Level Analysis</td><td>Recompressão JPEG ao nível de qualidade 95 e amplificação da diferença pixel a pixel (×15). Regiões coladas ou editadas apresentam nível de erro distinto do restante da imagem, revelando manipulação. Ref.: Krawetz (2007).</td></tr>
+            <tr><td style="font-weight:600">Análise de Ruído Residual</td><td>Subtração do canal de luminância suavizado (filtro gaussiano simulado) da imagem original. O resíduo é amplificado (×8) e segmentado em grade 16×16 blocos. Células com desvio acima de μ+2σ são marcadas como anômalas — padrão típico de colagem ou edição local. Ref.: Farid (2016).</td></tr>
+            <tr><td style="font-weight:600">Entropia de Shannon</td><td>Cálculo da entropia por byte H = −Σ p·log₂(p), com mapa de blocos. Entropia global >7,8 bits/byte sugere compressão ou criptografia; <4,0 sugere dados sintéticos ou reconstruídos. Anomalias locais indicam inserção de conteúdo externo. Ref.: Shannon (1948).</td></tr>
+            <tr><td style="font-weight:600">Inconsistência de Resolução</td><td>Comparação do DPI efetivo de cada bloco de imagem XObject em relação ao tamanho da página (MediaBox). Variação >50% entre blocos indica origem distinta — padrão de colagem ou inserção.</td></tr>
+            <tr><td style="font-weight:600">pHash DCT</td><td>Hash perceptual baseado na DCT 2D (Transformada Discreta do Cosseno) em bloco 32×32 reduzido a 64 bits. Distância de Hamming ≤10 bits indica imagens visualmente idênticas ou com alterações mínimas.</td></tr>
+            <tr><td style="font-weight:600">SHA-256 (cadeia de custódia)</td><td>Hash criptográfico do arquivo íntegro. Garante a integridade da evidência digital — qualquer alteração no arquivo produz hash completamente diferente.</td></tr>
+          </table>
+          <p style="margin:0;font-size:11px;color:var(--muted)"><strong>Referências:</strong> Ellen (2006); Hilton (1993); Krawetz (2007); Farid (2016); Popescu &amp; Farid (2004); Casey (2011); ISO 32000; SWGDOC Standards; ASTM E2388.</p>
+        </div>
+      </div>
+
       <!-- Observações -->
       <div class="card">
         <div class="card-title">Observações do Perito</div>
@@ -846,6 +864,7 @@ const FLAG_DESCS={
   'rf-assinatura-imagem':'Campo de assinatura contém imagem rasterizada, não elemento vetorial independente. A assinatura foi inserida como figura colada — não foi produzida no documento. Incompatível com sistema bancário real.',
   'rf-sem-jpegdump':'Ausência de estruturas JPEG internas (DCTDecode / FF D8 FF). Confirma que o PDF não contém imagens fotográficas reais, sendo composto por imagens rasterizadas de outro tipo ou reconstruídas.',
   'rf-dados-conflitantes':'Múltiplos CPFs ou dados cadastrais inconsistentes detectados no documento — possível montagem ou preenchimento incorreto.',
+  'rf-resolucao-inconsistente':'Variação superior a 50% na resolução entre blocos de imagem do mesmo documento. Indica inserção ou colagem de imagens capturadas em origens distintas — padrão incompatível com documento gerado de forma unitária.',
 };
 
 function renderExames(meta,flags,ext){
@@ -1003,7 +1022,7 @@ const FLAG_WEIGHTS={
   'rf-cert-expirado':30,'rf-cert-autoassinado':20,'rf-sem-horario-assinatura':10,
   'rf-pdf-imagem':45,'rf-pdf-fragmentado':40,'rf-hash-duplicado':65,
   'rf-sem-assinatura-campo':30,'rf-assinatura-imagem':50,'rf-sem-jpegdump':15,
-  'rf-dados-conflitantes':35,
+  'rf-dados-conflitantes':35,'rf-resolucao-inconsistente':45,
 };
 const calcFraudScore=flags=>Math.min(flags.reduce((s,f)=>s+(FLAG_WEIGHTS[f]||10),0),100);
 const flagSeverity=f=>{const w=FLAG_WEIGHTS[f]||10;return w>=30?'high':w>=15?'medium':'info';};
@@ -1528,6 +1547,30 @@ function parsePDF(buffer,file){
   else if(soft.includes('inkscape'))flags.push('rf-inkscape');
   else if(soft.includes('pdfcreator')||soft.includes('libreoffice')||soft.includes('openoffice'))flags.push('rf-software-suspeito');
 
+  // ── 18. Inconsistência de resolução (indício de colagem/inserção) ──
+  const widthMatches=text.match(/\/Width\s+(\d+)/g)||[];
+  const heightMatches=text.match(/\/Height\s+(\d+)/g)||[];
+  const bpcMatches=text.match(/\/BitsPerComponent\s+(\d+)/g)||[];
+  const imgDims=[];
+  for(let i=0;i<Math.min(widthMatches.length,heightMatches.length);i++){
+    const w=parseInt(widthMatches[i].replace(/\/Width\s+/,''));
+    const h=parseInt(heightMatches[i].replace(/\/Height\s+/,''));
+    if(w>10&&h>10)imgDims.push({w,h});
+  }
+  if(imgDims.length>1&&mbm){
+    const pgW=parseFloat(mbm[3])-parseFloat(mbm[1]);
+    const pgH=parseFloat(mbm[4])-parseFloat(mbm[2]);
+    const dpis=imgDims.map(d=>Math.round((d.w/pgW+d.h/pgH)/2*72));
+    const dpiMin=Math.min(...dpis),dpiMax=Math.max(...dpis);
+    meta['Resolução das Imagens']=`${imgDims.length} bloco(s): min ${dpiMin} dpi, max ${dpiMax} dpi`;
+    if(dpiMax>0&&dpiMin>0&&(dpiMax/dpiMin)>1.5){
+      meta['⚠ Inconsistência de Resolução']=`Variação >50% entre blocos (${dpiMin}–${dpiMax} dpi) — indica inserção ou colagem de imagens com origens distintas`;
+      flags.push('rf-resolucao-inconsistente');
+    }
+  }else if(imgDims.length===1){
+    meta['Resolução das Imagens']=`1 bloco de imagem: ${imgDims[0].w}×${imgDims[0].h} px`;
+  }
+
   // ── 17. Análise de datas ──
   const cd=meta['CreationDate'],md=meta['ModDate'];
   if(cd&&md){
@@ -1715,6 +1758,34 @@ ${currentEvidences.map(ev=>{
   <div style="padding:8px 14px;font-size:12px;color:#444;line-height:1.6;background:#fff"><b>Significância pericial:</b> ${ev.significance}</div>
 </div>`;}).join('')}`:''}
 ${obs?`<h2>${sigsHtml?(currentEvidences.length?'9':'8'):(currentEvidences.length?'8':'7')}. Observações do Perito</h2><p style="background:#f9f9f9;border-left:4px solid #333;padding:10px 14px;font-size:13px;line-height:1.6">${escHtml(obs).replace(/\n/g,'<br>')}</p>`:''}
+<h2 style="margin-top:30px">Metodologia</h2>
+<table style="width:100%;border-collapse:collapse;font-size:12px">
+  <tr style="background:#f5f5f5"><th style="padding:6px 10px;border:1px solid #ccc;text-align:left;width:200px">Método</th><th style="padding:6px 10px;border:1px solid #ccc;text-align:left">Descrição</th></tr>
+  <tr><td style="padding:6px 10px;border:1px solid #ccc;font-weight:bold">FraudScore</td><td style="padding:6px 10px;border:1px solid #ccc">Índice de risco 0–100 calculado pela soma ponderada dos indicadores detectados. Peso proporcional à relevância pericial: flags críticas (45–65 pts), atenção (20–45 pts), informativas (10–15 pts).</td></tr>
+  <tr><td style="padding:6px 10px;border:1px solid #ccc;font-weight:bold">Análise de Metadados PDF</td><td style="padding:6px 10px;border:1px solid #ccc">Extração de /Creator, /Producer, /Author, /CreationDate, /ModDate, versão, fontes (BaseFont/FontFile), XObjects, JpegDump (FF D8 FF / DCTDecode), hashes de autenticação e campos AcroForm /Sig. Base: ISO 32000.</td></tr>
+  <tr><td style="padding:6px 10px;border:1px solid #ccc;font-weight:bold">ELA — Error Level Analysis</td><td style="padding:6px 10px;border:1px solid #ccc">Recompressão JPEG (qualidade 95) e amplificação da diferença pixel a pixel (×15). Regiões coladas ou editadas apresentam nível de erro distinto do restante. Ref.: Krawetz (2007).</td></tr>
+  <tr><td style="padding:6px 10px;border:1px solid #ccc;font-weight:bold">Análise de Ruído Residual</td><td style="padding:6px 10px;border:1px solid #ccc">Subtração do canal de luminância suavizado da imagem original, amplificação (×8), segmentação em grade 16×16. Células com desvio &gt;μ+2σ indicam anomalia local — padrão típico de colagem. Ref.: Farid (2016).</td></tr>
+  <tr><td style="padding:6px 10px;border:1px solid #ccc;font-weight:bold">Entropia de Shannon</td><td style="padding:6px 10px;border:1px solid #ccc">H = −Σ p·log₂(p) por byte, com mapa por blocos. Entropia &gt;7,8 bits/byte: compressão/criptografia; &lt;4,0: dados sintéticos ou reconstruídos. Ref.: Shannon (1948).</td></tr>
+  <tr><td style="padding:6px 10px;border:1px solid #ccc;font-weight:bold">Inconsistência de Resolução</td><td style="padding:6px 10px;border:1px solid #ccc">Comparação do DPI efetivo de cada bloco XObject em relação à página (MediaBox). Variação &gt;50% entre blocos indica imagens de origens distintas — padrão de colagem ou inserção.</td></tr>
+  <tr><td style="padding:6px 10px;border:1px solid #ccc;font-weight:bold">pHash DCT</td><td style="padding:6px 10px;border:1px solid #ccc">Hash perceptual via DCT 2D em bloco 32×32 reduzido a 64 bits. Distância de Hamming ≤10 bits: imagens visualmente idênticas ou com alterações mínimas.</td></tr>
+  <tr><td style="padding:6px 10px;border:1px solid #ccc;font-weight:bold">SHA-256</td><td style="padding:6px 10px;border:1px solid #ccc">Hash criptográfico do arquivo íntegro para garantia de integridade e cadeia de custódia da evidência digital.</td></tr>
+</table>
+
+<h2 style="margin-top:24px">Referências Bibliográficas</h2>
+<ol style="font-size:12px;line-height:2;color:#333;padding-left:20px">
+  <li>ELLEN, David. <em>The Scientific Examination of Documents: Methods and Techniques</em>. 3. ed. Boca Raton: CRC Press, 2006.</li>
+  <li>HILTON, Ordway. <em>Scientific Examination of Questioned Documents</em>. Rev. ed. Boca Raton: CRC Press, 1993.</li>
+  <li>KRAWETZ, Neal. <em>A Picture's Worth: Digital Image Analysis and Forensics</em>. Black Hat USA, Las Vegas, 2007.</li>
+  <li>FARID, Hany. <em>Photo Forensics</em>. Cambridge: MIT Press, 2016.</li>
+  <li>POPESCU, Alin C.; FARID, Hany. <em>Exposing Digital Forgeries by Detecting Duplicated Image Regions</em>. Technical Report TR2004-515, Dartmouth College, 2004.</li>
+  <li>CHRISTLEIN, Vincent et al. An Evaluation of Popular Copy-Move Forgery Detection Approaches. <em>IEEE Transactions on Information Forensics and Security</em>, v. 7, n. 6, p. 1841–1854, 2012.</li>
+  <li>CASEY, Eoghan. <em>Digital Evidence and Computer Crime: Forensic Science, Computers and the Internet</em>. 3. ed. Waltham: Academic Press, 2011.</li>
+  <li>SHANNON, Claude E. A Mathematical Theory of Communication. <em>Bell System Technical Journal</em>, v. 27, p. 379–423, 1948.</li>
+  <li>ISO 32000-1:2008. <em>Document Management — Portable Document Format — Part 1: PDF 1.7</em>. Geneva: ISO, 2008.</li>
+  <li>SWGDOC. <em>Standard Terminology for Expressing Conclusions of Forensic Document Examiners</em>. Scientific Working Group for Forensic Document Examination, 2013.</li>
+  <li>ASTM E2388-11. <em>Standard Guide for Minimum Training Requirements for Forensic Document Examiners</em>. West Conshohocken: ASTM International, 2011.</li>
+</ol>
+
 <footer><p><strong>PerDoc v1.4</strong> — Análise documentoscópica digital com evidências documentadas. Gerado em ${new Date().toLocaleString('pt-BR')}.</p>
 <p style="margin-top:8px;font-style:italic">As conclusões deste relatório devem ser interpretadas por perito habilitado no contexto do exame documentoscópico.</p></footer>
 </body></html>`;
