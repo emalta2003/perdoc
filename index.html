@@ -749,7 +749,24 @@ async function handleFile(file){
 
   // Forense tab (hex dump; ELA/noise added later when image loads)
   const isImg=ext==='jpg'||ext==='jpeg'||ext==='png';
-  if(!isImg) initForense(buf,ext,null);
+  if(!isImg){
+    initForense(buf,ext,null);
+    // For PDFs: extract largest embedded JPEG and run image analyses
+    if(ext==='pdf'){
+      const jpegImg=extractLargestJPEG(buf);
+      if(jpegImg){
+        document.getElementById('ela-card').style.display='';
+        document.getElementById('noise-card').style.display='';
+        document.getElementById('copymove-card').style.display='';
+        document.getElementById('ela-original').src=jpegImg.src;
+        document.getElementById('noise-original').src=jpegImg.src;
+        document.getElementById('cm-original').src=jpegImg.src;
+        computeELA(jpegImg);
+        computeNoiseResidual(jpegImg);
+        computeCopyMove(jpegImg);
+      }
+    }
+  }
 
   // Assinaturas
   resetSigTab();
@@ -1977,6 +1994,31 @@ function renderSectionBadges(sections){
 function jpegMarkerName(b){
   const m={0xD8:'SOI',0xE0:'APP0',0xE1:'APP1/EXIF',0xE2:'APP2',0xDB:'DQT',0xC0:'SOF0',0xC2:'SOF2',0xC4:'DHT',0xDA:'SOS',0xD9:'EOI',0xFE:'COM',0xDD:'DRI'};
   return m[b]||('FF'+b.toString(16).toUpperCase().padStart(2,'0'));
+}
+
+// Extract largest JPEG stream from PDF binary
+function extractLargestJPEG(buffer){
+  const bytes=new Uint8Array(buffer);
+  const streams=[];
+  for(let i=0;i<bytes.length-3;i++){
+    if(bytes[i]===0xFF&&bytes[i+1]===0xD8&&bytes[i+2]===0xFF){
+      // find EOI marker FF D9
+      let end=-1;
+      for(let j=i+3;j<bytes.length-1;j++){
+        if(bytes[j]===0xFF&&bytes[j+1]===0xD9){end=j+2;break;}
+      }
+      if(end>i+100){streams.push({start:i,end,len:end-i});}
+      if(streams.length>20)break; // limit scan
+    }
+  }
+  if(!streams.length)return null;
+  // pick largest
+  streams.sort((a,b)=>b.len-a.len);
+  const best=streams[0];
+  const blob=new Blob([bytes.slice(best.start,best.end)],{type:'image/jpeg'});
+  const url=URL.createObjectURL(blob);
+  const img=new Image();img.src=url;
+  return img;
 }
 
 // ELA — Error Level Analysis
