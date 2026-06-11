@@ -7,7 +7,6 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"
         integrity="sha512-XMVd28F1oH/O71fzwBnV7HucLxVwtxf26XV8P4wPk26EDxuGZ91N8bsOttmnomcCD3CS5ZMRL50H0GgOHvegtg=="
         crossorigin="anonymous" referrerpolicy="no-referrer"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js" crossorigin="anonymous"></script>
 <style>
 :root{
   --bg:#0d1117;--surface:#161b22;--border:#30363d;
@@ -365,6 +364,24 @@ hr.divider{border:none;border-top:1px solid var(--border);margin:14px 0;}
   <div id="tab-forense" class="tab-panel">
     <div class="forense-empty" id="forense-empty"><div class="es-icon">🔬</div><div>Carregue um documento para análise forense</div></div>
     <div id="forense-results" style="display:none">
+
+      <!-- Imagem para análise visual (ELA / Ruído / Copy-Move) -->
+      <div class="card" id="img-input-card">
+        <div class="card-title">Imagem para Análise Visual</div>
+        <div style="font-size:12px;color:var(--muted);margin-bottom:10px">
+          Para ELA, Ruído Residual e Copy-Move: carregue aqui uma imagem JPEG ou PNG (screenshot, foto do documento, ou página exportada do PDF).
+        </div>
+        <div id="img-drop-zone" style="border:2px dashed var(--border);border-radius:8px;padding:24px;text-align:center;cursor:pointer;transition:border-color .2s"
+             onclick="document.getElementById('img-file-input').click()"
+             ondragover="event.preventDefault();this.style.borderColor='var(--accent2)'"
+             ondragleave="this.style.borderColor='var(--border)'"
+             ondrop="event.preventDefault();this.style.borderColor='var(--border)';handleForenseImage(event.dataTransfer.files[0])">
+          <div style="font-size:32px;margin-bottom:8px">🖼</div>
+          <div style="font-size:13px;color:var(--muted)">Clique ou arraste uma imagem aqui</div>
+          <div style="font-size:11px;color:var(--muted);margin-top:4px">JPEG · PNG · aceita screenshot do PDF</div>
+        </div>
+        <input type="file" id="img-file-input" accept="image/jpeg,image/png" style="display:none" onchange="handleForenseImage(this.files[0])">
+      </div>
 
       <!-- Hex Viewer -->
       <div class="card">
@@ -753,28 +770,6 @@ async function handleFile(file){
   const isImg=ext==='jpg'||ext==='jpeg'||ext==='png';
   if(!isImg){
     initForense(buf,ext,null);
-    // For PDFs: extract largest embedded JPEG and run image analyses
-    if(ext==='pdf'){
-      renderPDFPage(buf).then(jpegImg=>{
-        if(jpegImg){
-          document.getElementById('ela-card').style.display='';
-          document.getElementById('noise-card').style.display='';
-          document.getElementById('copymove-card').style.display='';
-          document.getElementById('ela-original').src=jpegImg.src;
-          document.getElementById('noise-original').src=jpegImg.src;
-          document.getElementById('cm-original').src=jpegImg.src;
-          computeELA(jpegImg);
-          computeNoiseResidual(jpegImg);
-          computeCopyMove(jpegImg);
-        } else {
-          // Show note in forense tab that no JPEG image was found
-          ['ela-card','noise-card','copymove-card'].forEach(id=>{
-            const el=document.getElementById(id);
-            if(el){el.style.display='';el.querySelector('.card-title').insertAdjacentHTML('afterend','<div style="font-size:12px;color:var(--muted);padding:8px 0">⚠ Nenhuma imagem JPEG acessível encontrada neste PDF. As análises ELA, Ruído e Copy-Move requerem um PDF baseado em imagem (com DCTDecode/JPEG interno).</div>');}
-          });
-        }
-      });
-    }
   }
 
   // Assinaturas
@@ -2005,48 +2000,25 @@ function jpegMarkerName(b){
   return m[b]||('FF'+b.toString(16).toUpperCase().padStart(2,'0'));
 }
 
-// Set status message in copy-move card
-function setCMStatus(msg,color){
-  const el=document.getElementById('cm-status');
-  if(el){el.style.color=color||'var(--muted)';el.textContent=msg;}
-}
-
-// Render first PDF page to Image using PDF.js
-async function renderPDFPage(buffer){
-  setCMStatus('⏳ Verificando PDF.js...');
-  document.getElementById('copymove-card').style.display='';
-  document.getElementById('ela-card').style.display='';
-  document.getElementById('noise-card').style.display='';
-
-  if(typeof pdfjsLib==='undefined'){
-    setCMStatus('⚠ PDF.js não carregou (sem internet ou CDN bloqueado). Análise de imagem indisponível para PDFs.','#f0b429');
-    return null;
-  }
-  try{
-    setCMStatus('⏳ Renderizando página do PDF...');
-    pdfjsLib.GlobalWorkerOptions.workerSrc='https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
-    const loadTask=pdfjsLib.getDocument({data:new Uint8Array(buffer)});
-    const pdf=await loadTask.promise;
-    setCMStatus('⏳ Obtendo página 1...');
-    const page=await pdf.getPage(1);
-    const vp=page.getViewport({scale:2.0});
-    const canvas=document.createElement('canvas');
-    canvas.width=vp.width;canvas.height=vp.height;
-    setCMStatus('⏳ Desenhando em canvas ('+vp.width+'×'+vp.height+' px)...');
-    await page.render({canvasContext:canvas.getContext('2d'),viewport:vp}).promise;
-    const img=new Image();
-    img.src=canvas.toDataURL('image/jpeg',0.95);
-    await new Promise(res=>{img.onload=res;img.onerror=res;});
-    if(img.naturalWidth>10){
-      setCMStatus('✅ Página renderizada ('+img.naturalWidth+'×'+img.naturalHeight+' px). Executando análises...','#3fb950');
-      return img;
-    }
-    setCMStatus('⚠ Página renderizada mas imagem vazia.','#f0b429');
-    return null;
-  }catch(e){
-    setCMStatus('⚠ Erro ao renderizar PDF: '+e.message,'#f85149');
-    return null;
-  }
+// Handle image dropped/selected in the Forense tab for visual analysis
+function handleForenseImage(file){
+  if(!file||!file.type.startsWith('image/'))return;
+  const url=URL.createObjectURL(file);
+  const img=new Image();
+  img.onload=()=>{
+    document.getElementById('ela-card').style.display='';
+    document.getElementById('noise-card').style.display='';
+    document.getElementById('copymove-card').style.display='';
+    document.getElementById('ela-original').src=url;
+    document.getElementById('noise-original').src=url;
+    document.getElementById('cm-original').src=url;
+    document.getElementById('img-drop-zone').innerHTML=
+      `<img src="${url}" style="max-height:120px;max-width:100%;border-radius:6px;margin-bottom:6px"><div style="font-size:12px;color:var(--muted)">${escHtml(file.name)} — ${img.naturalWidth}×${img.naturalHeight} px · ${formatBytes(file.size)}</div>`;
+    computeELA(img);
+    computeNoiseResidual(img);
+    computeCopyMove(img);
+  };
+  img.src=url;
 }
 
 // ELA — Error Level Analysis
