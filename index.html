@@ -431,6 +431,7 @@ hr.divider{border:none;border-top:1px solid var(--border);margin:14px 0;}
       <!-- Copy-Move / Clonagem / Inserção -->
       <div class="card" id="copymove-card" style="display:none">
         <div class="card-title">Clonagem, Inserção e Colagem (Copy-Move)</div>
+        <div id="cm-status" style="font-size:12px;padding:8px 10px;border-radius:6px;margin-bottom:10px;background:var(--surface);border:1px solid var(--border)"></div>
         <div style="font-size:12px;color:var(--muted);margin-bottom:10px">
           Divide a imagem em blocos e compara suas assinaturas. Blocos idênticos ou muito similares em posições distintas indicam <strong>clonagem</strong> (região copiada/colada dentro da mesma imagem). Blocos com textura inconsistente com a vizinhança indicam <strong>inserção</strong> ou <strong>colagem</strong> de elemento externo. Ref.: Popescu &amp; Farid (2004); Christlein et al. (2012).
         </div>
@@ -2004,23 +2005,48 @@ function jpegMarkerName(b){
   return m[b]||('FF'+b.toString(16).toUpperCase().padStart(2,'0'));
 }
 
+// Set status message in copy-move card
+function setCMStatus(msg,color){
+  const el=document.getElementById('cm-status');
+  if(el){el.style.color=color||'var(--muted)';el.textContent=msg;}
+}
+
 // Render first PDF page to Image using PDF.js
 async function renderPDFPage(buffer){
+  setCMStatus('⏳ Verificando PDF.js...');
+  document.getElementById('copymove-card').style.display='';
+  document.getElementById('ela-card').style.display='';
+  document.getElementById('noise-card').style.display='';
+
+  if(typeof pdfjsLib==='undefined'){
+    setCMStatus('⚠ PDF.js não carregou (sem internet ou CDN bloqueado). Análise de imagem indisponível para PDFs.','#f0b429');
+    return null;
+  }
   try{
-    if(typeof pdfjsLib==='undefined')return null;
+    setCMStatus('⏳ Renderizando página do PDF...');
     pdfjsLib.GlobalWorkerOptions.workerSrc='https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
-    const pdf=await pdfjsLib.getDocument({data:new Uint8Array(buffer)}).promise;
+    const loadTask=pdfjsLib.getDocument({data:new Uint8Array(buffer)});
+    const pdf=await loadTask.promise;
+    setCMStatus('⏳ Obtendo página 1...');
     const page=await pdf.getPage(1);
-    const scale=2.0;
-    const vp=page.getViewport({scale});
+    const vp=page.getViewport({scale:2.0});
     const canvas=document.createElement('canvas');
     canvas.width=vp.width;canvas.height=vp.height;
+    setCMStatus('⏳ Desenhando em canvas ('+vp.width+'×'+vp.height+' px)...');
     await page.render({canvasContext:canvas.getContext('2d'),viewport:vp}).promise;
     const img=new Image();
     img.src=canvas.toDataURL('image/jpeg',0.95);
     await new Promise(res=>{img.onload=res;img.onerror=res;});
-    return(img.naturalWidth>10)?img:null;
-  }catch(e){return null;}
+    if(img.naturalWidth>10){
+      setCMStatus('✅ Página renderizada ('+img.naturalWidth+'×'+img.naturalHeight+' px). Executando análises...','#3fb950');
+      return img;
+    }
+    setCMStatus('⚠ Página renderizada mas imagem vazia.','#f0b429');
+    return null;
+  }catch(e){
+    setCMStatus('⚠ Erro ao renderizar PDF: '+e.message,'#f85149');
+    return null;
+  }
 }
 
 // ELA — Error Level Analysis
