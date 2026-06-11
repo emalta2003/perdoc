@@ -7,6 +7,7 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"
         integrity="sha512-XMVd28F1oH/O71fzwBnV7HucLxVwtxf26XV8P4wPk26EDxuGZ91N8bsOttmnomcCD3CS5ZMRL50H0GgOHvegtg=="
         crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js" crossorigin="anonymous"></script>
 <style>
 :root{
   --bg:#0d1117;--surface:#161b22;--border:#30363d;
@@ -753,7 +754,7 @@ async function handleFile(file){
     initForense(buf,ext,null);
     // For PDFs: extract largest embedded JPEG and run image analyses
     if(ext==='pdf'){
-      extractLargestJPEG(buf).then(jpegImg=>{
+      renderPDFPage(buf).then(jpegImg=>{
         if(jpegImg){
           document.getElementById('ela-card').style.display='';
           document.getElementById('noise-card').style.display='';
@@ -2003,46 +2004,23 @@ function jpegMarkerName(b){
   return m[b]||('FF'+b.toString(16).toUpperCase().padStart(2,'0'));
 }
 
-// Extract largest valid JPEG stream from PDF binary
-async function extractLargestJPEG(buffer){
-  const bytes=new Uint8Array(buffer);
-  const MAX_JPEG=15*1024*1024; // 15 MB max per JPEG
-  const candidates=[];
-
-  // Find all SOI markers (FF D8 FF)
-  for(let i=0;i<bytes.length-3;i++){
-    if(bytes[i]===0xFF&&bytes[i+1]===0xD8&&bytes[i+2]===0xFF){
-      // Third byte must be a valid JPEG marker (E0/E1/E2/DB/C0/C4/FE...)
-      const m=bytes[i+2]; // already 0xFF, next is the marker byte
-      const nextMarker=bytes[i+3];
-      if(nextMarker<0xC0&&nextMarker!==0xE0&&nextMarker!==0xE1&&nextMarker!==0xFE&&nextMarker!==0xDB) continue;
-
-      // Search for EOI (FF D9) within MAX_JPEG bytes
-      const scanEnd=Math.min(bytes.length-1, i+MAX_JPEG);
-      let end=-1;
-      for(let j=i+2;j<scanEnd;j++){
-        if(bytes[j]===0xFF&&bytes[j+1]===0xD9){end=j+2;break;}
-      }
-      if(end>i+1000) candidates.push({start:i,end,len:end-i});
-    }
-  }
-  if(!candidates.length)return null;
-
-  // Try candidates from largest to smallest until one loads
-  candidates.sort((a,b)=>b.len-a.len);
-  for(const c of candidates.slice(0,5)){
-    const blob=new Blob([bytes.slice(c.start,c.end)],{type:'image/jpeg'});
-    const url=URL.createObjectURL(blob);
+// Render first PDF page to Image using PDF.js
+async function renderPDFPage(buffer){
+  try{
+    if(typeof pdfjsLib==='undefined')return null;
+    pdfjsLib.GlobalWorkerOptions.workerSrc='https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+    const pdf=await pdfjsLib.getDocument({data:new Uint8Array(buffer)}).promise;
+    const page=await pdf.getPage(1);
+    const scale=2.0;
+    const vp=page.getViewport({scale});
+    const canvas=document.createElement('canvas');
+    canvas.width=vp.width;canvas.height=vp.height;
+    await page.render({canvasContext:canvas.getContext('2d'),viewport:vp}).promise;
     const img=new Image();
-    const ok=await new Promise(res=>{
-      img.onload=()=>res(true);
-      img.onerror=()=>res(false);
-      img.src=url;
-    });
-    if(ok&&img.naturalWidth>10&&img.naturalHeight>10) return img;
-    URL.revokeObjectURL(url);
-  }
-  return null;
+    img.src=canvas.toDataURL('image/jpeg',0.95);
+    await new Promise(res=>{img.onload=res;img.onerror=res;});
+    return(img.naturalWidth>10)?img:null;
+  }catch(e){return null;}
 }
 
 // ELA — Error Level Analysis
