@@ -7,6 +7,7 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"
         integrity="sha512-XMVd28F1oH/O71fzwBnV7HucLxVwtxf26XV8P4wPk26EDxuGZ91N8bsOttmnomcCD3CS5ZMRL50H0GgOHvegtg=="
         crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+<script src="pdf.min.js"></script>
 <style>
 :root{
   --bg:#0d1117;--surface:#161b22;--border:#30363d;
@@ -766,10 +767,25 @@ async function handleFile(file){
   const fileInfoObj={name:file.name,size:file.size,lastModified:new Date(file.lastModified),ext,sha256,analysisTime};
   try{buildEvidences(result.meta,result.flags,ext,fileInfoObj);}catch(e){console.warn('Evidências:',e);}
 
-  // Forense tab (hex dump; ELA/noise added later when image loads)
+  // Forense tab
   const isImg=ext==='jpg'||ext==='jpeg'||ext==='png';
   if(!isImg){
     initForense(buf,ext,null);
+    if(ext==='pdf'){
+      renderPDFPage(buf).then(img=>{
+        if(img){
+          ['ela-card','noise-card','copymove-card'].forEach(id=>document.getElementById(id).style.display='');
+          document.getElementById('ela-original').src=img.src;
+          document.getElementById('noise-original').src=img.src;
+          document.getElementById('cm-original').src=img.src;
+          document.getElementById('img-drop-zone').innerHTML=
+            `<img src="${img.src}" style="max-height:100px;max-width:100%;border-radius:6px"><div style="font-size:11px;color:var(--muted);margin-top:4px">Página 1 renderizada via PDF.js — ${img.naturalWidth}×${img.naturalHeight} px</div>`;
+          computeELA(img);
+          computeNoiseResidual(img);
+          computeCopyMove(img);
+        }
+      });
+    }
   }
 
   // Assinaturas
@@ -1998,6 +2014,24 @@ function renderSectionBadges(sections){
 function jpegMarkerName(b){
   const m={0xD8:'SOI',0xE0:'APP0',0xE1:'APP1/EXIF',0xE2:'APP2',0xDB:'DQT',0xC0:'SOF0',0xC2:'SOF2',0xC4:'DHT',0xDA:'SOS',0xD9:'EOI',0xFE:'COM',0xDD:'DRI'};
   return m[b]||('FF'+b.toString(16).toUpperCase().padStart(2,'0'));
+}
+
+// Render first PDF page to canvas using local PDF.js
+async function renderPDFPage(buffer){
+  try{
+    if(typeof pdfjsLib==='undefined')return null;
+    pdfjsLib.GlobalWorkerOptions.workerSrc='pdf.worker.min.js';
+    const pdf=await pdfjsLib.getDocument({data:new Uint8Array(buffer)}).promise;
+    const page=await pdf.getPage(1);
+    const vp=page.getViewport({scale:2.0});
+    const canvas=document.createElement('canvas');
+    canvas.width=vp.width;canvas.height=vp.height;
+    await page.render({canvasContext:canvas.getContext('2d'),viewport:vp}).promise;
+    const img=new Image();
+    img.src=canvas.toDataURL('image/jpeg',0.95);
+    await new Promise(res=>{img.onload=res;img.onerror=res;});
+    return img.naturalWidth>10?img:null;
+  }catch(e){return null;}
 }
 
 // Handle image dropped/selected in the Forense tab for visual analysis
