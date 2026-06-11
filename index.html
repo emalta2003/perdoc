@@ -857,7 +857,6 @@ function renderResults({meta,flags},file,ext,sha256,analysisTime){
   const tb=document.getElementById('meta-table-body');
   tb.innerHTML='';
   const entries=Object.entries(meta).filter(([,v])=>v!=null&&v!==undefined&&v!=='');
-  if(!entries.length) tb.innerHTML='<tr><td colspan="2" style="color:var(--muted);padding:8px">Nenhum metadado encontrado.</td></tr>';
   const PRODUCER_SUSPEITO={
     'ghostscript':'GhostScript — software de reprocessamento/conversão de PDF, comumente utilizado em adulterações.',
     'inkscape':'Inkscape — editor de gráficos vetoriais, não utilizado em geração legítima de documentos oficiais.',
@@ -880,6 +879,7 @@ function renderResults({meta,flags},file,ext,sha256,analysisTime){
     'cairo':'Cairo — biblioteca gráfica de baixo nível, pode indicar conversão não oficial.',
     'scribus':'Scribus — software de diagramação, não utilizado em geração de documentos oficiais.',
   };
+  if(!entries.length){tb.innerHTML='<tr><td colspan="2" style="color:var(--muted);padding:8px">Nenhum metadado encontrado.</td></tr>';}
   else entries.forEach(([k,v])=>{
     const tr=document.createElement('tr');
     let cellVal=escHtml(String(v));
