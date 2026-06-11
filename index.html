@@ -427,6 +427,31 @@ hr.divider{border:none;border-top:1px solid var(--border);margin:14px 0;}
         <div id="noise-interpretation" style="margin-top:10px;font-size:12px;padding:10px 12px;border-radius:6px;background:var(--bg);border:1px solid var(--border)"></div>
       </div>
 
+      <!-- Copy-Move / Clonagem / Inserção -->
+      <div class="card" id="copymove-card" style="display:none">
+        <div class="card-title">Clonagem, Inserção e Colagem (Copy-Move)</div>
+        <div style="font-size:12px;color:var(--muted);margin-bottom:10px">
+          Divide a imagem em blocos e compara suas assinaturas. Blocos idênticos ou muito similares em posições distintas indicam <strong>clonagem</strong> (região copiada/colada dentro da mesma imagem). Blocos com textura inconsistente com a vizinhança indicam <strong>inserção</strong> ou <strong>colagem</strong> de elemento externo. Ref.: Popescu &amp; Farid (2004); Christlein et al. (2012).
+        </div>
+        <div class="ela-wrap">
+          <div class="ela-col">
+            <div class="ela-label">Original</div>
+            <img id="cm-original" class="ela-img" alt="Original">
+          </div>
+          <div class="ela-col">
+            <div class="ela-label">Mapa de clonagem / inserção</div>
+            <canvas id="cm-canvas" class="ela-img"></canvas>
+          </div>
+        </div>
+        <div id="cm-stats" style="margin-top:10px;font-size:12px;line-height:1.8"></div>
+        <div id="cm-legend" style="margin-top:6px;font-size:11px;display:flex;gap:16px;flex-wrap:wrap">
+          <span><span style="display:inline-block;width:12px;height:12px;background:#ff6b35;border-radius:2px;margin-right:4px;vertical-align:middle"></span>Clonagem (bloco duplicado)</span>
+          <span><span style="display:inline-block;width:12px;height:12px;background:#a78bfa;border-radius:2px;margin-right:4px;vertical-align:middle"></span>Inserção / textura inconsistente</span>
+          <span><span style="display:inline-block;width:12px;height:12px;background:#22c55e;border-radius:2px;margin-right:4px;vertical-align:middle"></span>Normal</span>
+        </div>
+        <div id="cm-interpretation" style="margin-top:10px;font-size:12px;padding:10px 12px;border-radius:6px;background:var(--bg);border:1px solid var(--border)"></div>
+      </div>
+
       <!-- Entropia Binária -->
       <div class="card" id="entropy-card">
         <div class="card-title">Entropia Binária do Arquivo</div>
@@ -1843,8 +1868,11 @@ function initForense(buffer,ext,imgEl){
   if(isImg&&imgEl){
     document.getElementById('ela-original').src=imgEl.src||imgEl;
     document.getElementById('noise-original').src=imgEl.src||imgEl;
+    document.getElementById('cm-original').src=imgEl.src||imgEl;
+    document.getElementById('copymove-card').style.display='';
     computeELA(imgEl);
     computeNoiseResidual(imgEl);
+    computeCopyMove(imgEl);
   }
   // Entropy analysis for all file types
   setTimeout(()=>initEntropy(buffer),50);
@@ -2102,6 +2130,149 @@ async function computeNoiseResidual(imgSrc){
       :anomalyCells>0
         ?`${anomalyCells} região(ões) com ruído levemente elevado. Verificar visualmente as áreas destacadas no mapa.`
         :'Padrão de ruído uniforme. Nenhuma região com inconsistência detectável por análise residual.'
+  });
+}
+
+// Copy-Move / Clonagem / Inserção
+async function computeCopyMove(imgSrc){
+  const BLOCK=16,THRESH_CLONE=8,THRESH_INSERT=22;
+  const img=new Image();
+  img.crossOrigin='anonymous';
+  await new Promise(res=>{img.onload=res;img.onerror=res;img.src=typeof imgSrc==='string'?imgSrc:imgSrc.src;});
+  const W=img.naturalWidth,H=img.naturalHeight;
+  if(!W||!H)return;
+
+  // Scale down for performance (max 512 on longest side)
+  const scale=Math.min(1,512/Math.max(W,H));
+  const SW=Math.floor(W*scale),SH=Math.floor(H*scale);
+
+  const c=document.createElement('canvas');c.width=SW;c.height=SH;
+  const ctx=c.getContext('2d');ctx.drawImage(img,0,0,SW,SH);
+  const px=ctx.getImageData(0,0,SW,SH).data;
+
+  // Grayscale + per-block feature: [mean, std, 4 quadrant means] = 6 values
+  const cols=Math.floor(SW/BLOCK),rows=Math.floor(SH/BLOCK);
+  const nBlocks=cols*rows;
+  if(nBlocks<4)return;
+
+  const feats=[];
+  for(let gy=0;gy<rows;gy++){
+    for(let gx=0;gx<cols;gx++){
+      let sum=0,sum2=0,cnt=0;
+      const qSum=[0,0,0,0],qCnt=[0,0,0,0];
+      for(let y=gy*BLOCK;y<(gy+1)*BLOCK&&y<SH;y++){
+        for(let x=gx*BLOCK;x<(gx+1)*BLOCK&&x<SW;x++){
+          const i=(y*SW+x)*4;
+          const g=(px[i]*77+px[i+1]*150+px[i+2]*29)>>8;
+          sum+=g;sum2+=g*g;cnt++;
+          const qy=y<gy*BLOCK+BLOCK/2?0:1;
+          const qx=x<gx*BLOCK+BLOCK/2?0:1;
+          qSum[qy*2+qx]+=g;qCnt[qy*2+qx]++;
+        }
+      }
+      const mean=cnt?sum/cnt:0;
+      const std=cnt?Math.sqrt(Math.max(0,sum2/cnt-mean*mean)):0;
+      feats.push({gx,gy,mean,std,q:qCnt.map((c,i)=>c?qSum[i]/c:0)});
+    }
+  }
+
+  // Block distance: weighted sum of feature differences
+  const dist=(a,b)=>{
+    let d=Math.abs(a.mean-b.mean)*1.5+Math.abs(a.std-b.std)*0.8;
+    for(let i=0;i<4;i++)d+=Math.abs(a.q[i]-b.q[i])*0.5;
+    return d;
+  };
+
+  // Global mean/std of all block means (for insertion detection)
+  const allMeans=feats.map(f=>f.mean);
+  const gMean=allMeans.reduce((s,v)=>s+v,0)/allMeans.length;
+  const gStd=Math.sqrt(allMeans.map(v=>(v-gMean)**2).reduce((s,v)=>s+v,0)/allMeans.length);
+
+  // For each block: find closest other block (nearest neighbor in feature space)
+  // Also flag blocks with mean far from global mean as insertion candidates
+  const cloneFlags=new Uint8Array(nBlocks);
+  const insertFlags=new Uint8Array(nBlocks);
+  let clonePairs=0;
+
+  // Sort blocks by mean for faster matching (only compare nearby in feature space)
+  const sorted=[...feats.map((f,i)=>({...f,idx:i}))].sort((a,b)=>a.mean-b.mean);
+
+  for(let i=0;i<sorted.length;i++){
+    const a=sorted[i];
+    // Only compare within a window of similar means
+    for(let j=i+1;j<sorted.length&&sorted[j].mean-a.mean<30;j++){
+      const b=sorted[j];
+      // Must be spatially separated (not adjacent)
+      if(Math.abs(a.gx-b.gx)<=1&&Math.abs(a.gy-b.gy)<=1)continue;
+      const d=dist(a,b);
+      if(d<THRESH_CLONE){
+        cloneFlags[a.idx]=1;cloneFlags[b.idx]=1;
+        clonePairs++;
+      }
+    }
+    // Insertion: block mean very different from image average
+    if(gStd>5&&Math.abs(a.mean-gMean)>THRESH_INSERT+gStd*1.2){
+      insertFlags[a.idx]=1;
+    }
+  }
+
+  // Draw result overlay on original
+  const out=document.getElementById('cm-canvas');
+  out.width=SW;out.height=SH;
+  const octx=out.getContext('2d');
+  octx.drawImage(c,0,0);
+
+  // Draw colored overlays per block
+  for(let i=0;i<nBlocks;i++){
+    const f=feats[i];
+    if(cloneFlags[i]){
+      octx.fillStyle='rgba(255,107,53,0.55)';
+      octx.fillRect(f.gx*BLOCK,f.gy*BLOCK,BLOCK,BLOCK);
+    } else if(insertFlags[i]){
+      octx.fillStyle='rgba(167,139,250,0.45)';
+      octx.fillRect(f.gx*BLOCK,f.gy*BLOCK,BLOCK,BLOCK);
+    }
+  }
+  // Draw grid (subtle)
+  octx.strokeStyle='rgba(255,255,255,0.08)';octx.lineWidth=0.5;
+  for(let x=0;x<=SW;x+=BLOCK){octx.beginPath();octx.moveTo(x,0);octx.lineTo(x,SH);octx.stroke();}
+  for(let y=0;y<=SH;y+=BLOCK){octx.beginPath();octx.moveTo(0,y);octx.lineTo(SW,y);octx.stroke();}
+
+  const nClone=cloneFlags.filter(v=>v).length;
+  const nInsert=insertFlags.filter(v=>v).length;
+  const pClone=(nClone*100/nBlocks).toFixed(1);
+  const pInsert=(nInsert*100/nBlocks).toFixed(1);
+
+  document.getElementById('cm-stats').innerHTML=
+    `<b>Blocos analisados:</b> ${nBlocks} (${cols}×${rows}) &nbsp;|&nbsp; `+
+    `<b style="color:#ff6b35">Clonagem:</b> ${nClone} blocos (${pClone}%) &nbsp;|&nbsp; `+
+    `<b style="color:#a78bfa">Inserção:</b> ${nInsert} blocos (${pInsert}%) &nbsp;|&nbsp; `+
+    `<b>Resolução analisada:</b> ${SW}×${SH} px`;
+
+  let interp='',icolor='var(--fg)';
+  if(nClone===0&&nInsert===0){
+    interp='✅ Nenhum padrão de clonagem ou inserção detectado. Distribuição de blocos homogênea.';icolor='#3fb950';
+  } else if(nClone>0&&nInsert===0){
+    interp=`⚠ ${nClone} bloco(s) com padrão de clonagem (laranja) — regiões com assinaturas idênticas em posições distintas. Indício de cópia e colagem de área dentro da mesma imagem.`;icolor='#f85149';
+  } else if(nClone===0&&nInsert>0){
+    interp=`⚡ ${nInsert} bloco(s) com textura inconsistente com o restante da imagem (roxo) — indício de inserção ou colagem de elemento externo.`;icolor='#f0b429';
+  } else {
+    interp=`⚠ ${nClone} bloco(s) de clonagem + ${nInsert} bloco(s) de inserção detectados. Padrão combinado indica manipulação: cópia de região interna e inserção de elemento externo.`;icolor='#f85149';
+  }
+  document.getElementById('cm-interpretation').innerHTML=`<span style="color:${icolor}">${interp}</span>`;
+
+  // Evidence
+  const cmOrig=captureCanvasEvidence('cm-canvas','Copy-Move — mapa de clonagem/inserção');
+  if(cmOrig) addEvidence({
+    title:'Análise de Clonagem, Inserção e Colagem (Copy-Move)',
+    status:(nClone>0||nInsert>5)?'fail':(nInsert>0)?'warn':'ok',
+    data:`Blocos analisados  : ${nBlocks} (${cols}×${rows} grade)\nClonagem (laranja) : ${nClone} blocos (${pClone}%)\nInserção (roxo)    : ${nInsert} blocos (${pInsert}%)\nResolução          : ${SW}×${SH} px (${W}×${H} original)`,
+    imgs:[cmOrig],
+    significance:(nClone>0||nInsert>5)
+      ?`Padrão de clonagem e/ou inserção detectado. Blocos laranjas indicam regiões copiadas internamente (copy-move forgery). Blocos roxos indicam textura estatisticamente inconsistente com o entorno — típico de inserção de assinatura, texto ou imagem de outra fonte. Ref.: Popescu & Farid (2004).`
+      :nInsert>0
+        ?`Pequena quantidade de blocos com textura ligeiramente inconsistente. Pode ser artefato de compressão. Verificar visualmente as regiões roxas.`
+        :'Nenhum padrão de clonagem ou inserção detectado por análise de blocos.'
   });
 }
 
