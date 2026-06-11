@@ -753,18 +753,25 @@ async function handleFile(file){
     initForense(buf,ext,null);
     // For PDFs: extract largest embedded JPEG and run image analyses
     if(ext==='pdf'){
-      const jpegImg=extractLargestJPEG(buf);
-      if(jpegImg){
-        document.getElementById('ela-card').style.display='';
-        document.getElementById('noise-card').style.display='';
-        document.getElementById('copymove-card').style.display='';
-        document.getElementById('ela-original').src=jpegImg.src;
-        document.getElementById('noise-original').src=jpegImg.src;
-        document.getElementById('cm-original').src=jpegImg.src;
-        computeELA(jpegImg);
-        computeNoiseResidual(jpegImg);
-        computeCopyMove(jpegImg);
-      }
+      extractLargestJPEG(buf).then(jpegImg=>{
+        if(jpegImg){
+          document.getElementById('ela-card').style.display='';
+          document.getElementById('noise-card').style.display='';
+          document.getElementById('copymove-card').style.display='';
+          document.getElementById('ela-original').src=jpegImg.src;
+          document.getElementById('noise-original').src=jpegImg.src;
+          document.getElementById('cm-original').src=jpegImg.src;
+          computeELA(jpegImg);
+          computeNoiseResidual(jpegImg);
+          computeCopyMove(jpegImg);
+        } else {
+          // Show note in forense tab that no JPEG image was found
+          ['ela-card','noise-card','copymove-card'].forEach(id=>{
+            const el=document.getElementById(id);
+            if(el){el.style.display='';el.querySelector('.card-title').insertAdjacentHTML('afterend','<div style="font-size:12px;color:var(--muted);padding:8px 0">⚠ Nenhuma imagem JPEG acessível encontrada neste PDF. As análises ELA, Ruído e Copy-Move requerem um PDF baseado em imagem (com DCTDecode/JPEG interno).</div>');}
+          });
+        }
+      });
     }
   }
 
@@ -1996,29 +2003,46 @@ function jpegMarkerName(b){
   return m[b]||('FF'+b.toString(16).toUpperCase().padStart(2,'0'));
 }
 
-// Extract largest JPEG stream from PDF binary
-function extractLargestJPEG(buffer){
+// Extract largest valid JPEG stream from PDF binary
+async function extractLargestJPEG(buffer){
   const bytes=new Uint8Array(buffer);
-  const streams=[];
+  const MAX_JPEG=15*1024*1024; // 15 MB max per JPEG
+  const candidates=[];
+
+  // Find all SOI markers (FF D8 FF)
   for(let i=0;i<bytes.length-3;i++){
     if(bytes[i]===0xFF&&bytes[i+1]===0xD8&&bytes[i+2]===0xFF){
-      // find EOI marker FF D9
+      // Third byte must be a valid JPEG marker (E0/E1/E2/DB/C0/C4/FE...)
+      const m=bytes[i+2]; // already 0xFF, next is the marker byte
+      const nextMarker=bytes[i+3];
+      if(nextMarker<0xC0&&nextMarker!==0xE0&&nextMarker!==0xE1&&nextMarker!==0xFE&&nextMarker!==0xDB) continue;
+
+      // Search for EOI (FF D9) within MAX_JPEG bytes
+      const scanEnd=Math.min(bytes.length-1, i+MAX_JPEG);
       let end=-1;
-      for(let j=i+3;j<bytes.length-1;j++){
+      for(let j=i+2;j<scanEnd;j++){
         if(bytes[j]===0xFF&&bytes[j+1]===0xD9){end=j+2;break;}
       }
-      if(end>i+100){streams.push({start:i,end,len:end-i});}
-      if(streams.length>20)break; // limit scan
+      if(end>i+1000) candidates.push({start:i,end,len:end-i});
     }
   }
-  if(!streams.length)return null;
-  // pick largest
-  streams.sort((a,b)=>b.len-a.len);
-  const best=streams[0];
-  const blob=new Blob([bytes.slice(best.start,best.end)],{type:'image/jpeg'});
-  const url=URL.createObjectURL(blob);
-  const img=new Image();img.src=url;
-  return img;
+  if(!candidates.length)return null;
+
+  // Try candidates from largest to smallest until one loads
+  candidates.sort((a,b)=>b.len-a.len);
+  for(const c of candidates.slice(0,5)){
+    const blob=new Blob([bytes.slice(c.start,c.end)],{type:'image/jpeg'});
+    const url=URL.createObjectURL(blob);
+    const img=new Image();
+    const ok=await new Promise(res=>{
+      img.onload=()=>res(true);
+      img.onerror=()=>res(false);
+      img.src=url;
+    });
+    if(ok&&img.naturalWidth>10&&img.naturalHeight>10) return img;
+    URL.revokeObjectURL(url);
+  }
+  return null;
 }
 
 // ELA — Error Level Analysis
