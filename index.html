@@ -344,7 +344,7 @@ hr.divider{border:none;border-top:1px solid var(--border);margin:14px 0;}
 
         <div style="margin-bottom:14px">
           <div class="card-title" style="font-size:12px;margin-bottom:4px">2. Equipamentos e Softwares Utilizados</div>
-          <textarea class="obs" id="laudo-equipamentos" placeholder="Ex: Computador Dell XPS 15, Intel Core i7, 32 GB RAM, Windows 11 Pro&#10;PerDoc v1.4 (análise documentoscópica digital)&#10;Adobe Acrobat Reader 2024&#10;…" style="min-height:80px"></textarea>
+          <textarea class="obs" id="laudo-equipamentos" placeholder="Informe o equipamento utilizado:&#10;Ex: Computador Dell XPS 15, Intel Core i7, 32 GB RAM&#10;Sistema Operacional: Windows 11 Pro 22H2&#10;(Os recursos de análise são listados automaticamente no laudo)" style="min-height:70px"></textarea>
         </div>
 
         <div style="margin-bottom:14px">
@@ -2148,7 +2148,25 @@ ${curriculo?`<div class="obs-block" style="margin-top:8px;white-space:pre-wrap">
 
 <!-- 2. EQUIPAMENTOS E SOFTWARES -->
 ${sec('Equipamentos e Softwares Utilizados','🖥️')}
-${equipamentos?`<div class="obs-block" style="white-space:pre-wrap">${escHtml(equipamentos)}</div>`:`<div class="obs-block"><strong>PerDoc v1.4</strong> — sistema de análise documentoscópica digital, processamento local (sem transmissão de dados).<br>Hardware e sistema operacional: <em>(não informado)</em>.</div>`}
+${equipamentos?`<div style="margin-bottom:10px"><div class="lbl" style="margin-bottom:4px">Equipamento / Hardware</div><div class="obs-block" style="white-space:pre-wrap">${escHtml(equipamentos)}</div></div>`:''}
+<table>
+  <thead><tr><th style="width:220px">Recurso / Ferramenta</th><th style="width:140px">Versão / Norma</th><th>Finalidade na Análise</th></tr></thead>
+  <tbody>
+    <tr><td><strong>PerDoc</strong></td><td>v1.4</td><td>Sistema de análise documentoscópica digital. Processamento 100% local — nenhum dado é transmitido externamente. Cadeia de custódia preservada.</td></tr>
+    <tr><td><strong>SHA-256</strong></td><td>FIPS PUB 180-4 (NIST, 2015)</td><td>Hash criptográfico do arquivo íntegro para identificação unívoca e garantia da cadeia de custódia da evidência digital.</td></tr>
+    <tr><td><strong>PDF.js</strong> (Mozilla)</td><td>v3.11.174</td><td>Renderização de páginas PDF em canvas para análise visual forense (ELA, ruído residual, copy-move). Execução local via Web Worker.</td></tr>
+    <tr><td><strong>Análise de Metadados PDF</strong></td><td>ISO 32000-1:2008</td><td>Leitura binária direta dos campos /Info (/Creator, /Producer, /Author, /CreationDate, /ModDate), XObjects, fontes, JpegDump (FF D8 FF / DCTDecode) e AcroForm /Sig.</td></tr>
+    <tr><td><strong>Análise de Metadados EXIF</strong></td><td>JEITA CP-3451C</td><td>Extração dos segmentos APP0 (JFIF) e APP1 (EXIF) de arquivos JPEG: câmera, data/hora de captura, GPS, software, parâmetros de exposição.</td></tr>
+    <tr><td><strong>Análise de Metadados OOXML</strong></td><td>ISO/IEC 29500:2012</td><td>Extração de docProps/core.xml e docProps/app.xml em arquivos DOCX/XLSX: autor, último editor, número de revisões, datas.</td></tr>
+    <tr><td><strong>ELA — Error Level Analysis</strong></td><td>Krawetz (2007)</td><td>Recompressão JPEG (qualidade 95) e amplificação da diferença pixel a pixel (×15). Regiões adulteradas apresentam nível de erro distinto do restante da imagem.</td></tr>
+    <tr><td><strong>Análise de Ruído Residual</strong></td><td>Farid (2016)</td><td>Subtração do canal de luminância suavizado (blur gaussiano 3 px) da imagem original, amplificação ×8, segmentação em grade 16×16. Anomalias detectadas por limiar μ+2σ.</td></tr>
+    <tr><td><strong>Copy-Move / Inserção</strong></td><td>Popescu &amp; Farid (2004); Christlein et al. (2012)</td><td>Segmentação em blocos 16×16 px, vetor de características [média, σ, 4 quadrantes], janela deslizante. Clone: distância &lt;8; Inserção: |média−μ_global| &gt;1,2σ+22.</td></tr>
+    <tr><td><strong>Entropia de Shannon</strong></td><td>Shannon (1948)</td><td>H = −Σ p·log₂(p) calculada por byte sobre o arquivo íntegro e por blocos. Detecta padrões de compressão, criptografia ou geração sintética de conteúdo.</td></tr>
+    <tr><td><strong>pHash DCT</strong></td><td>Zauner (2010)</td><td>Hash perceptual via DCT 2D em bloco 32×32 reduzido a 64 bits. Comparação por distância de Hamming — ≤10 bits: imagens visualmente idênticas.</td></tr>
+    <tr><td><strong>Verificação de Assinaturas ICP-Brasil</strong></td><td>MP 2.200-2/2001; DOC-ICP-15; RFC 3852</td><td>Extração e verificação de assinaturas digitais PKCS#7/CMS embutidas no PDF: certificado X.509, /ByteRange, validade temporal e integridade do conteúdo assinado.</td></tr>
+    <tr><td><strong>Análise de Autenticação Eletrônica</strong></td><td>DOC-ICP-15 (ITI)</td><td>Busca de hashes criptográficos (MD5/SHA-1/SHA-256) no conteúdo textual do PDF e verificação de unicidade — hashes duplicados indicam transposição de código de autenticação.</td></tr>
+  </tbody>
+</table>
 
 <!-- 3. CONTEXTO DO CASO -->
 ${sec('Contexto do Caso','📂')}
