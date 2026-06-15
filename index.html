@@ -1898,7 +1898,11 @@ function exportReport(){
     .map(([k,v])=>`<tr><td style="padding:5px 10px;border:1px solid #ccc;font-weight:bold;background:#f5f5f5;width:200px">${escHtml(k)}</td><td style="padding:5px 10px;border:1px solid #ccc;font-family:monospace">${escHtml(String(v))}</td></tr>`).join('');
 
   const exames=buildExames(meta,flags,fileInfo.ext);
-  const examesRows=exames.map(e=>`<tr><td style="padding:5px 10px;border:1px solid #ccc">${e.icon} ${e.name}</td><td style="padding:5px 10px;border:1px solid #ccc;font-weight:bold;color:${e.status==='ok'?'#155724':e.status==='fail'?'#c00':'#7a5200'}">${statusLabel(e.status)}</td><td style="padding:5px 10px;border:1px solid #ccc">${escHtml(e.result)}</td></tr>`).join('');
+  const examesRows=exames.map(e=>{
+    const sc=e.status==='ok'?'#155724':e.status==='fail'?'#c00':'#7a5200';
+    const metodRow=e.metod?`<tr><td colspan="3" style="padding:5px 14px 8px 32px;border:1px solid #ccc;background:#f9f9f9;font-size:11px;color:#444;line-height:1.7;border-top:none"><em><b>Metodologia:</b> ${e.metod}</em></td></tr>`:'';
+    return`<tr><td style="padding:5px 10px;border:1px solid #ccc">${e.icon} ${e.name}</td><td style="padding:5px 10px;border:1px solid #ccc;font-weight:bold;color:${sc}">${statusLabel(e.status)}</td><td style="padding:5px 10px;border:1px solid #ccc">${escHtml(e.result)}</td></tr>${metodRow}`;
+  }).join('');
 
   const flagsHtml=flags.length?flags.map(f=>`<div style="margin-bottom:8px;border-left:4px solid ${flagSeverity(f)==='high'?'#c00':flagSeverity(f)==='medium'?'#7a5200':'#004080'};padding:6px 10px;background:#fafafa"><strong>${f}</strong><br><span style="font-size:12px;color:#444">${FLAG_DESCS[f]||''}</span></div>`).join(''):'<p><em>Nenhum indicador de risco detectado.</em></p>';
 
