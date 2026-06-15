@@ -1948,6 +1948,14 @@ function exportReport(){
     .map(([k,v])=>`<tr><td style="padding:5px 10px;border:1px solid #ccc;font-weight:bold;background:#f5f5f5;width:200px">${escHtml(k)}</td><td style="padding:5px 10px;border:1px solid #ccc;font-family:monospace">${escHtml(String(v))}</td></tr>`).join('');
 
   const exames=buildExames(meta,flags,fileInfo.ext);
+  // Sobrescreve o placeholder de assinaturas ICP-Brasil com o resultado real já computado
+  const sigExame=exames.find(e=>e.id==='exame-sig');
+  if(sigExame){
+    const hasFail=currentSigs.some(s=>s.flags.includes('rf-assinatura-invalida')||s.flags.includes('rf-modificado-pos-assinatura'));
+    const hasWarn=currentSigs.some(s=>s.flags.length>0);
+    sigExame.status=currentSigs.length===0?'na':hasFail?'fail':hasWarn?'warn':'ok';
+    sigExame.result=currentSigs.length===0?'Não se aplica — nenhuma assinatura digital ICP-Brasil detectada':`${currentSigs.length} assinatura(s) — ${hasFail?'inválida(s)':hasWarn?'atenção necessária':'todas íntegras'}`;
+  }
   const examesRows=exames.map(e=>{
     const sc=e.status==='ok'?'#155724':e.status==='fail'?'#c00':'#7a5200';
     const metodRow=e.metod?`<tr><td colspan="3" style="padding:5px 14px 8px 32px;border:1px solid #ccc;background:#f9f9f9;font-size:11px;color:#444;line-height:1.7;border-top:none"><em><b>Metodologia:</b> ${e.metod}</em></td></tr>`:'';
