@@ -331,10 +331,49 @@ hr.divider{border:none;border-top:1px solid var(--border);margin:14px 0;}
         </div>
       </div>
 
-      <!-- Observações -->
+      <!-- Campos do laudo -->
       <div class="card">
-        <div class="card-title">Observações do Perito</div>
-        <textarea class="obs" id="obs-text" placeholder="Anotações para o laudo…"></textarea>
+        <div class="card-title">📋 Dados para o Laudo Pericial</div>
+
+        <div style="margin-bottom:14px">
+          <div class="card-title" style="font-size:12px;margin-bottom:4px">1. Do Perito — Currículo / Qualificação</div>
+          <textarea class="obs" id="laudo-curriculo" placeholder="Cole aqui o currículo ou qualificação do perito (formação, especialidades, experiência, registros profissionais)…" style="min-height:90px"></textarea>
+        </div>
+
+        <div style="margin-bottom:14px">
+          <div class="card-title" style="font-size:12px;margin-bottom:4px">2. Equipamentos e Softwares Utilizados</div>
+          <textarea class="obs" id="laudo-equipamentos" placeholder="Ex: Computador Dell XPS 15, Intel Core i7, 32 GB RAM, Windows 11 Pro&#10;PerDoc v1.4 (análise documentoscópica digital)&#10;Adobe Acrobat Reader 2024&#10;…" style="min-height:80px"></textarea>
+        </div>
+
+        <div style="margin-bottom:14px">
+          <div class="card-title" style="font-size:12px;margin-bottom:4px">3. Contexto do Caso</div>
+          <textarea class="obs" id="laudo-contexto" placeholder="Descreva os fatos e o contexto apresentados pelas partes: origem do documento, circunstâncias de apresentação, alegações relevantes…" style="min-height:100px"></textarea>
+        </div>
+
+        <div style="margin-bottom:14px">
+          <div class="card-title" style="font-size:12px;margin-bottom:4px">4. Quesitos do Autor</div>
+          <textarea class="obs" id="laudo-quesitos-autor" placeholder="Cole aqui os quesitos formulados pelo autor / requerente…" style="min-height:80px"></textarea>
+        </div>
+
+        <div style="margin-bottom:14px">
+          <div class="card-title" style="font-size:12px;margin-bottom:4px">4. Quesitos do Réu / Requerido</div>
+          <textarea class="obs" id="laudo-quesitos-reu" placeholder="Cole aqui os quesitos formulados pelo réu / requerido…" style="min-height:80px"></textarea>
+        </div>
+
+        <div style="margin-bottom:14px">
+          <div class="card-title" style="font-size:12px;margin-bottom:4px">Observações Técnicas do Perito</div>
+          <textarea class="obs" id="obs-text" placeholder="Anotações técnicas adicionais para o laudo…"></textarea>
+        </div>
+
+        <div style="margin-bottom:14px">
+          <div class="card-title" style="font-size:12px;margin-bottom:4px">Resposta aos Quesitos</div>
+          <textarea class="obs" id="laudo-respostas" placeholder="Responda aqui cada quesito das partes, referenciando as análises realizadas…" style="min-height:120px"></textarea>
+        </div>
+
+        <div style="margin-bottom:6px">
+          <div class="card-title" style="font-size:12px;margin-bottom:4px">Conclusão</div>
+          <textarea class="obs" id="laudo-conclusao" placeholder="Redija a conclusão pericial, sintetizando os achados e o posicionamento técnico final…" style="min-height:100px"></textarea>
+        </div>
       </div>
 
       <div class="action-row">
@@ -1892,6 +1931,13 @@ function exportReport(){
   const reg=document.getElementById('perito-reg').value.trim()||'(não informado)';
   const caso=document.getElementById('caso-num').value.trim()||'—';
   const obs=document.getElementById('obs-text').value.trim();
+  const curriculo=document.getElementById('laudo-curriculo').value.trim();
+  const equipamentos=document.getElementById('laudo-equipamentos').value.trim();
+  const contexto=document.getElementById('laudo-contexto').value.trim();
+  const quesitosAutor=document.getElementById('laudo-quesitos-autor').value.trim();
+  const quesitosReu=document.getElementById('laudo-quesitos-reu').value.trim();
+  const respostas=document.getElementById('laudo-respostas').value.trim();
+  const conclusao=document.getElementById('laudo-conclusao').value.trim();
   const score=calcFraudScore(flags);
 
   const metaRows=Object.entries(meta).filter(([,v])=>v!=null&&v!==undefined&&v!=='')
@@ -2047,27 +2093,45 @@ tr:last-child td{border-bottom:none;}
 <!-- CORPO -->
 <div class="body">
 
-<!-- 1. VEREDICTO PERICIAL -->
-${sec('Veredicto Pericial','⚖️')}
-<div class="verdict avoid-break">
-  <div class="verdict-score">${score}<span>/100</span></div>
-  <div class="verdict-bar-wrap">
-    <div class="verdict-bar-bg"><div class="verdict-bar-fill"></div></div>
-    <div class="verdict-label">${score>=60?'⚠ ALTO RISCO DE ADULTERAÇÃO':score>=30?'⚡ RISCO MODERADO — VERIFICAÇÃO NECESSÁRIA':'✓ BAIXO RISCO — SEM INDICADORES SIGNIFICATIVOS'}</div>
-    <div class="verdict-flags">${flags.length} indicador(es) de risco detectado(s) · FraudScore ponderado por severidade pericial</div>
+<!-- 1. DO PERITO -->
+${sec('Do Perito','👤')}
+<div class="info-grid" style="margin-bottom:10px">
+  <div class="info-item"><div class="lbl">Nome</div><div class="val">${escHtml(perito)}</div></div>
+  <div class="info-item"><div class="lbl">Matrícula / Registro</div><div class="val">${escHtml(reg)}</div></div>
+</div>
+${curriculo?`<div class="obs-block" style="margin-top:8px;white-space:pre-wrap">${escHtml(curriculo)}</div>`:'<p style="color:#7A8FAD;font-style:italic;font-size:12px">Currículo não informado.</p>'}
+
+<!-- 2. EQUIPAMENTOS E SOFTWARES -->
+${sec('Equipamentos e Softwares Utilizados','🖥️')}
+${equipamentos?`<div class="obs-block" style="white-space:pre-wrap">${escHtml(equipamentos)}</div>`:`<div class="obs-block"><strong>PerDoc v1.4</strong> — sistema de análise documentoscópica digital, processamento local (sem transmissão de dados).<br>Hardware e sistema operacional: <em>(não informado)</em>.</div>`}
+
+<!-- 3. CONTEXTO DO CASO -->
+${sec('Contexto do Caso','📂')}
+${contexto?`<div class="obs-block" style="white-space:pre-wrap">${escHtml(contexto)}</div>`:'<p style="color:#7A8FAD;font-style:italic;font-size:12px">Contexto não informado.</p>'}
+
+<!-- 4. QUESITOS DAS PARTES -->
+${sec('Quesitos das Partes','⚖️')}
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
+  <div>
+    <div style="font-size:10px;letter-spacing:1.2px;text-transform:uppercase;color:#7A8FAD;font-family:Arial,sans-serif;margin-bottom:6px">Quesitos do Autor / Requerente</div>
+    ${quesitosAutor?`<div class="obs-block" style="white-space:pre-wrap">${escHtml(quesitosAutor)}</div>`:'<p style="color:#7A8FAD;font-style:italic;font-size:12px">Não informado.</p>'}
+  </div>
+  <div>
+    <div style="font-size:10px;letter-spacing:1.2px;text-transform:uppercase;color:#7A8FAD;font-family:Arial,sans-serif;margin-bottom:6px">Quesitos do Réu / Requerido</div>
+    ${quesitosReu?`<div class="obs-block" style="white-space:pre-wrap">${escHtml(quesitosReu)}</div>`:'<p style="color:#7A8FAD;font-style:italic;font-size:12px">Não informado.</p>'}
   </div>
 </div>
 
-<!-- 2. IDENTIFICAÇÃO DO CASO -->
+<!-- 5. IDENTIFICAÇÃO DO CASO -->
 ${sec('Identificação do Caso','📁')}
 <div class="info-grid">
-  <div class="info-item"><div class="lbl">Número do Caso</div><div class="val">${escHtml(caso)}</div></div>
+  <div class="info-item"><div class="lbl">Número do Caso / Processo</div><div class="val">${escHtml(caso)}</div></div>
   <div class="info-item"><div class="lbl">Data / Hora da Análise</div><div class="val">${fileInfo.analysisTime}</div></div>
   <div class="info-item"><div class="lbl">Perito / Analista</div><div class="val">${escHtml(perito)}</div></div>
   <div class="info-item"><div class="lbl">Matrícula / Registro</div><div class="val">${escHtml(reg)}</div></div>
 </div>
 
-<!-- 3. IDENTIFICAÇÃO DO DOCUMENTO -->
+<!-- 6. IDENTIFICAÇÃO DO DOCUMENTO -->
 ${sec('Identificação do Documento Examinado','📄')}
 <div class="info-grid">
   <div class="info-item"><div class="lbl">Nome do Arquivo</div><div class="val">${escHtml(fileInfo.name)}</div></div>
@@ -2077,7 +2141,18 @@ ${sec('Identificação do Documento Examinado','📄')}
 </div>
 <div class="sha-box"><span class="sha-lbl">SHA-256 — Cadeia de Custódia</span>${fileInfo.sha256}</div>
 
-<!-- 4. EXAMES REALIZADOS -->
+<!-- 7. VEREDICTO PERICIAL -->
+${sec('Veredicto Pericial — FraudScore','🎯')}
+<div class="verdict avoid-break">
+  <div class="verdict-score">${score}<span>/100</span></div>
+  <div class="verdict-bar-wrap">
+    <div class="verdict-bar-bg"><div class="verdict-bar-fill"></div></div>
+    <div class="verdict-label">${score>=60?'⚠ ALTO RISCO DE ADULTERAÇÃO':score>=30?'⚡ RISCO MODERADO — VERIFICAÇÃO NECESSÁRIA':'✓ BAIXO RISCO — SEM INDICADORES SIGNIFICATIVOS'}</div>
+    <div class="verdict-flags">${flags.length} indicador(es) de risco detectado(s) · FraudScore ponderado por severidade pericial</div>
+  </div>
+</div>
+
+<!-- 8. EXAMES REALIZADOS -->
 ${sec('Exames Realizados','🔬')}
 <table class="avoid-break">
   <thead><tr><th style="width:220px">Exame</th><th style="width:130px">Situação</th><th>Resultado / Achado</th></tr></thead>
@@ -2160,6 +2235,14 @@ ${sec('Referências Bibliográficas','📚')}
   <li>ASTM E2388-11. <em>Standard Guide for Minimum Training Requirements for Forensic Document Examiners</em>. ASTM International, 2011.</li>
   <li>MP 2.200-2/2001 e DOC-ICP-15 (ITI). <em>Padrões de Assinatura Digital ICP-Brasil</em>.</li>
 </ol>
+
+<!-- PENÚLTIMO: RESPOSTA AOS QUESITOS -->
+${sec('Resposta aos Quesitos','💬')}
+${respostas?`<div class="obs-block" style="white-space:pre-wrap">${escHtml(respostas)}</div>`:'<p style="color:#7A8FAD;font-style:italic;font-size:12px">Respostas não informadas.</p>'}
+
+<!-- ÚLTIMO: CONCLUSÃO -->
+${sec('Conclusão','📌')}
+${conclusao?`<div style="border:2px solid #1C2B4A;border-radius:8px;padding:18px 22px;background:#F4F6FA;font-size:13px;line-height:1.8;color:#1C1C1C;white-space:pre-wrap">${escHtml(conclusao)}</div>`:'<p style="color:#7A8FAD;font-style:italic;font-size:12px">Conclusão não informada.</p>'}
 
 <!-- RODAPÉ -->
 <div class="report-footer pg-break avoid-break">
