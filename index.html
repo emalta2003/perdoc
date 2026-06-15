@@ -1915,84 +1915,277 @@ function exportReport(){
   const scoreColor=score>=60?'#c00':score>=30?'#7a5200':'#155724';
   const scoreBg=score>=60?'#ffe0e0':score>=30?'#fff3cd':'#d4edda';
 
-  const html=`<!DOCTYPE html><html lang="pt-BR"><head><meta charset="UTF-8"><title>Relatório PerDoc — ${escHtml(fileInfo.name)}</title>
-<style>body{font-family:Arial,sans-serif;font-size:13px;color:#1a1a1a;max-width:920px;margin:0 auto;padding:30px 40px;}@media print{body{padding:10px 20px;}}h1{font-size:20px;border-bottom:3px solid #1a1a1a;padding-bottom:6px;margin-bottom:4px;}h2{font-size:13px;text-transform:uppercase;letter-spacing:.6px;color:#555;margin:22px 0 8px;}table{width:100%;border-collapse:collapse;}.info-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px 24px;}.info-item{border-bottom:1px solid #e0e0e0;padding:5px 0;}.lbl{font-size:11px;color:#777;text-transform:uppercase;}.val{font-weight:bold;font-size:13px;}.sha{font-family:monospace;font-size:11px;background:#f0f0f0;padding:8px 12px;border-radius:4px;word-break:break-all;margin:4px 0;}footer{margin-top:40px;border-top:1px solid #ccc;padding-top:12px;font-size:11px;color:#777;}</style></head><body>
-<h1>PerDoc — Relatório de Evidências Documentoscópicas</h1>
-<p style="font-size:12px;color:#777;margin-bottom:20px">Gerado por PerDoc v1.4</p>
-<h2>1. Identificação do Caso</h2>
+  // ── seção numerada helper
+  let secN=0;
+  const sec=(title,icon='')=>{secN++;return`<div class="sec-head"><span class="sec-n">${secN}</span><span class="sec-icon">${icon}</span>${title}</div>`;};
+
+  // ── status badge helper
+  const badge=(s,lbl)=>{const map={ok:['#1E6B3C','#D6F0E0'],fail:['#9B1C1C','#FCE4E4'],warn:['#7A4F00','#FFF3CC'],na:['#4A5568','#EDF2F7']};const[tc,bg]=map[s]||map.na;return`<span style="display:inline-block;padding:2px 9px;border-radius:20px;font-size:10px;font-weight:700;letter-spacing:.5px;background:${bg};color:${tc};border:1px solid ${tc}40">${lbl}</span>`;};
+
+  // ── veredicto FraudScore
+  const vColor=score>=60?'#9B1C1C':score>=30?'#7A4F00':'#1E6B3C';
+  const vBg=score>=60?'#FCE4E4':score>=30?'#FFF3CC':'#D6F0E0';
+  const vBorder=score>=60?'#E53E3E':score>=30?'#D69E2E':'#38A169';
+  const vIcon=score>=60?'⚠':score>=30?'⚡':'✓';
+  const vLabel=score>=60?'ALTO RISCO DE ADULTERAÇÃO':score>=30?'RISCO MODERADO — VERIFICAÇÃO NECESSÁRIA':'BAIXO RISCO — SEM INDICADORES SIGNIFICATIVOS';
+
+  const html=`<!DOCTYPE html><html lang="pt-BR"><head><meta charset="UTF-8">
+<title>Laudo Pericial Documentoscópico — ${escHtml(fileInfo.name)}</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'Georgia',serif;font-size:13px;color:#1C1C1C;background:#fff;max-width:960px;margin:0 auto;padding:0;}
+@media print{
+  @page{size:A4;margin:20mm 18mm 22mm 22mm;}
+  body{max-width:100%;}
+  .no-print{display:none!important;}
+  .pg-break{page-break-before:always;}
+  .avoid-break{page-break-inside:avoid;}
+}
+
+/* ── CAPA / HEADER */
+.cover{background:#1C2B4A;color:#fff;padding:36px 48px 28px;}
+.cover-title{font-size:9px;letter-spacing:3px;text-transform:uppercase;color:#C8A84B;margin-bottom:6px;}
+.cover-h1{font-size:22px;font-weight:700;letter-spacing:.3px;line-height:1.3;margin-bottom:4px;}
+.cover-sub{font-size:12px;color:#a8b8d0;margin-bottom:24px;}
+.cover-meta{display:grid;grid-template-columns:1fr 1fr 1fr;gap:0;border-top:1px solid #2e4270;}
+.cm{padding:14px 0 4px;border-right:1px solid #2e4270;padding-right:20px;margin-right:20px;}
+.cm:last-child{border-right:none;margin-right:0;padding-right:0;}
+.cm-lbl{font-size:9px;letter-spacing:1.5px;text-transform:uppercase;color:#7A8FAD;margin-bottom:3px;}
+.cm-val{font-size:13px;font-weight:600;color:#E8EEF8;}
+
+/* ── BODY */
+.body{padding:32px 48px 48px;}
+
+/* ── SEÇÃO */
+.sec-head{display:flex;align-items:center;gap:10px;margin:32px 0 14px;padding-bottom:8px;border-bottom:2px solid #1C2B4A;}
+.sec-n{display:flex;align-items:center;justify-content:center;width:26px;height:26px;border-radius:50%;background:#1C2B4A;color:#C8A84B;font-size:12px;font-weight:700;font-family:Arial,sans-serif;flex-shrink:0;}
+.sec-icon{font-size:16px;}
+.sec-head{font-size:13px;font-weight:700;text-transform:uppercase;letter-spacing:.8px;color:#1C2B4A;}
+
+/* ── GRIDS DE INFO */
+.info-grid{display:grid;grid-template-columns:1fr 1fr;gap:0;border:1px solid #DDE3ED;border-radius:6px;overflow:hidden;}
+.info-item{padding:9px 14px;border-bottom:1px solid #DDE3ED;border-right:1px solid #DDE3ED;}
+.info-item:nth-child(2n){border-right:none;}
+.info-item:nth-last-child(-n+2){border-bottom:none;}
+.lbl{font-size:9px;letter-spacing:1.2px;text-transform:uppercase;color:#7A8FAD;font-family:Arial,sans-serif;margin-bottom:2px;}
+.val{font-size:13px;font-weight:600;color:#1C2B4A;}
+.sha-box{font-family:'Courier New',monospace;font-size:10.5px;background:#F4F6FA;border:1px solid #DDE3ED;border-radius:5px;padding:10px 14px;word-break:break-all;color:#2D3748;margin-top:10px;line-height:1.6;}
+.sha-box .sha-lbl{font-family:Arial,sans-serif;font-size:9px;letter-spacing:1.2px;text-transform:uppercase;color:#7A8FAD;display:block;margin-bottom:4px;}
+
+/* ── VEREDICTO */
+.verdict{border:2px solid ${vBorder};border-radius:8px;background:${vBg};padding:20px 24px;display:flex;align-items:center;gap:20px;margin-bottom:6px;}
+.verdict-score{font-size:52px;font-weight:700;color:${vColor};font-family:Arial,sans-serif;line-height:1;min-width:90px;text-align:center;}
+.verdict-score span{font-size:18px;font-weight:400;}
+.verdict-bar-wrap{flex:1;}
+.verdict-bar-bg{background:#00000015;border-radius:4px;height:10px;overflow:hidden;margin-bottom:8px;}
+.verdict-bar-fill{width:${Math.min(score,100)}%;height:100%;background:${vBorder};border-radius:4px;}
+.verdict-label{font-size:14px;font-weight:700;color:${vColor};font-family:Arial,sans-serif;letter-spacing:.3px;}
+.verdict-flags{font-size:11px;color:${vColor}88;margin-top:3px;font-family:Arial,sans-serif;}
+
+/* ── TABELAS */
+table{width:100%;border-collapse:collapse;font-size:12px;}
+th{background:#1C2B4A;color:#C8A84B;padding:8px 12px;text-align:left;font-family:Arial,sans-serif;font-size:10px;letter-spacing:.8px;text-transform:uppercase;font-weight:600;}
+td{padding:8px 12px;border-bottom:1px solid #EEF1F7;vertical-align:top;}
+tr:nth-child(even) td{background:#F7F9FC;}
+tr:last-child td{border-bottom:none;}
+.metod-td{background:#F0F4FA!important;font-size:11px;color:#4A5568;font-style:italic;padding:5px 12px 9px 28px;border-bottom:1px solid #DDE3ED;}
+
+/* ── RED FLAGS */
+.flag-card{border-radius:6px;padding:10px 14px;margin-bottom:8px;display:flex;gap:12px;align-items:flex-start;page-break-inside:avoid;}
+.flag-card.high{background:#FCE4E4;border-left:4px solid #E53E3E;}
+.flag-card.medium{background:#FFF3CC;border-left:4px solid #D69E2E;}
+.flag-card.low{background:#EBF4FF;border-left:4px solid #3182CE;}
+.flag-icon{font-size:18px;flex-shrink:0;margin-top:1px;}
+.flag-title{font-size:12px;font-weight:700;color:#1C1C1C;margin-bottom:2px;}
+.flag-desc{font-size:11px;color:#444;line-height:1.5;}
+
+/* ── EVIDÊNCIAS */
+.ev-card{border:1px solid #DDE3ED;border-radius:7px;margin-bottom:18px;overflow:hidden;page-break-inside:avoid;}
+.ev-header{display:flex;align-items:center;gap:10px;padding:9px 14px;}
+.ev-n{font-size:10px;font-weight:700;padding:2px 10px;border-radius:20px;color:#fff;white-space:nowrap;}
+.ev-title{font-size:13px;font-weight:600;flex:1;}
+.ev-sig{font-size:11px;font-weight:700;}
+.ev-data{margin:0;padding:10px 14px;font-family:'Courier New',monospace;font-size:10.5px;background:#F7F9FC;border-top:1px solid #EEF1F7;white-space:pre-wrap;word-break:break-all;}
+.ev-imgs{display:flex;gap:12px;flex-wrap:wrap;padding:10px 14px;background:#F7F9FC;border-top:1px solid #EEF1F7;}
+.ev-img-cap{font-size:10px;color:#777;margin-top:3px;text-align:center;}
+.ev-sig-line{padding:8px 14px;font-size:12px;color:#444;line-height:1.6;background:#fff;border-top:1px solid #EEF1F7;}
+
+/* ── OBS PERITO */
+.obs-block{background:#F7F9FC;border-left:4px solid #C8A84B;border-radius:0 6px 6px 0;padding:12px 16px;font-size:13px;line-height:1.7;color:#2D3748;}
+
+/* ── ASSINATURAS */
+.sig-ok{color:#1E6B3C;font-weight:700;}
+.sig-fail{color:#9B1C1C;font-weight:700;}
+
+/* ── METODOLOGIA */
+.metod-table td:first-child{font-weight:600;color:#1C2B4A;width:180px;font-family:Arial,sans-serif;}
+
+/* ── REFS */
+.refs{font-size:11.5px;line-height:1.9;color:#2D3748;padding-left:18px;}
+.refs li{margin-bottom:2px;}
+
+/* ── RODAPÉ */
+.report-footer{margin-top:48px;padding-top:16px;border-top:2px solid #1C2B4A;}
+.footer-sign{display:grid;grid-template-columns:1fr 1fr;gap:32px;margin-top:24px;}
+.sign-block{border-top:1px solid #666;padding-top:6px;}
+.sign-lbl{font-size:10px;color:#666;font-family:Arial,sans-serif;letter-spacing:.5px;}
+.footer-note{font-size:10px;color:#7A8FAD;margin-top:18px;font-style:italic;text-align:center;font-family:Arial,sans-serif;}
+</style></head><body>
+
+<!-- CAPA -->
+<div class="cover">
+  <div class="cover-title">Perícia Documentoscópica Digital</div>
+  <div class="cover-h1">Laudo de Exame Documentoscópico</div>
+  <div class="cover-sub">Análise forense de autenticidade e integridade de documento digital — PerDoc v1.4</div>
+  <div class="cover-meta">
+    <div class="cm"><div class="cm-lbl">Nº do Caso</div><div class="cm-val">${escHtml(caso)}</div></div>
+    <div class="cm"><div class="cm-lbl">Perito Responsável</div><div class="cm-val">${escHtml(perito)}</div></div>
+    <div class="cm"><div class="cm-lbl">Data da Análise</div><div class="cm-val">${fileInfo.analysisTime}</div></div>
+  </div>
+</div>
+
+<!-- CORPO -->
+<div class="body">
+
+<!-- 1. VEREDICTO PERICIAL -->
+${sec('Veredicto Pericial','⚖️')}
+<div class="verdict avoid-break">
+  <div class="verdict-score">${score}<span>/100</span></div>
+  <div class="verdict-bar-wrap">
+    <div class="verdict-bar-bg"><div class="verdict-bar-fill"></div></div>
+    <div class="verdict-label">${score>=60?'⚠ ALTO RISCO DE ADULTERAÇÃO':score>=30?'⚡ RISCO MODERADO — VERIFICAÇÃO NECESSÁRIA':'✓ BAIXO RISCO — SEM INDICADORES SIGNIFICATIVOS'}</div>
+    <div class="verdict-flags">${flags.length} indicador(es) de risco detectado(s) · FraudScore ponderado por severidade pericial</div>
+  </div>
+</div>
+
+<!-- 2. IDENTIFICAÇÃO DO CASO -->
+${sec('Identificação do Caso','📁')}
 <div class="info-grid">
   <div class="info-item"><div class="lbl">Número do Caso</div><div class="val">${escHtml(caso)}</div></div>
-  <div class="info-item"><div class="lbl">Data/Hora da Análise</div><div class="val">${fileInfo.analysisTime}</div></div>
+  <div class="info-item"><div class="lbl">Data / Hora da Análise</div><div class="val">${fileInfo.analysisTime}</div></div>
   <div class="info-item"><div class="lbl">Perito / Analista</div><div class="val">${escHtml(perito)}</div></div>
   <div class="info-item"><div class="lbl">Matrícula / Registro</div><div class="val">${escHtml(reg)}</div></div>
 </div>
-<h2>2. Identificação do Documento</h2>
+
+<!-- 3. IDENTIFICAÇÃO DO DOCUMENTO -->
+${sec('Identificação do Documento Examinado','📄')}
 <div class="info-grid">
-  <div class="info-item"><div class="lbl">Nome</div><div class="val">${escHtml(fileInfo.name)}</div></div>
+  <div class="info-item"><div class="lbl">Nome do Arquivo</div><div class="val">${escHtml(fileInfo.name)}</div></div>
   <div class="info-item"><div class="lbl">Tipo</div><div class="val">${fileInfo.ext.toUpperCase()}</div></div>
   <div class="info-item"><div class="lbl">Tamanho</div><div class="val">${formatBytes(fileInfo.size)}</div></div>
-  <div class="info-item"><div class="lbl">Última Modificação (SO)</div><div class="val">${fileInfo.lastModified.toLocaleString('pt-BR')}</div></div>
+  <div class="info-item"><div class="lbl">Última Modificação (Sistema Operacional)</div><div class="val">${fileInfo.lastModified.toLocaleString('pt-BR')}</div></div>
 </div>
-<div style="margin-top:10px"><div class="lbl">SHA-256 (cadeia de custódia)</div><div class="sha">${fileInfo.sha256}</div></div>
-<h2>3. Exames Realizados</h2>
-<table><tr style="background:#f5f5f5"><th style="padding:6px 10px;border:1px solid #ccc;text-align:left">Exame</th><th style="padding:6px 10px;border:1px solid #ccc;text-align:left">Resultado</th><th style="padding:6px 10px;border:1px solid #ccc;text-align:left">Detalhe</th></tr>${examesRows}</table>
-<h2>4. Metadados Extraídos</h2>
-<table>${metaRows||'<tr><td colspan="2" style="padding:8px;color:#777">Nenhum metadado encontrado.</td></tr>'}</table>
-<h2>5. FraudScore</h2>
-<div style="display:flex;align-items:center;gap:16px;margin-bottom:10px">
-  <div style="font-size:42px;font-weight:bold;color:${scoreColor}">${score}<span style="font-size:18px">/100</span></div>
-  <div style="flex:1"><div style="background:#e0e0e0;border-radius:5px;height:12px;overflow:hidden"><div style="width:${Math.min(score,100)}%;height:100%;background:${scoreColor};border-radius:5px"></div></div>
-  <div style="margin-top:6px;padding:6px 12px;background:${scoreBg};border-radius:4px;font-weight:bold;color:${scoreColor};font-size:13px">${score>=60?'⚠ Alto risco — múltiplos indicadores de adulteração':score>=30?'⚡ Risco moderado — verificação adicional recomendada':'✓ Baixo risco — nenhum indicador significativo detectado'}</div></div>
-</div>
-<h2>6. Indicadores de Risco (Red Flags)</h2>${flagsHtml}
-${sigsHtml?`<h2>7. Assinaturas Digitais</h2><table style="font-size:12px"><tr style="background:#f5f5f5"><th style="padding:6px;border:1px solid #ccc">Nº</th><th style="padding:6px;border:1px solid #ccc">Signatário</th><th style="padding:6px;border:1px solid #ccc">Organização</th><th style="padding:6px;border:1px solid #ccc">Data/Hora</th><th style="padding:6px;border:1px solid #ccc">Algoritmo</th><th style="padding:6px;border:1px solid #ccc">Integridade</th></tr>${sigsHtml}</table>`:''}
-${currentEvidences.length?`<h2>${sigsHtml?'8':'7'}. Evidências Documentadas</h2>
-<p style="font-size:12px;color:#555;margin-bottom:14px">Cada achado técnico é registrado como evidência numerada com base documental para avaliação pericial independente.</p>
-${currentEvidences.map(ev=>{
-  const sc={ok:'#155724',warn:'#7a5200',fail:'#c00'}[ev.status]||'#333';
-  const bg={ok:'#d4edda',warn:'#fff3cd',fail:'#ffe0e0'}[ev.status]||'#f5f5f5';
-  const lb={ok:'Normal',warn:'Atenção',fail:'Suspeito'}[ev.status]||ev.status;
-  return`<div style="border:1px solid #ccc;border-radius:6px;margin-bottom:16px;overflow:hidden;page-break-inside:avoid">
-  <div style="display:flex;align-items:center;gap:10px;padding:8px 14px;background:${bg}">
-    <span style="font-size:11px;font-weight:700;background:${sc};color:#fff;padding:2px 8px;border-radius:10px;white-space:nowrap">Evidência #${ev.n}</span>
-    <span style="font-size:13px;font-weight:600;color:#1a1a1a;flex:1">${escHtml(ev.title)}</span>
-    <span style="font-size:11px;font-weight:700;color:${sc}">${lb}</span>
-  </div>
-  ${ev.data?`<pre style="margin:0;padding:10px 14px;font-family:monospace;font-size:11px;background:#fafafa;border-bottom:1px solid #eee;white-space:pre-wrap;word-break:break-all;max-height:160px;overflow:hidden">${escHtml(ev.data)}</pre>`:''}
-  ${ev.imgs&&ev.imgs.length?`<div style="display:flex;gap:12px;flex-wrap:wrap;padding:10px 14px;background:#fafafa;border-bottom:1px solid #eee">${ev.imgs.map(im=>`<div style="text-align:center"><img src="${im.src}" style="max-width:380px;max-height:200px;border:1px solid #ccc;border-radius:4px;display:block"><div style="font-size:10px;color:#777;margin-top:3px">${escHtml(im.label)}</div></div>`).join('')}</div>`:''}
-  <div style="padding:8px 14px;font-size:12px;color:#444;line-height:1.6;background:#fff"><b>Significância pericial:</b> ${ev.significance}</div>
-</div>`;}).join('')}`:''}
-${obs?`<h2>${sigsHtml?(currentEvidences.length?'9':'8'):(currentEvidences.length?'8':'7')}. Observações do Perito</h2><p style="background:#f9f9f9;border-left:4px solid #333;padding:10px 14px;font-size:13px;line-height:1.6">${escHtml(obs).replace(/\n/g,'<br>')}</p>`:''}
-<h2 style="margin-top:30px">Metodologia</h2>
-<table style="width:100%;border-collapse:collapse;font-size:12px">
-  <tr style="background:#f5f5f5"><th style="padding:6px 10px;border:1px solid #ccc;text-align:left;width:200px">Método</th><th style="padding:6px 10px;border:1px solid #ccc;text-align:left">Descrição</th></tr>
-  <tr><td style="padding:6px 10px;border:1px solid #ccc;font-weight:bold">FraudScore</td><td style="padding:6px 10px;border:1px solid #ccc">Índice de risco 0–100 calculado pela soma ponderada dos indicadores detectados. Peso proporcional à relevância pericial: flags críticas (45–65 pts), atenção (20–45 pts), informativas (10–15 pts).</td></tr>
-  <tr><td style="padding:6px 10px;border:1px solid #ccc;font-weight:bold">Análise de Metadados PDF</td><td style="padding:6px 10px;border:1px solid #ccc">Extração de /Creator, /Producer, /Author, /CreationDate, /ModDate, versão, fontes (BaseFont/FontFile), XObjects, JpegDump (FF D8 FF / DCTDecode), hashes de autenticação e campos AcroForm /Sig. Base: ISO 32000.</td></tr>
-  <tr><td style="padding:6px 10px;border:1px solid #ccc;font-weight:bold">ELA — Error Level Analysis</td><td style="padding:6px 10px;border:1px solid #ccc">Recompressão JPEG (qualidade 95) e amplificação da diferença pixel a pixel (×15). Regiões coladas ou editadas apresentam nível de erro distinto do restante. Ref.: Krawetz (2007).</td></tr>
-  <tr><td style="padding:6px 10px;border:1px solid #ccc;font-weight:bold">Análise de Ruído Residual</td><td style="padding:6px 10px;border:1px solid #ccc">Subtração do canal de luminância suavizado da imagem original, amplificação (×8), segmentação em grade 16×16. Células com desvio &gt;μ+2σ indicam anomalia local — padrão típico de colagem. Ref.: Farid (2016).</td></tr>
-  <tr><td style="padding:6px 10px;border:1px solid #ccc;font-weight:bold">Entropia de Shannon</td><td style="padding:6px 10px;border:1px solid #ccc">H = −Σ p·log₂(p) por byte, com mapa por blocos. Entropia &gt;7,8 bits/byte: compressão/criptografia; &lt;4,0: dados sintéticos ou reconstruídos. Ref.: Shannon (1948).</td></tr>
-  <tr><td style="padding:6px 10px;border:1px solid #ccc;font-weight:bold">Inconsistência de Resolução</td><td style="padding:6px 10px;border:1px solid #ccc">Comparação do DPI efetivo de cada bloco XObject em relação à página (MediaBox). Variação &gt;50% entre blocos indica imagens de origens distintas — padrão de colagem ou inserção.</td></tr>
-  <tr><td style="padding:6px 10px;border:1px solid #ccc;font-weight:bold">pHash DCT</td><td style="padding:6px 10px;border:1px solid #ccc">Hash perceptual via DCT 2D em bloco 32×32 reduzido a 64 bits. Distância de Hamming ≤10 bits: imagens visualmente idênticas ou com alterações mínimas.</td></tr>
-  <tr><td style="padding:6px 10px;border:1px solid #ccc;font-weight:bold">SHA-256</td><td style="padding:6px 10px;border:1px solid #ccc">Hash criptográfico do arquivo íntegro para garantia de integridade e cadeia de custódia da evidência digital.</td></tr>
+<div class="sha-box"><span class="sha-lbl">SHA-256 — Cadeia de Custódia</span>${fileInfo.sha256}</div>
+
+<!-- 4. EXAMES REALIZADOS -->
+${sec('Exames Realizados','🔬')}
+<table class="avoid-break">
+  <thead><tr><th style="width:220px">Exame</th><th style="width:130px">Situação</th><th>Resultado / Achado</th></tr></thead>
+  <tbody>${exames.map(e=>{
+    const bl={ok:badge('ok','Concluído'),fail:badge('fail','Irregular'),warn:badge('warn','Atenção'),na:badge('na','N/A')}[e.status]||badge('na',e.status);
+    const mRow=e.metod?`<tr><td colspan="3" class="metod-td"><strong>Metodologia:</strong> ${e.metod}</td></tr>`:'';
+    return`<tr><td><strong>${e.icon} ${e.name}</strong></td><td>${bl}</td><td>${escHtml(e.result)}</td></tr>${mRow}`;
+  }).join('')}</tbody>
 </table>
 
-<h2 style="margin-top:24px">Referências Bibliográficas</h2>
-<ol style="font-size:12px;line-height:2;color:#333;padding-left:20px">
+<!-- 5. INDICADORES DE RISCO -->
+${sec('Indicadores de Risco (Red Flags)','🚩')}
+${flags.length?flags.map(f=>{const sev=flagSeverity(f);return`<div class="flag-card ${sev} avoid-break"><div class="flag-icon">${sev==='high'?'🔴':sev==='medium'?'🟡':'🔵'}</div><div><div class="flag-title">${f}</div><div class="flag-desc">${FLAG_DESCS[f]||''}</div></div></div>`;}).join(''):'<p style="color:#7A8FAD;font-style:italic;font-size:12px">Nenhum indicador de risco detectado.</p>'}
+
+<!-- 6. METADADOS EXTRAÍDOS -->
+${sec('Metadados Extraídos','🗃️')}
+<table>
+  <thead><tr><th style="width:220px">Campo</th><th>Valor</th></tr></thead>
+  <tbody>${metaRows||'<tr><td colspan="2" style="color:#7A8FAD;font-style:italic">Nenhum metadado encontrado.</td></tr>'}</tbody>
+</table>
+
+${sigsHtml?`<!-- 7. ASSINATURAS DIGITAIS -->
+${sec('Assinaturas Digitais ICP-Brasil','🔏')}
+<table style="font-size:11.5px">
+  <thead><tr><th>#</th><th>Signatário</th><th>Organização</th><th>Data / Hora</th><th>Algoritmo</th><th>Integridade</th></tr></thead>
+  <tbody>${sigsHtml}</tbody>
+</table>`:''}
+
+${currentEvidences.length?`<!-- EVIDÊNCIAS -->
+${sec('Evidências Documentadas','📎')}
+<p style="font-size:12px;color:#4A5568;margin-bottom:16px">Cada achado técnico é registrado como evidência numerada com base documental para avaliação pericial independente.</p>
+${currentEvidences.map(ev=>{
+  const sc={ok:'#1E6B3C',warn:'#7A4F00',fail:'#9B1C1C'}[ev.status]||'#333';
+  const bg={ok:'#D6F0E0',warn:'#FFF3CC',fail:'#FCE4E4'}[ev.status]||'#F5F5F5';
+  const lb={ok:'Regular',warn:'Atenção',fail:'Suspeito'}[ev.status]||ev.status;
+  return`<div class="ev-card avoid-break">
+  <div class="ev-header" style="background:${bg}">
+    <span class="ev-n" style="background:${sc}">Evidência #${ev.n}</span>
+    <span class="ev-title">${escHtml(ev.title)}</span>
+    <span class="ev-sig" style="color:${sc}">${lb}</span>
+  </div>
+  ${ev.data?`<pre class="ev-data">${escHtml(ev.data)}</pre>`:''}
+  ${ev.imgs&&ev.imgs.length?`<div class="ev-imgs">${ev.imgs.map(im=>`<div><img src="${im.src}" style="max-width:360px;max-height:200px;border:1px solid #DDE3ED;border-radius:4px;display:block"><div class="ev-img-cap">${escHtml(im.label)}</div></div>`).join('')}</div>`:''}
+  <div class="ev-sig-line"><strong>Significância pericial:</strong> ${ev.significance}</div>
+</div>`; }).join('')}`:''}
+
+${obs?`${sec('Observações do Perito','📝')}
+<div class="obs-block">${escHtml(obs).replace(/\n/g,'<br>')}</div>`:''}
+
+<!-- METODOLOGIA GERAL -->
+${sec('Metodologia Aplicada','📐')}
+<table class="metod-table">
+  <thead><tr><th style="width:200px">Método / Exame</th><th>Procedimento e Fundamento</th></tr></thead>
+  <tbody>
+    <tr><td>FraudScore</td><td>Índice de risco 0–100 calculado pela soma ponderada dos indicadores detectados. Peso proporcional à relevância pericial: flags críticas (45–65 pts), atenção (20–45 pts), informativas (10–15 pts).</td></tr>
+    <tr><td>Metadados PDF / EXIF / OOXML</td><td>Extração de /Creator, /Producer, /Author, /CreationDate, /ModDate, versão, fontes (BaseFont/FontFile), XObjects, JpegDump (FF D8 FF / DCTDecode), hashes de autenticação e campos AcroForm /Sig. EXIF: segmentos APP0/APP1 (JEITA CP-3451C). OOXML: docProps/core.xml (ISO/IEC 29500).</td></tr>
+    <tr><td>ELA — Error Level Analysis</td><td>Recompressão JPEG (qualidade 95) e amplificação da diferença pixel a pixel (×15). Regiões coladas ou editadas apresentam nível de erro distinto do restante. Ref.: Krawetz (2007).</td></tr>
+    <tr><td>Análise de Ruído Residual</td><td>Subtração do canal de luminância suavizado da imagem original, amplificação (×8), segmentação em grade 16×16. Células com desvio &gt;μ+2σ indicam anomalia local. Ref.: Farid (2016).</td></tr>
+    <tr><td>Copy-Move / Inserção</td><td>Segmentação em blocos 16×16 px, vetor de características [média, σ, 4 quadrantes], janela deslizante. Clone: distância &lt;8; Inserção: |média−μ_global| &gt;1,2σ+22. Ref.: Popescu &amp; Farid (2004); Christlein et al. (2012).</td></tr>
+    <tr><td>Entropia de Shannon</td><td>H = −Σ p·log₂(p) por byte, com mapa por blocos. Entropia &gt;7,8 bits/byte: compressão/criptografia; &lt;4,0: dados sintéticos. Ref.: Shannon (1948).</td></tr>
+    <tr><td>pHash DCT</td><td>Hash perceptual via DCT 2D em bloco 32×32 reduzido a 64 bits. Distância de Hamming ≤10 bits: imagens visualmente idênticas. Ref.: Zauner (2010).</td></tr>
+    <tr><td>SHA-256</td><td>Hash criptográfico do arquivo íntegro para garantia de integridade e cadeia de custódia. FIPS PUB 180-4 (NIST, 2015).</td></tr>
+  </tbody>
+</table>
+
+<!-- REFERÊNCIAS -->
+${sec('Referências Bibliográficas','📚')}
+<ol class="refs">
   <li>ELLEN, David. <em>The Scientific Examination of Documents: Methods and Techniques</em>. 3. ed. Boca Raton: CRC Press, 2006.</li>
   <li>HILTON, Ordway. <em>Scientific Examination of Questioned Documents</em>. Rev. ed. Boca Raton: CRC Press, 1993.</li>
   <li>KRAWETZ, Neal. <em>A Picture's Worth: Digital Image Analysis and Forensics</em>. Black Hat USA, Las Vegas, 2007.</li>
   <li>FARID, Hany. <em>Photo Forensics</em>. Cambridge: MIT Press, 2016.</li>
-  <li>POPESCU, Alin C.; FARID, Hany. <em>Exposing Digital Forgeries by Detecting Duplicated Image Regions</em>. Technical Report TR2004-515, Dartmouth College, 2004.</li>
+  <li>POPESCU, Alin C.; FARID, Hany. <em>Exposing Digital Forgeries by Detecting Duplicated Image Regions</em>. TR2004-515, Dartmouth College, 2004.</li>
   <li>CHRISTLEIN, Vincent et al. An Evaluation of Popular Copy-Move Forgery Detection Approaches. <em>IEEE Transactions on Information Forensics and Security</em>, v. 7, n. 6, p. 1841–1854, 2012.</li>
-  <li>CASEY, Eoghan. <em>Digital Evidence and Computer Crime: Forensic Science, Computers and the Internet</em>. 3. ed. Waltham: Academic Press, 2011.</li>
+  <li>CASEY, Eoghan. <em>Digital Evidence and Computer Crime</em>. 3. ed. Waltham: Academic Press, 2011.</li>
   <li>SHANNON, Claude E. A Mathematical Theory of Communication. <em>Bell System Technical Journal</em>, v. 27, p. 379–423, 1948.</li>
+  <li>ZAUNER, Christoph. <em>Implementation and Benchmarking of Perceptual Image Hash Functions</em>. FH Hagenberg, 2010.</li>
   <li>ISO 32000-1:2008. <em>Document Management — Portable Document Format — Part 1: PDF 1.7</em>. Geneva: ISO, 2008.</li>
-  <li>SWGDOC. <em>Standard Terminology for Expressing Conclusions of Forensic Document Examiners</em>. Scientific Working Group for Forensic Document Examination, 2013.</li>
-  <li>ASTM E2388-11. <em>Standard Guide for Minimum Training Requirements for Forensic Document Examiners</em>. West Conshohocken: ASTM International, 2011.</li>
+  <li>SWGDOC. <em>Standard Terminology for Expressing Conclusions of Forensic Document Examiners</em>. 2013.</li>
+  <li>ASTM E2388-11. <em>Standard Guide for Minimum Training Requirements for Forensic Document Examiners</em>. ASTM International, 2011.</li>
+  <li>MP 2.200-2/2001 e DOC-ICP-15 (ITI). <em>Padrões de Assinatura Digital ICP-Brasil</em>.</li>
 </ol>
 
-<footer><p><strong>PerDoc v1.4</strong> — Análise documentoscópica digital com evidências documentadas. Gerado em ${new Date().toLocaleString('pt-BR')}.</p>
-<p style="margin-top:8px;font-style:italic">As conclusões deste relatório devem ser interpretadas por perito habilitado no contexto do exame documentoscópico.</p></footer>
+<!-- RODAPÉ -->
+<div class="report-footer pg-break avoid-break">
+  <div style="display:flex;justify-content:space-between;align-items:flex-end">
+    <div>
+      <div style="font-size:10px;letter-spacing:1px;text-transform:uppercase;color:#7A8FAD;font-family:Arial,sans-serif;margin-bottom:2px">Gerado por</div>
+      <div style="font-size:14px;font-weight:700;color:#1C2B4A;font-family:Arial,sans-serif">PerDoc v1.4</div>
+      <div style="font-size:11px;color:#7A8FAD;font-family:Arial,sans-serif">Análise documentoscópica digital · ${new Date().toLocaleString('pt-BR')}</div>
+    </div>
+    <div style="text-align:right;font-size:11px;color:#7A8FAD;font-family:Arial,sans-serif">
+      FraudScore: <strong style="color:${vBorder}">${score}/100</strong> · ${flags.length} red flag(s)
+    </div>
+  </div>
+  <div class="footer-sign">
+    <div class="sign-block">
+      <div class="sign-lbl">Perito Responsável — ${escHtml(perito)}</div>
+      <div class="sign-lbl" style="margin-top:2px">Matrícula / Registro: ${escHtml(reg)}</div>
+    </div>
+    <div class="sign-block">
+      <div class="sign-lbl">Local e Data</div>
+    </div>
+  </div>
+  <div class="footer-note">Este laudo foi produzido por sistema automatizado de análise forense digital. As conclusões devem ser interpretadas por perito habilitado no contexto do exame documentoscópico. O arquivo original não foi modificado — a análise preserva a cadeia de custódia.</div>
+</div>
+
+</div><!-- /body -->
 </body></html>`;
 
   const blob=new Blob([html],{type:'text/html;charset=utf-8'});
