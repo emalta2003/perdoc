@@ -1025,6 +1025,11 @@ function renderExames(meta,flags,ext){
     const div=document.createElement('div');
     div.className='exame-card '+e.status;
     if(e.id==='exame-sig') div.setAttribute('data-exame-sig','1');
+    const metodHtml=e.metod?`
+      <details class="metod" style="margin-top:8px">
+        <summary>📋 Metodologia</summary>
+        <div class="metod-body">${e.metod}</div>
+      </details>`:'';
     div.innerHTML=`
       <div class="exame-header">
         <div class="exame-icon">${e.icon}</div>
@@ -1033,10 +1038,56 @@ function renderExames(meta,flags,ext){
           <span class="exame-status ${e.status}">${statusLabel(e.status)}</span>
         </div>
       </div>
-      <div class="exame-result">${e.result}</div>`;
+      <div class="exame-result">${e.result}</div>${metodHtml}`;
     grid.appendChild(div);
   });
 }
+
+const METOD={
+  sha256:`<b>Método:</b> Hash criptográfico SHA-256 (FIPS PUB 180-4, NIST 2015)<br><b>Procedimento:</b> O arquivo é lido byte a byte em memória, sem qualquer modificação. A função SHA-256 aplica operações de compressão sobre blocos de 512 bits, produzindo um resumo de 256 bits (64 hex). Qualquer alteração mínima no arquivo produz um hash completamente diferente.<br><b>Finalidade pericial:</b> Identifica univocamente o arquivo examinado e assegura a cadeia de custódia — permite que outro perito confirme que analisou o mesmo arquivo.`,
+
+  metadados:`<b>Método:</b> Extração de metadados por leitura direta da estrutura binária, sem modificação do arquivo original<br><b>PDF:</b> Leitura do dicionário /Info (Creator, Producer, Author, Title, CreationDate, ModDate) e stream XMP quando presente — ISO 32000-1:2008.<br><b>JPEG:</b> Segmentos APP0 (JFIF) e APP1 (EXIF) — JEITA CP-3451C.<br><b>DOCX/XLSX:</b> docProps/core.xml e docProps/app.xml no container ZIP/OPC — ISO/IEC 29500.<br><b>Interpretação:</b> Os valores são confrontados com o tipo de documento declarado e os padrões esperados para a instituição emissora.`,
+
+  camera:`<b>Método:</b> Leitura do segmento EXIF APP1 (JEITA CP-3451C)<br><b>Procedimento:</b> Extração das tags IFD0: Make (0x010F), Model (0x0110), Software (0x0131), e IFD Exif: DateTimeOriginal (0x9003), ISO (0x8827), FNumber (0x829D), ExposureTime (0x829A).<br><b>Interpretação:</b> Permite verificar se os dados do dispositivo de captura são consistentes com o contexto declarado do documento.`,
+
+  dataExif:`<b>Método:</b> Extração da data/hora de captura do segmento EXIF APP1<br><b>Procedimento:</b> Leitura da tag DateTimeOriginal (0x9003) — data em que o obturador foi acionado — e DateTimeDigitized (0x9004). Confronto com ModifyDate (0x0132) para detectar edição posterior à captura.<br><b>Interpretação:</b> Divergência entre data de captura e data de modificação indica que a imagem foi editada após ser fotografada.`,
+
+  softwareJpeg:`<b>Método:</b> Análise da tag Software no segmento EXIF e segmentos XMP<br><b>Procedimento:</b> Leitura da tag Software (0x0131) no IFD0 e busca por strings de software nos segmentos APP1/APP13. Os valores são confrontados com lista de softwares de edição conhecidos (Photoshop, GIMP, Lightroom, etc.).<br><b>Interpretação:</b> Presença de software de edição indica que a imagem foi processada após a captura — não implica necessariamente adulteração, mas exige atenção.`,
+
+  gps:`<b>Método:</b> Extração das tags GPS do segmento EXIF APP1 — sub-IFD GPS<br><b>Procedimento:</b> Leitura das tags GPSLatitude (0x0002), GPSLongitude (0x0004), GPSAltitude (0x0006) e GPSDateStamp (0x001D). As coordenadas são convertidas de graus/minutos/segundos para decimal.<br><b>Interpretação:</b> Permite verificar se o local de captura é compatível com o contexto declarado do documento. Presença de GPS em documentos que deveriam ter sido produzidos em local específico pode ser relevante.`,
+
+  phash:`<b>Método:</b> Hash Perceptual por Transformada Discreta do Cosseno — DCT-pHash<br><b>Procedimento:</b> 1. Imagem redimensionada para 32×32 px em escala de cinza; 2. Aplicação da DCT-II 2D; 3. Extração dos 64 coeficientes de baixa frequência (bloco 8×8 superior esquerdo); 4. Cada bit = 1 se coeficiente > média, 0 caso contrário. Resultado: 64 bits / 16 hex.<br><b>Aplicação:</b> Comparação por distância de Hamming — 0 = idênticas; ≤10 = muito similares; >20 = distintas. Não detecta alterações locais pontuais.<br><b>Ref.:</b> Zauner, C. "Implementation and Benchmarking of Perceptual Image Hash Functions." FH Hagenberg, 2010.`,
+
+  tipoDoc:`<b>Método:</b> Classificação do tipo de documento PDF por análise combinada de sua estrutura interna<br><b>Procedimento:</b> Verifica-se: (a) presença de fontes (/Font com /FontFile — font embedding); (b) presença de XObjects de imagem (/Subtype /Image); (c) streams JPEG (FF D8 FF / DCTDecode); (d) conteúdo textual extraível. <b>Nato-digital:</b> possui fontes e texto extraível. <b>Baseado em imagem:</b> sem fontes, composto exclusivamente por imagens — padrão de digitalização (scan) ou impressão-para-PDF.<br><b>Relevância:</b> Documentos nato-digitais que deveriam existir apenas em papel sendo apresentados como digitais exigem análise da origem.`,
+
+  softwarePDF:`<b>Método:</b> Análise dos campos Creator e Producer do dicionário /Info do PDF<br><b>Procedimento:</b> Leitura dos campos /Creator (software que originou o documento) e /Producer (software de conversão/exportação). Os valores são confrontados com lista de softwares de edição e reprocessamento de PDF (GhostScript, Inkscape, iText, LibreOffice, iLovePDF, PDFCreator, Smallpdf, Sejda, Nitro, Foxit, Cairo, Scribus, entre outros).<br><b>Interpretação:</b> Softwares de edição no Producer indicam que o PDF foi reprocessado após geração — comum em adulterações. Softwares legítimos (ex: Microsoft Word, Adobe Acrobat) são esperados em documentos originais.`,
+
+  propPDF:`<b>Método:</b> Extração de propriedades estruturais do PDF por análise binária direta<br><b>Procedimento:</b> Versão: cabeçalho %PDF-x.x (primeiros 8 bytes); Linearização: presença de /Linearized nos primeiros 1024 bytes; Criptografia: presença de /Encrypt no xref; Acessibilidade: /Marked true no catalog; Tamanho de página: /MediaBox [x y w h] no page dictionary.<br><b>Relevância:</b> Propriedades inconsistentes com o contexto (ex: documento governamental sem Tagged, versão PDF muito antiga ou muito nova) podem indicar geração por software não institucional.`,
+
+  paginas:`<b>Método:</b> Contagem de páginas por leitura do dicionário /Pages do PDF<br><b>Procedimento:</b> Busca da entrada /Count no dicionário de páginas via expressão regular /Count\s+(\d+). O valor é confrontado com o tamanho do arquivo (PDFs de uma página com vários MB são anômalos e sugerem conteúdo embutido não declarado).<br><b>Relevância:</b> Permite identificar páginas ocultas ou conteúdo adicional não visível na renderização padrão.`,
+
+  datas:`<b>Método:</b> Extração e análise de consistência das datas de criação e modificação do PDF<br><b>Procedimento:</b> Leitura dos campos /CreationDate e /ModDate do dicionário /Info. As datas são comparadas entre si e com o contexto do documento. <b>Critérios de anomalia:</b> (1) ModDate anterior a CreationDate — fisicamente impossível; (2) CreationDate = ModDate — suspeito em documentos que deveriam ter histórico de edição; (3) Datas anacrônicas (ex: documento de 2024 com data de 1980).<br><b>Ref.:</b> ISO 32000-1:2008, seção 14.3.3.`,
+
+  fontes:`<b>Método:</b> Análise do catálogo de fontes da estrutura interna do PDF<br><b>Procedimento:</b> Busca dos objetos /Font no stream de recursos de cada página. Para cada fonte, verifica-se a presença de /FontFile, /FontFile2 ou /FontFile3 (fonte embutida/incorporada) vs. fonte apenas referenciada externamente. <b>Critérios:</b> Documento nato-digital → fontes referenciadas e/ou incorporadas. Documento baseado em imagem → nenhuma fonte (ausência total é o padrão esperado para scans).<br><b>Relevância:</b> Ausência de fontes em documento que se apresenta como texto editável é contradição estrutural — forte indício de que o conteúdo é imagem, não texto.`,
+
+  fragmentacao:`<b>Método:</b> Contagem de objetos de imagem XObject por página — detecção de fragmentação<br><b>Procedimento:</b> Contagem dos objetos /XObject /Subtype /Image por página via varredura do stream. <b>Critérios:</b> 1 imagem/página = digitalização normal; ≥3 imagens/página = fragmentação. <b>Padrão de adulteração:</b> Softwares como GhostScript, PDFCreator e similares, ao reprocessarem um PDF, frequentemente fragmentam o conteúdo de cada página em múltiplos blocos de imagem — padrão característico de reprocessamento.<br><b>Ref.:</b> Análise estrutural conforme ISO 32000-1:2008, seção 8.8 (Image XObjects).`,
+
+  jpegdump:`<b>Método:</b> Varredura binária em busca de streams JPEG embutidos no PDF (JpegDump)<br><b>Procedimento:</b> Varredura byte a byte do arquivo em busca do marcador SOI (FF D8 FF) — início de imagem JPEG. Simultaneamente, busca-se o filtro /DCTDecode nos dicionários de stream, que indica compressão JPEG. <b>Interpretação:</b> Presença de JPEG interno confirma que o PDF contém imagens fotografadas ou digitalizadas. Ausência de DCTDecode pode indicar compressão alternativa (CCITT para documentos preto e branco, JBIG2, JPX/JPEG2000) ou que o PDF é nato-digital sem imagens embutidas.`,
+
+  autenticacao:`<b>Método:</b> Busca de hashes de autenticação eletrônica no conteúdo textual do PDF<br><b>Procedimento:</b> Extração do conteúdo textual decodificado e busca por padrões hexadecimais correspondentes a hashes criptográficos: MD5 (32 hex), SHA-1 (40 hex), SHA-256 (64 hex). Quando encontrados, verifica-se unicidade — hashes idênticos em posições distintas do documento indicam duplicação. <b>Critério de anomalia:</b> Em documentos com autenticação eletrônica legítima, o código hash é único. Duplicação sugere cópia e colagem do código de autenticação de outro documento — adulteração grave.<br><b>Ref.:</b> ITI — ICP-Brasil, DOC-ICP-15 (Padrão de Assinatura Digital).`,
+
+  assinatura:`<b>Método:</b> Análise da estrutura de assinatura digital do PDF (AcroForm / PKCS#7)<br><b>Procedimento:</b> Verifica-se: (a) presença de /AcroForm no catalog; (b) campo /FT /Sig (campo de assinatura); (c) /Contents <hex> (dados PKCS#7 da assinatura); (d) /ByteRange (intervalo de bytes cobertos pela assinatura). Adicionalmente, busca-se padrão /Subtype /Image próximo a /BitsPerComponent 8 — assinatura como imagem rasterizada. <b>Critérios:</b> Assinatura válida = campo /Sig com certificado. Assinatura como imagem = sem campo /Sig, apenas imagem inserida na posição da assinatura — não tem validade jurídica como assinatura digital.<br><b>Ref.:</b> ISO 32000-1:2008, seção 12.8; MP 2.200-2/2001 (ICP-Brasil).`,
+
+  cadastrais:`<b>Método:</b> Extração de dados cadastrais por expressão regular sobre o conteúdo textual<br><b>Procedimento:</b> Decodificação do conteúdo textual do PDF e aplicação de expressão regular para CPF: \d{3}[.\s]?\d{3}[.\s]?\d{3}[-\s]?\d{2}. Os CPFs encontrados são listados e, quando múltiplos, comparados entre si. <b>Critério de anomalia:</b> Múltiplos CPFs distintos em documento que deveria pertencer a uma única pessoa podem indicar substituição de titular ou montagem de documento.<br><b>Limitação:</b> A análise textual depende da extração correta do texto — em PDFs baseados em imagem, a extração pode ser incompleta.`,
+
+  sigICP:`<b>Método:</b> Verificação de assinaturas digitais ICP-Brasil embutidas no PDF<br><b>Procedimento:</b> Extração dos objetos de assinatura via varredura do stream. Para cada assinatura encontrada: (a) leitura do certificado X.509 embutido; (b) extração do /ByteRange (porção do arquivo coberta pela assinatura); (c) verificação da validade temporal do certificado; (d) análise de modificações após a data da assinatura. <b>Critérios de anomalia:</b> Certificado expirado; ByteRange incompleto (não cobre o arquivo inteiro); assinatura sem cadeia de certificação ICP-Brasil válida; conteúdo modificado após a assinatura.<br><b>Ref.:</b> MP 2.200-2/2001; DOC-ICP-15 (ITI); RFC 3852 (PKCS#7/CMS).`,
+
+  autorDocx:`<b>Método:</b> Extração de metadados de autoria do container OOXML<br><b>Procedimento:</b> Descompactação do arquivo DOCX/XLSX (container ZIP) e leitura do arquivo docProps/core.xml: campos dc:creator (autor original), cp:lastModifiedBy (último editor), cp:revision (número de revisões), dcterms:created e dcterms:modified (datas). <b>Interpretação:</b> Inconsistência entre o autor declarado e o autor nos metadados, ou número de revisões igual a zero em documento que apresenta edição, são indícios de manipulação.<br><b>Ref.:</b> ISO/IEC 29500:2012 (OOXML), Parte 2 — Open Packaging Conventions.`,
+
+  dimPNG:`<b>Método:</b> Leitura do chunk IHDR do arquivo PNG (ISO/IEC 15948)<br><b>Procedimento:</b> Leitura dos bytes 16-23 do arquivo PNG (chunk IHDR): largura (4 bytes big-endian) e altura (4 bytes big-endian). Leitura adicional do chunk pHYs para resolução (pixels por unidade). <b>Interpretação:</b> Dimensões inconsistentes com o tipo de documento (ex: resolução muito baixa para documentos periciais) podem indicar degradação intencional ou captura inadequada.`,
+
+  softPNG:`<b>Método:</b> Leitura de chunks de texto do PNG — tEXt, zTXt e iTXt<br><b>Procedimento:</b> Varredura dos chunks do arquivo PNG em busca de chunks tEXt (texto simples), zTXt (texto comprimido) e iTXt (texto Unicode). A chave "Software" ou "Comment" frequentemente contém o nome do software que gerou a imagem. Os valores são confrontados com lista de softwares de edição conhecidos.<br><b>Ref.:</b> ISO/IEC 15948:2004 (PNG); W3C PNG Specification, seção 11.3.`
+};
 
 function buildExames(meta,flags,ext){
   const exames=[];
@@ -1044,100 +1095,100 @@ function buildExames(meta,flags,ext){
   const val=k=>meta[k]||meta[Object.keys(meta).find(m=>m.toLowerCase()===k.toLowerCase())];
 
   // SHA-256
-  exames.push({icon:'🔐',name:'Hash SHA-256',status:'ok',result:'Calculado — identifica univocamente este arquivo (cadeia de custódia)'});
+  exames.push({icon:'🔐',name:'Hash SHA-256',status:'ok',result:'Calculado — identifica univocamente este arquivo (cadeia de custódia)',metod:METOD.sha256});
 
   // Metadados gerais
   const nMeta=Object.keys(meta).filter(k=>meta[k]).length;
-  exames.push({icon:'📋',name:'Metadados',status:nMeta>0?'ok':'warn',result:nMeta>0?`${nMeta} campo(s) extraído(s)`:'Nenhum metadado encontrado'});
+  exames.push({icon:'📋',name:'Metadados',status:nMeta>0?'ok':'warn',result:nMeta>0?`${nMeta} campo(s) extraído(s)`:'Nenhum metadado encontrado',metod:METOD.metadados});
 
   if(ext==='jpg'||ext==='jpeg'){
     const cam=meta['Make (câmera)']||meta['Model (câmera)'];
-    exames.push({icon:'📷',name:'Câmera (EXIF)',status:cam?'ok':'warn',result:cam?`${meta['Make (câmera)']||''} ${meta['Model (câmera)']||''}`.trim():'Dados de câmera não encontrados'});
+    exames.push({icon:'📷',name:'Câmera (EXIF)',status:cam?'ok':'warn',result:cam?`${meta['Make (câmera)']||''} ${meta['Model (câmera)']||''}`.trim():'Dados de câmera não encontrados',metod:METOD.camera});
     const dt=meta['DateTimeOriginal']||meta['DateTime'];
-    exames.push({icon:'📅',name:'Data/Hora EXIF',status:dt?'ok':'warn',result:dt||'Não encontrado'});
+    exames.push({icon:'📅',name:'Data/Hora EXIF',status:dt?'ok':'warn',result:dt||'Não encontrado',metod:METOD.dataExif});
     const soft=meta['Software'];
-    exames.push({icon:'🖥',name:'Software de Edição',status:hasFlag('rf-software-edicao')?'fail':'ok',result:soft?`Detectado: ${soft}`:'Sem software de edição identificado'});
+    exames.push({icon:'🖥',name:'Software de Edição',status:hasFlag('rf-software-edicao')?'fail':'ok',result:soft?`Detectado: ${soft}`:'Sem software de edição identificado',metod:METOD.softwareJpeg});
     const gps=meta['GPS Latitude'];
-    exames.push({icon:'📍',name:'Coordenadas GPS',status:gps?'warn':'ok',result:gps?`Lat: ${meta['GPS Latitude']} | Lon: ${meta['GPS Longitude']}`:'Sem GPS'});
-    exames.push({icon:'🔢',name:'Hash Perceptual (pHash)',status:'ok',result:'Calculado na aba Hash Perceptual'});
+    exames.push({icon:'📍',name:'Coordenadas GPS',status:gps?'warn':'ok',result:gps?`Lat: ${meta['GPS Latitude']} | Lon: ${meta['GPS Longitude']}`:'Sem GPS',metod:METOD.gps});
+    exames.push({icon:'🔢',name:'Hash Perceptual (pHash)',status:'ok',result:'Calculado na aba Hash Perceptual',metod:METOD.phash});
   }
 
   if(ext==='pdf'){
     // Tipo do documento
     const tipoDoc=meta['Tipo de Documento']||'';
     const isImg=tipoDoc.includes('imagem');
-    exames.push({icon:'📄',name:'Tipo de Documento',status:isImg?'fail':'ok',result:tipoDoc||'Não determinado'});
+    exames.push({icon:'📄',name:'Tipo de Documento',status:isImg?'fail':'ok',result:tipoDoc||'Não determinado',metod:METOD.tipoDoc});
 
     // Software / Creator / Producer
     const creator=meta['Creator'],producer=meta['Producer'];
     const softStatus=hasFlag('rf-ghostscript')||hasFlag('rf-inkscape')||hasFlag('rf-software-suspeito')?'fail':'ok';
-    exames.push({icon:'🖨',name:'Software de Origem',status:softStatus,result:[creator&&`Creator: ${creator}`,producer&&`Producer: ${producer}`].filter(Boolean).join(' | ')||'Não identificado'});
+    exames.push({icon:'🖨',name:'Software de Origem',status:softStatus,result:[creator&&`Creator: ${creator}`,producer&&`Producer: ${producer}`].filter(Boolean).join(' | ')||'Não identificado',metod:METOD.softwarePDF});
 
     // Versão, Tagged, Encrypted, Linearizado, Tamanho página
     const versao=meta['Versão PDF'],tagged=meta['Tagged'],crypt=meta['Criptografado'],linear=meta['Linearizado (Otimizado)'],pageSize=meta['Tamanho da Página'];
-    exames.push({icon:'🗂',name:'Propriedades PDF',status:'ok',result:[versao&&`Versão: ${versao}`,tagged&&`Tagged: ${tagged}`,crypt&&`Criptografado: ${crypt}`,linear&&`Linearizado: ${linear}`,pageSize&&`Página: ${pageSize}`].filter(Boolean).join(' | ')||'—'});
+    exames.push({icon:'🗂',name:'Propriedades PDF',status:'ok',result:[versao&&`Versão: ${versao}`,tagged&&`Tagged: ${tagged}`,crypt&&`Criptografado: ${crypt}`,linear&&`Linearizado: ${linear}`,pageSize&&`Página: ${pageSize}`].filter(Boolean).join(' | ')||'—',metod:METOD.propPDF});
 
     // Páginas
     const pages=meta['Número de Páginas'];
-    exames.push({icon:'📑',name:'Número de Páginas',status:pages&&pages!=='(não determinado)'?'ok':'warn',result:pages?`${pages} página(s)`:'Não determinado'});
+    exames.push({icon:'📑',name:'Número de Páginas',status:pages&&pages!=='(não determinado)'?'ok':'warn',result:pages?`${pages} página(s)`:'Não determinado',metod:METOD.paginas});
 
     // Datas
     const cd=meta['CreationDate'],md=meta['ModDate'];
     const dateStatus=hasFlag('rf-datas-incompat')?'fail':hasFlag('rf-datas-iguais')?'warn':cd||md?'ok':'warn';
-    exames.push({icon:'📅',name:'Análise de Datas',status:dateStatus,result:cd&&md?`Criação: ${cd.replace(' (criação)','')} | Modif: ${md.replace(' (modificação)','')}`:cd||md||'Datas não encontradas'});
+    exames.push({icon:'📅',name:'Análise de Datas',status:dateStatus,result:cd&&md?`Criação: ${cd.replace(' (criação)','')} | Modif: ${md.replace(' (modificação)','')}`:cd||md||'Datas não encontradas',metod:METOD.datas});
 
     // Fontes
     const fontes=meta['Fontes Referenciadas'],fontEmb=meta['Fontes Incorporadas'];
-    exames.push({icon:'🔤',name:'Fontes',status:hasFlag('rf-pdf-imagem')?'fail':'ok',result:`Referenciadas: ${fontes||'Nenhuma'} | Incorporadas: ${fontEmb||'Nenhuma'}`});
+    exames.push({icon:'🔤',name:'Fontes',status:hasFlag('rf-pdf-imagem')?'fail':'ok',result:`Referenciadas: ${fontes||'Nenhuma'} | Incorporadas: ${fontEmb||'Nenhuma'}`,metod:METOD.fontes});
 
     // Fragmentação
     const xobj=meta['Imagens XObject'];
-    exames.push({icon:'🧩',name:'Fragmentação em Blocos',status:hasFlag('rf-pdf-fragmentado')?'fail':xobj&&xobj!=='Nenhum bloco de imagem XObject'?'warn':'ok',result:xobj||'Não detectada'});
+    exames.push({icon:'🧩',name:'Fragmentação em Blocos',status:hasFlag('rf-pdf-fragmentado')?'fail':xobj&&xobj!=='Nenhum bloco de imagem XObject'?'warn':'ok',result:xobj||'Não detectada',metod:METOD.fragmentacao});
 
     // JpegDump
     const jpeg=meta['JpegDump (JPEG interno)'];
-    exames.push({icon:'📸',name:'JpegDump (JPEG interno)',status:hasFlag('rf-sem-jpegdump')?'warn':'ok',result:jpeg||'Não analisado'});
+    exames.push({icon:'📸',name:'JpegDump (JPEG interno)',status:hasFlag('rf-sem-jpegdump')?'warn':'ok',result:jpeg||'Não analisado',metod:METOD.jpegdump});
 
     // Autenticação eletrônica
     const auth=meta['Autenticação Eletrônica'];
     const authDup=meta['⚠ Hashes Duplicados'];
-    exames.push({icon:'🔑',name:'Autenticação Eletrônica',status:hasFlag('rf-hash-duplicado')?'fail':auth&&!auth.includes('Nenhum')?'ok':'warn',result:authDup?`${auth} — ⚠ ${authDup}`:auth||'Não analisado'});
+    exames.push({icon:'🔑',name:'Autenticação Eletrônica',status:hasFlag('rf-hash-duplicado')?'fail':auth&&!auth.includes('Nenhum')?'ok':'warn',result:authDup?`${auth} — ⚠ ${authDup}`:auth||'Não analisado',metod:METOD.autenticacao});
 
     // Campo de assinatura
     const campoSig=meta['Campo de Assinatura'];
     const tipoSig=meta['Tipo de Assinatura'];
-    exames.push({icon:'✍',name:'Campo de Assinatura',status:hasFlag('rf-assinatura-imagem')?'fail':hasFlag('rf-sem-assinatura-campo')?'warn':'ok',result:[campoSig,tipoSig].filter(Boolean).join(' | ')||'Não analisado'});
+    exames.push({icon:'✍',name:'Campo de Assinatura',status:hasFlag('rf-assinatura-imagem')?'fail':hasFlag('rf-sem-assinatura-campo')?'warn':'ok',result:[campoSig,tipoSig].filter(Boolean).join(' | ')||'Não analisado',metod:METOD.assinatura});
 
     // Dados cadastrais
     const cpfs=meta['CPF(s) encontrado(s)'];
-    exames.push({icon:'🪪',name:'Dados Cadastrais',status:hasFlag('rf-dados-conflitantes')?'fail':cpfs?'ok':'warn',result:cpfs?`CPF(s): ${cpfs}`:'Nenhum CPF detectado no texto'});
+    exames.push({icon:'🪪',name:'Dados Cadastrais',status:hasFlag('rf-dados-conflitantes')?'fail':cpfs?'ok':'warn',result:cpfs?`CPF(s): ${cpfs}`:'Nenhum CPF detectado no texto',metod:METOD.cadastrais});
 
     // Assinaturas digitais ICP-Brasil (placeholder, atualizado depois)
-    exames.push({icon:'🔏',name:'Assinaturas Digitais ICP-Brasil',status:'ok',result:'Analisando…',id:'exame-sig'});
+    exames.push({icon:'🔏',name:'Assinaturas Digitais ICP-Brasil',status:'ok',result:'Analisando…',id:'exame-sig',metod:METOD.sigICP});
   }
 
   if(ext==='docx'||ext==='xlsx'){
     const author=meta['Autor'];
-    exames.push({icon:'👤',name:'Autor',status:author?'ok':'warn',result:author||'Não encontrado'});
+    exames.push({icon:'👤',name:'Autor',status:author?'ok':'warn',result:author||'Não encontrado',metod:METOD.autorDocx});
     const lastMod=meta['Última Modificação por'];
-    exames.push({icon:'✏️',name:'Último Editor',status:lastMod?'ok':'warn',result:lastMod||'Não encontrado'});
+    exames.push({icon:'✏️',name:'Último Editor',status:lastMod?'ok':'warn',result:lastMod||'Não encontrado',metod:METOD.autorDocx});
     const rev=meta['Número de Revisões'];
-    exames.push({icon:'🔄',name:'Revisões',status:hasFlag('rf-revisoes-zero')?'warn':'ok',result:rev?`${rev} revisão(ões)`:'Não encontrado'});
+    exames.push({icon:'🔄',name:'Revisões',status:hasFlag('rf-revisoes-zero')?'warn':'ok',result:rev?`${rev} revisão(ões)`:'Não encontrado',metod:METOD.autorDocx});
     const cd=meta['Data de Criação'],md=meta['Data de Modificação'];
     const dateStatus=hasFlag('rf-datas-incompat')?'fail':hasFlag('rf-datas-iguais')?'warn':cd||md?'ok':'warn';
-    exames.push({icon:'📅',name:'Análise de Datas',status:dateStatus,result:cd&&md?`Criação: ${cd} | Modif: ${md}`:cd||md||'Não encontrado'});
+    exames.push({icon:'📅',name:'Análise de Datas',status:dateStatus,result:cd&&md?`Criação: ${cd} | Modif: ${md}`:cd||md||'Não encontrado',metod:METOD.datas});
     const app=meta['Aplicativo'];
-    exames.push({icon:'🖥',name:'Aplicativo',status:'ok',result:app||'Não identificado'});
+    exames.push({icon:'🖥',name:'Aplicativo',status:'ok',result:app||'Não identificado',metod:METOD.softwarePDF});
   }
 
   if(ext==='png'){
     const w=meta['Largura'],h=meta['Altura'];
-    exames.push({icon:'📐',name:'Dimensões',status:w?'ok':'warn',result:w&&h?`${w} × ${h}`:'Não encontrado'});
+    exames.push({icon:'📐',name:'Dimensões',status:w?'ok':'warn',result:w&&h?`${w} × ${h}`:'Não encontrado',metod:METOD.dimPNG});
     const res=meta['Resolução X'];
-    exames.push({icon:'🔬',name:'Resolução',status:res?'ok':'warn',result:res||'Não encontrado'});
+    exames.push({icon:'🔬',name:'Resolução',status:res?'ok':'warn',result:res||'Não encontrado',metod:METOD.dimPNG});
     const soft=Object.entries(meta).find(([k])=>k.includes('Software')||k.includes('software'));
-    exames.push({icon:'🖥',name:'Software (chunks)',status:hasFlag('rf-software-edicao')?'fail':soft?'warn':'ok',result:soft?soft[1]:'Não identificado em chunks tEXt/iTXt'});
-    exames.push({icon:'🔢',name:'Hash Perceptual (pHash)',status:'ok',result:'Calculado na aba Hash Perceptual'});
+    exames.push({icon:'🖥',name:'Software (chunks)',status:hasFlag('rf-software-edicao')?'fail':soft?'warn':'ok',result:soft?soft[1]:'Não identificado em chunks tEXt/iTXt',metod:METOD.softPNG});
+    exames.push({icon:'🔢',name:'Hash Perceptual (pHash)',status:'ok',result:'Calculado na aba Hash Perceptual',metod:METOD.phash});
   }
 
   return exames;
@@ -1158,7 +1209,7 @@ function updateExameSig(sigs){
   el.querySelector('.exame-result').textContent=result;
 }
 
-function statusLabel(s){return{ok:'Concluído ✓',warn:'Atenção ⚡',fail:'Falhou ⚠',na:'N/A'}[s]||s;}
+function statusLabel(s){return{ok:'Concluído ✓',warn:'Atenção ⚡',fail:'Irregular ⚠',na:'N/A'}[s]||s;}
 
 
 // ═══════════════════════════════════
