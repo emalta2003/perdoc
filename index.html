@@ -148,6 +148,16 @@ header{background:var(--surface);border-bottom:1px solid var(--border);padding:1
 .evidence-img-label{font-size:11px;color:var(--muted);text-align:center;margin-top:3px;}
 .evidence-significance{padding:8px 14px;font-size:12px;line-height:1.6;border-top:1px solid var(--border);color:var(--muted);}
 .evidence-significance b{color:var(--text);}
+/* ── Metodologia ── */
+details.metod{margin-top:14px;border:1px solid var(--border);border-radius:6px;overflow:hidden;}
+details.metod summary{padding:7px 12px;font-size:12px;font-weight:600;color:var(--muted);cursor:pointer;user-select:none;list-style:none;display:flex;align-items:center;gap:6px;}
+details.metod summary::before{content:'▶';font-size:10px;transition:transform .2s;}
+details.metod[open] summary::before{transform:rotate(90deg);}
+details.metod summary:hover{color:var(--text);}
+.metod-body{padding:12px 14px;font-size:12px;line-height:1.8;border-top:1px solid var(--border);background:var(--bg);}
+.metod-body dt{font-weight:600;color:var(--text);margin-top:8px;}
+.metod-body dd{color:var(--muted);margin:0 0 0 12px;}
+.metod-body .metod-ref{font-style:italic;color:var(--accent2);margin-top:8px;font-size:11px;}
 /* ── Forense ── */
 .forense-empty{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:60px 20px;color:var(--muted);gap:10px;}
 .hex-controls{display:flex;align-items:center;flex-wrap:wrap;gap:6px;margin-bottom:10px;font-size:13px;color:var(--text);}
@@ -290,6 +300,17 @@ hr.divider{border:none;border-top:1px solid var(--border);margin:14px 0;}
       <div class="card">
         <div class="card-title">Metadados Extraídos</div>
         <table class="meta-table" id="meta-table-body"></table>
+        <details class="metod">
+          <summary>📋 Metodologia</summary>
+          <div class="metod-body"><dl>
+            <dt>Método</dt><dd>Extração e análise de metadados por leitura direta da estrutura binária do arquivo, sem modificação do conteúdo original</dd>
+            <dt>PDF — Procedimento</dt><dd>Leitura dos campos do dicionário /Info (/Creator, /Producer, /Author, /Title, /Subject, /Keywords, /CreationDate, /ModDate); identificação da versão (%PDF-x.x no cabeçalho); detecção de linearização (/Linearized nos primeiros 1024 bytes); análise de fontes (/Font e /FontFile — fontes referenciadas vs. embutidas); contagem de XObjects por página (fragmentação); varredura binária de streams JPEG (FF D8 FF / DCTDecode); busca de hashes de autenticação eletrônica (padrões hex de 32, 40 e 64 caracteres); análise de campos de assinatura (/AcroForm, /FT /Sig, /Contents); extração de CPFs e datas.</dd>
+            <dt>JPEG — Procedimento</dt><dd>Leitura dos segmentos APP0 (JFIF) e APP1 (EXIF) conforme JEITA CP-3451C; extração de data/hora original, software de captura/edição, fabricante e modelo do dispositivo, configurações de câmera (ISO, abertura, velocidade), coordenadas GPS quando presentes.</dd>
+            <dt>DOCX/XLSX — Procedimento</dt><dd>Descompactação do container ZIP/OPC; leitura de docProps/core.xml (autor, data de criação, modificação, revisão) e docProps/app.xml (software, versão, contagem de páginas/palavras).</dd>
+            <dt>Parâmetros</dt><dd>Leitura integral do buffer em memória · Sem escrita ou modificação do arquivo original · Todos os campos extraídos diretamente dos bytes brutos</dd>
+            <p class="metod-ref">Referências: ISO 32000-1:2008 (PDF 1.7) · JEITA CP-3451C (EXIF 2.3) · ISO/IEC 29500 (OOXML) · Ellen, D. "The Scientific Examination of Documents." 3ª ed. CRC Press, 2006.</p>
+          </dl></div>
+        </details>
       </div>
 
       <!-- Metodologia -->
@@ -336,6 +357,17 @@ hr.divider{border:none;border-top:1px solid var(--border);margin:14px 0;}
     <div class="phash-layout">
       <div class="card">
         <div class="card-title">Hash Perceptual (pHash DCT 32×32)</div>
+        <details class="metod" style="margin-bottom:10px">
+          <summary>📋 Metodologia</summary>
+          <div class="metod-body"><dl>
+            <dt>Método</dt><dd>Hash Perceptual por Transformada Discreta do Cosseno (DCT-pHash) — gera uma assinatura de 64 bits que representa o conteúdo visual da imagem, resistente a pequenas alterações de escala, compressão e brilho</dd>
+            <dt>Procedimento</dt><dd>1. A imagem é redimensionada para 32×32 pixels em escala de cinza; 2. Aplica-se a Transformada Discreta do Cosseno 2D (DCT-II) sobre a matriz de pixels; 3. Extraem-se os 64 coeficientes de baixa frequência do canto superior esquerdo (8×8); 4. Calcula-se a média dos 64 coeficientes; 5. Cada bit do hash é 1 se o coeficiente for maior que a média, 0 caso contrário; 6. O resultado é um hash de 64 bits expresso em hexadecimal.</dd>
+            <dt>Parâmetros</dt><dd>Resolução de análise: 32×32 px · Coeficientes DCT utilizados: 64 (bloco 8×8 de baixa frequência) · Saída: 64 bits (16 caracteres hexadecimais)</dd>
+            <dt>Aplicação pericial</dt><dd>Permite verificar se duas imagens são visualmente idênticas ou muito similares, mesmo após compressão, redimensionamento ou pequenas edições. A distância de Hamming entre dois pHashes indica o grau de diferença: 0 = idênticas; até 10 = muito similares; acima de 20 = imagens distintas.</dd>
+            <dt>Limitações</dt><dd>Não detecta adulterações locais (ex: alteração de um dígito num documento). Para isso, usar ELA e análise de ruído.</dd>
+            <p class="metod-ref">Referência: Zauner, C. "Implementation and Benchmarking of Perceptual Image Hash Functions." FH Hagenberg, 2010.</p>
+          </dl></div>
+        </details>
         <div id="hash-empty" style="color:var(--muted);font-size:13px">Carregue uma imagem JPEG ou PNG para calcular o pHash.</div>
         <div id="hash-result" style="display:none">
           <img id="hash-img-preview" class="img-preview" alt="Preview">
@@ -401,6 +433,17 @@ hr.divider{border:none;border-top:1px solid var(--border);margin:14px 0;}
         </div>
         <div class="hex-sections" id="hex-sections"></div>
         <pre class="hex-viewer" id="hex-viewer"></pre>
+        <details class="metod">
+          <summary>📋 Metodologia</summary>
+          <div class="metod-body"><dl>
+            <dt>Método</dt><dd>Análise da estrutura binária interna do arquivo por inspeção hexadecimal (Hex Dump)</dd>
+            <dt>Procedimento</dt><dd>1. Os bytes brutos do arquivo são lidos diretamente do buffer em memória, sem qualquer decodificação ou interpretação; 2. Cada byte é representado em hexadecimal (base 16) e sua representação ASCII imprimível é exibida ao lado; 3. Marcadores estruturais são identificados automaticamente: cabeçalho do formato (%PDF, FF D8 FF para JPEG, PK para ZIP/DOCX), marcadores JPEG (SOI, APP0/APP1, SOF, EOI), assinaturas de software e offsets relevantes.</dd>
+            <dt>Parâmetros</dt><dd>Offset inicial: configurável · Volume: 256 B a 8 KB por visualização · Codificação: hexadecimal (base 16) com representação ASCII lado a lado</dd>
+            <dt>Interpretação</dt><dd>Permite identificar: cabeçalhos adulterados, presença de streams JPEG embutidos (FF D8 FF), marcadores de fim de arquivo deslocados, padrões de assinatura de software, e bytes fora do padrão esperado para o formato declarado.</dd>
+            <dt>Aplicação pericial</dt><dd>A inspeção hexadecimal é o método mais direto e irrefutável de verificação da estrutura interna de um documento digital — permite identificar manipulações que não são visíveis na renderização visual do arquivo.</dd>
+            <p class="metod-ref">Referência: ISO 32000-1:2008 — Document Management: Portable Document Format (PDF 1.7). · Casey, E. "Digital Evidence and Computer Crime." 3ª ed. Academic Press, 2011.</p>
+          </dl></div>
+        </details>
       </div>
 
       <!-- ELA -->
@@ -409,6 +452,17 @@ hr.divider{border:none;border-top:1px solid var(--border);margin:14px 0;}
         <div style="font-size:12px;color:var(--muted);margin-bottom:10px">
           Recomprime a imagem em JPEG qualidade 95 e amplifica as diferenças pixel a pixel (×15). Regiões editadas, coladas ou reprocessadas aparecem com brilho maior que o fundo.
         </div>
+        <details class="metod">
+          <summary>📋 Metodologia</summary>
+          <div class="metod-body"><dl>
+            <dt>Método</dt><dd>Error Level Analysis (ELA) — Análise de Nível de Erro por recompressão JPEG</dd>
+            <dt>Procedimento</dt><dd>1. A imagem original é recomprimida em formato JPEG com qualidade fixa de 95%; 2. Calcula-se a diferença absoluta pixel a pixel entre a imagem original e a recomprimida, em cada canal (R, G, B); 3. A diferença média é amplificada pelo fator ×15 e exibida em escala de cinza.</dd>
+            <dt>Parâmetros</dt><dd>Qualidade de recompressão: 95% · Fator de amplificação: ×15</dd>
+            <dt>Interpretação</dt><dd>Regiões com brilho elevado na imagem ELA indicam maior diferença de compressão — típico de áreas editadas, coladas ou reprocessadas em momento distinto do restante. Imagens não manipuladas tendem a apresentar ELA uniforme.</dd>
+            <dt>Limitações</dt><dd>Imagens salvas múltiplas vezes ou com alta compressão original podem apresentar falsos positivos. O resultado deve ser cotejado com a análise de ruído e os metadados.</dd>
+            <p class="metod-ref">Referência: Krawetz, N. "A Picture's Worth: Digital Image Analysis and Forensics." BlackHat USA, 2007.</p>
+          </dl></div>
+        </details>
         <div class="ela-wrap">
           <div class="ela-col">
             <div class="ela-label">Original</div>
@@ -428,6 +482,17 @@ hr.divider{border:none;border-top:1px solid var(--border);margin:14px 0;}
         <div style="font-size:12px;color:var(--muted);margin-bottom:10px">
           Subtrai a versão suavizada (blur 3 px) da imagem original e amplifica o resíduo (×8). Regiões com ruído inconsistente — bordas serrilhadas, halos, pixelização irregular — indicam elementos inseridos digitalmente ou regiões de origens distintas.
         </div>
+        <details class="metod">
+          <summary>📋 Metodologia</summary>
+          <div class="metod-body"><dl>
+            <dt>Método</dt><dd>Análise de Ruído Residual por filtragem de passagem alta (High-Pass Noise Residual)</dd>
+            <dt>Procedimento</dt><dd>1. Aplica-se filtro gaussiano (blur 3 px) à imagem original, obtendo-se uma versão suavizada (componente de baixa frequência); 2. Subtrai-se a imagem suavizada da original, isolando o ruído de alta frequência; 3. O resíduo é amplificado ×8 e centralizado em tom médio 128; 4. Calcula-se grade 16×16 de células — células com média acima de μ + 2σ são sinalizadas como anômalas.</dd>
+            <dt>Parâmetros</dt><dd>Raio do filtro gaussiano: 3 px · Amplificação: ×8 · Grade: 16×16 células · Limiar de anomalia: μ + 2 desvios-padrão</dd>
+            <dt>Interpretação</dt><dd>Células anômalas (vermelho no mapa) indicam regiões com padrão de ruído estatisticamente diferente do restante — típico de elementos inseridos (assinatura, carimbo, texto) provenientes de outra fonte digital. Bordas serrilhadas e halos são característicos de colagem de imagem.</dd>
+            <dt>Limitações</dt><dd>Bordas naturais de texto e gráficos também geram ruído de alta frequência. Avaliar em conjunto com ELA e copy-move.</dd>
+            <p class="metod-ref">Referência: Farid, H. "Photo Forensics." MIT Press, 2016. Cap. 3 — Noise Analysis.</p>
+          </dl></div>
+        </details>
         <div class="ela-wrap">
           <div class="ela-col">
             <div class="ela-label">Original</div>
@@ -470,6 +535,18 @@ hr.divider{border:none;border-top:1px solid var(--border);margin:14px 0;}
           <span><span style="display:inline-block;width:12px;height:12px;background:#22c55e;border-radius:2px;margin-right:4px;vertical-align:middle"></span>Normal</span>
         </div>
         <div id="cm-interpretation" style="margin-top:10px;font-size:12px;padding:10px 12px;border-radius:6px;background:var(--bg);border:1px solid var(--border)"></div>
+        <details class="metod">
+          <summary>📋 Metodologia</summary>
+          <div class="metod-body"><dl>
+            <dt>Método</dt><dd>Detecção de clonagem por correspondência de blocos (Block-Matching Copy-Move Forgery Detection) e detecção de inserção por análise de consistência de textura</dd>
+            <dt>Procedimento — Clonagem</dt><dd>1. A imagem é redimensionada para no máximo 512 px no lado maior; 2. Divide-se em blocos 16×16 px; 3. Calcula-se um vetor de características por bloco: média de intensidade, desvio-padrão e médias dos 4 quadrantes internos; 4. Os blocos são ordenados pela média e comparados entre si em janela deslizante (diferença de média &lt; 30); 5. Pares com distância de características &lt; 8 e separação espacial &gt; 1 bloco são classificados como clones.</dd>
+            <dt>Procedimento — Inserção</dt><dd>Blocos cuja média de intensidade difere da média global em mais de 1,2 desvios-padrão + 22 unidades são sinalizados como textura inconsistente — indicativo de elemento inserido de fonte externa.</dd>
+            <dt>Parâmetros</dt><dd>Tamanho de bloco: 16×16 px · Resolução máxima de análise: 512 px · Limiar de clonagem: distância &lt; 8 · Limiar de inserção: |média_bloco − μ_global| &gt; 1,2σ + 22</dd>
+            <dt>Interpretação</dt><dd>Laranja = blocos duplicados internamente (copy-move). Roxo = textura estatisticamente inconsistente com o documento (splicing/inserção). Verde = região normal.</dd>
+            <dt>Limitações</dt><dd>Fundos uniformes (brancos, lisos) geram falsos positivos de clonagem. Imagens com compressão muito alta reduzem a sensibilidade. O método opera sobre a imagem renderizada, não sobre os bytes brutos.</dd>
+            <p class="metod-ref">Referências: Popescu, A. & Farid, H. "Exposing Digital Forgeries by Detecting Duplicated Image Regions." Dartmouth, 2004. · Christlein, V. et al. "An Evaluation of Popular Copy-Move Forgery Detection Approaches." IEEE TIFS, 2012.</p>
+          </dl></div>
+        </details>
       </div>
 
       <!-- Entropia Binária -->
@@ -485,6 +562,17 @@ hr.divider{border:none;border-top:1px solid var(--border);margin:14px 0;}
           <canvas id="entropy-map" height="32" style="width:100%;border-radius:4px;image-rendering:pixelated;border:1px solid var(--border)"></canvas>
         </div>
         <div id="entropy-interpretation" style="margin-top:10px;font-size:12px;padding:10px 12px;border-radius:6px;background:var(--bg);border:1px solid var(--border)"></div>
+        <details class="metod">
+          <summary>📋 Metodologia</summary>
+          <div class="metod-body"><dl>
+            <dt>Método</dt><dd>Análise de Entropia de Shannon — medida da aleatoriedade da distribuição de bytes do arquivo</dd>
+            <dt>Procedimento</dt><dd>1. Conta-se a frequência de cada um dos 256 valores de byte possíveis no arquivo; 2. Calcula-se a entropia global H = −Σ p(x) · log₂p(x), onde p(x) é a probabilidade de cada byte; 3. O arquivo é dividido em 256 blocos de tamanho igual e a entropia é calculada individualmente em cada bloco; 4. Gera-se histograma de distribuição de bytes e mapa de calor (verde = alta entropia / vermelho = baixa entropia).</dd>
+            <dt>Parâmetros</dt><dd>Faixa de entropia: 0–8 bits/byte · Número de blocos: 256 · Faixa esperada para arquivo comprimido/cifrado: 7,5–8,0 · Faixa esperada para texto/PDF estruturado: 5,0–7,5 · Abaixo de 4,0: conteúdo repetitivo ou pouco comprimido</dd>
+            <dt>Interpretação</dt><dd>Entropia globalmente alta e uniforme é típica de PDFs com compressão flate ou criptografia. Quedas bruscas de entropia em blocos específicos indicam regiões com conteúdo não comprimido ou inserido manualmente. Picos isolados podem indicar streams de imagem embutidos.</dd>
+            <dt>Limitações</dt><dd>A análise opera sobre os bytes brutos do arquivo, não sobre o conteúdo decodificado. Arquivos totalmente comprimidos tendem a apresentar entropia uniforme independentemente de manipulação.</dd>
+            <p class="metod-ref">Referência: Shannon, C. E. "A Mathematical Theory of Communication." Bell System Technical Journal, v. 27, p. 379–423, 1948.</p>
+          </dl></div>
+        </details>
       </div>
 
     </div>
