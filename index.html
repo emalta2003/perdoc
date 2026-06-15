@@ -1201,8 +1201,8 @@ function updateExameSig(sigs){
   if(!el) return;
   const hasFail=sigs.some(s=>s.flags.includes('rf-assinatura-invalida')||s.flags.includes('rf-modificado-pos-assinatura'));
   const hasWarn=sigs.some(s=>s.flags.length>0);
-  const status=sigs.length===0?'warn':hasFail?'fail':hasWarn?'warn':'ok';
-  const result=sigs.length===0?'Nenhuma assinatura encontrada':`${sigs.length} assinatura(s) — ${hasFail?'FALHOU':hasWarn?'atenção necessária':'todas íntegras'}`;
+  const status=sigs.length===0?'na':hasFail?'fail':hasWarn?'warn':'ok';
+  const result=sigs.length===0?'Não se aplica — nenhuma assinatura digital ICP-Brasil detectada':`${sigs.length} assinatura(s) — ${hasFail?'FALHOU':hasWarn?'atenção necessária':'todas íntegras'}`;
   el.className='exame-card '+status;
   el.querySelector('.exame-status').className='exame-status '+status;
   el.querySelector('.exame-status').textContent=statusLabel(status);
